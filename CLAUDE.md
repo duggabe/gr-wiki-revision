@@ -8,9 +8,13 @@ dependency list from EttusResearch's own Docker build environment
 (`.ci/docker/uhd-builder-ubuntu2604.Dockerfile` in the `EttusResearch/uhd`
 repo on GitHub).
 
-Not a git repository yet — this is local working files on the "Lenovo"
-machine (Ubuntu), being prepared for a first commit / private GitHub repo per
-the porting checklist in `AI_notes.txt`.
+Pushed to **https://github.com/duggabe/gr-wiki-revision** (public). Note:
+that repo was originally created for GNU Radio wiki scripts (its
+description still says so) — it was reused for this UHD project by explicit
+choice rather than creating a separate repo, so the name/description don't
+match this project's actual content. The repo's original auto-generated
+`README.md` was merged in (`--allow-unrelated-histories`) rather than
+overwritten.
 
 **Two different Ubuntu versions are in play:** development/authoring happens
 on **Ubuntu 24.04**, but the actual USRP hardware testing/build target is
@@ -108,16 +112,15 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    with `--dockerfile-url`/`--dockerfile-path` forcing the 26.04 file; real
    dependency installs and `--build` runs should only happen on the 26.04
    test machine where the hardware is.
-3. Turn this directory into a git repo and push to a private GitHub repo,
-   per the steps in `AI_notes.txt` (git identity is `Barry
-   <barry@dcsmail.net>`).
-4. Add a `.gitignore` (`.env`, `*.key`, `node_modules/`, `__pycache__/`,
-   `.venv/`, `.claude/settings.local.json`) before the first commit —
-   `__pycache__/` already exists in this directory and should not be
-   committed.
-5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
+3. ~~Turn this directory into a git repo and push to GitHub~~ — done:
+   pushed to https://github.com/duggabe/gr-wiki-revision (see note above on
+   repo name mismatch).
+4. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
-6. Copy over `~/.claude/projects/` history from the original machine if
+5. Copy over `~/.claude/projects/` history from the original machine if
    continuity of past Claude Code sessions is wanted (see `AI_notes.txt` step
    8), or rely on this file going forward.
+6. Consider whether the repo should be made private and/or renamed/described
+   to reflect that it now also holds UHD bare-metal build tooling, not just
+   GNU Radio wiki scripts.

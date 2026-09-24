@@ -75,8 +75,16 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   the Dockerfile live from GitHub instead of baking in the package list, and
   adds an end-to-end `--build` path (clone → cmake → make → install → udev
   rules) instead of just printing next-step instructions.
-- Started porting the project to a second machine ("Lenovo"), following the
-  git/GitHub setup steps recorded in `AI_notes.txt`.
+- Ported the project to a second machine ("Lenovo"), following the git/GitHub
+  setup steps recorded in `AI_notes.txt`: initialized git, added
+  `.gitignore`, committed, and pushed to the existing
+  https://github.com/duggabe/gr-wiki-revision repo (merged with its
+  pre-existing `README.md` via `--allow-unrelated-histories`).
+- 2026-09-24: Now migrating again to a further new machine, which will be
+  used for all future work going forward. Since the project is already on
+  GitHub, this migration is just: install `git`/`gh`/Claude Code, `gh auth
+  login`, `git config` identity, then `gh repo clone duggabe/gr-wiki-revision`
+  — no `.env` to copy (none exists in this project).
 
 ## Key decisions
 
@@ -93,9 +101,10 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - **`uhd_find_devices` failure is tolerated, not fatal**, during `--build`,
   since a non-zero exit there just means no USRP hardware is attached, not a
   build failure.
-- **This directory is not yet a git repo.** Per `AI_notes.txt`'s migration
-  checklist, the plan is: add a `.gitignore`, `git init -b main`, commit,
-  then `gh repo create --private --source=. --push`.
+- **Reused the existing `gr-wiki-revision` repo instead of creating a new
+  one**, on explicit instruction, even though its name/description are for
+  GNU Radio wiki scripts, not this UHD tooling. Its original `README.md` was
+  merged in rather than overwritten.
 
 ## Next steps
 
@@ -115,12 +124,17 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 3. ~~Turn this directory into a git repo and push to GitHub~~ — done:
    pushed to https://github.com/duggabe/gr-wiki-revision (see note above on
    repo name mismatch).
-4. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
+4. **Finish migrating to the newest machine** (in progress as of
+   2026-09-24, this is now the primary/only machine for future work): install
+   `git`, `gh`, Claude Code; `gh auth login`; set git identity
+   (`duggabe` / `barry@dcsmail.net`); `gh repo clone
+   duggabe/gr-wiki-revision`. Optionally copy `~/.claude/projects/` session
+   history over if continuity of past Claude Code sessions is wanted (see
+   `AI_notes.txt`'s step 8) — otherwise this file carries the context
+   forward.
+5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
-5. Copy over `~/.claude/projects/` history from the original machine if
-   continuity of past Claude Code sessions is wanted (see `AI_notes.txt` step
-   8), or rely on this file going forward.
 6. Consider whether the repo should be made private and/or renamed/described
    to reflect that it now also holds UHD bare-metal build tooling, not just
    GNU Radio wiki scripts.

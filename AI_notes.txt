@@ -126,4 +126,37 @@ git add . && git commit -m "Describe what changed" && git push
 
 You can also just tell Claude Code "commit and push my changes."
 
+09/24 (later)
+Completed the Lenovo migration above: git init'd this directory, added
+.gitignore, committed, and pushed to the existing
+https://github.com/duggabe/gr-wiki-revision repo (a repo originally created
+for GNU Radio wiki scripts, reused here for this UHD project on purpose —
+merged its pre-existing README.md in rather than overwriting it).
+
+Now migrating again, to a further new machine, which will be used for all
+future work from here on. Since the project is already on GitHub this repeat
+of the migration is simpler than the first time:
+
+On the new machine:
+
+bash
+sudo apt update
+sudo apt install -y git gh
+gh auth login
+git config --global user.name "duggabe"
+git config --global user.email "barry@dcsmail.net"
+curl -fsSL https://claude.ai/install.sh | bash
+
+Then, in a new terminal:
+
+bash
+gh repo clone duggabe/gr-wiki-revision AIwork
+cd AIwork
+claude
+
+No .env exists in this project, so there's nothing to scp over. Optionally
+copy ~/.claude/projects/-home-barry-AIwork to the same path under
+~/.claude/projects/ on the new machine (only works if the project also lives
+at ~/AIwork there) to carry over old Claude Code session history — otherwise
+CLAUDE.md carries the necessary context forward.
 

@@ -56,6 +56,10 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   — likely because upstream's Dockerfile has been updated since the bash
   script was written. Not yet reconciled — see Next steps.
 
+- **`LICENSE`** — Creative Commons Attribution-ShareAlike 4.0
+  International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
+  Commons advises against its licenses for software; kept as-is by choice.
+
 - **`AI_notes.txt`** — running log/notes, including the machine-migration
   checklist (git/gh setup, CLAUDE.md, `.gitignore`, transferring `.env` and
   `~/.claude/projects/` history) used to move this project between machines.

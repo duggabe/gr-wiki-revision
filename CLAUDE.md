@@ -58,8 +58,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 
 - **`AI_notes.txt`** — running log/notes, including the machine-migration
   checklist (git/gh setup, CLAUDE.md, `.gitignore`, transferring `.env` and
-  `~/.claude/projects/` history) used to move this project from the original
-  machine to this one ("Lenovo").
+  `~/.claude/projects/` history) used to move this project between machines.
 
 ## What's been done
 
@@ -75,16 +74,19 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   the Dockerfile live from GitHub instead of baking in the package list, and
   adds an end-to-end `--build` path (clone → cmake → make → install → udev
   rules) instead of just printing next-step instructions.
-- Ported the project to a second machine ("Lenovo"), following the git/GitHub
-  setup steps recorded in `AI_notes.txt`: initialized git, added
+- Set this machine up for git/GitHub, following the migration checklist
+  recorded in `AI_notes.txt`: initialized git in `~/AIwork`, added
   `.gitignore`, committed, and pushed to the existing
   https://github.com/duggabe/gr-wiki-revision repo (merged with its
   pre-existing `README.md` via `--allow-unrelated-histories`).
-- 2026-09-24: Now migrating again to a further new machine, which will be
-  used for all future work going forward. Since the project is already on
-  GitHub, this migration is just: install `git`/`gh`/Claude Code, `gh auth
-  login`, `git config` identity, then `gh repo clone duggabe/gr-wiki-revision`
-  — no `.env` to copy (none exists in this project).
+- 2026-09-24: Now migrating to a new machine, **LENOVO**, which will be used
+  for all future work going forward. On LENOVO the working directory will be
+  the repo clone itself, `~/gr-wiki-revision` (not `~/AIwork` — that name
+  only exists on this now-historical machine). Since the project is already
+  on GitHub, the migration is just: install `git`/`gh`/Claude Code, `gh auth
+  login`, `git config` identity, then `gh repo clone
+  duggabe/gr-wiki-revision` — no `.env` to copy (none exists in this
+  project).
 
 ## Key decisions
 
@@ -124,14 +126,15 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 3. ~~Turn this directory into a git repo and push to GitHub~~ — done:
    pushed to https://github.com/duggabe/gr-wiki-revision (see note above on
    repo name mismatch).
-4. **Finish migrating to the newest machine** (in progress as of
-   2026-09-24, this is now the primary/only machine for future work): install
-   `git`, `gh`, Claude Code; `gh auth login`; set git identity
-   (`duggabe` / `barry@dcsmail.net`); `gh repo clone
-   duggabe/gr-wiki-revision`. Optionally copy `~/.claude/projects/` session
-   history over if continuity of past Claude Code sessions is wanted (see
-   `AI_notes.txt`'s step 8) — otherwise this file carries the context
-   forward.
+4. **Finish migrating to LENOVO** (in progress as of 2026-09-24 — LENOVO will
+   be the only machine used for future work; this machine's `~/AIwork` becomes
+   historical only): install `git`, `gh`, Claude Code; `gh auth login`; set
+   git identity (`duggabe` / `barry@dcsmail.net`); `gh repo clone
+   duggabe/gr-wiki-revision` (clones to `~/gr-wiki-revision` by default —
+   that's the working directory on LENOVO, not `AIwork`). Session-history
+   continuity (`~/.claude/projects/`, see `AI_notes.txt` step 8) won't carry
+   over automatically since the directory name is changing; rely on this
+   file for context on LENOVO instead.
 5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.

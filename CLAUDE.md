@@ -135,6 +135,6 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
-6. Consider whether the repo should be made private and/or renamed/described
-   to reflect that it now also holds UHD bare-metal build tooling, not just
-   GNU Radio wiki scripts.
+6. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
+   for now. Revisit later if the mismatch (still named/described for GNU
+   Radio wiki scripts) becomes a problem.

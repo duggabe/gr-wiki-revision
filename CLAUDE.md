@@ -50,15 +50,11 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   `install-uhd-build-deps.sh` installs (Ubuntu 26.04).
 
 - **`uhd-dependencies.txt`** — output of the most recent
-  `uhd_bare_metal_installer.py` run (default `-o` filename). Has a few extra
-  packages (`clang-format-14`, `swig`) and two duplicate entries
-  (`libgps-dev`, `python3-ruamel.yaml`) vs. `uhd-ubuntu2604-dependencies.txt`
-  — likely because upstream's Dockerfile has been updated since the bash
-  script was written. Not yet reconciled — see Next steps. **Stale as of
-  2026-09-25:** a fresh upstream fetch no longer has `clang-format-14`,
-  `swig`, or the duplicates, and adds `python3-setuptools`; the committed
-  copy therefore fails `volk_bare_metal_installer.py`'s content check
-  until `uhd_bare_metal_installer.py` is re-run.
+  `uhd_bare_metal_installer.py` run (default `-o` filename). Refreshed
+  2026-09-25 (`--list-only` on Ubuntu 26.04); now identical to
+  `uhd-ubuntu2604-dependencies.txt`. Re-run `--list-only` (and commit)
+  whenever upstream's Dockerfile changes, or `volk_bare_metal_installer.py`'s
+  content check will fail.
 
 - **`volk_bare_metal_installer.py`** — builds/installs Volk from source
   after the UHD installer has installed deps. Imports parsing/build helpers
@@ -136,13 +132,13 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 
 ## Next steps
 
-1. Reconcile the discrepancy between `uhd-dependencies.txt` (latest live
-   fetch: has `clang-format-14`, `swig`, and two duplicate packages) and
-   `uhd-ubuntu2604-dependencies.txt` / `install-uhd-build-deps.sh` (no
-   duplicates, missing those two packages) — likely just needs
-   `install-uhd-build-deps.sh` refreshed against the current upstream
-   Dockerfile, or the duplicates are a parsing bug worth checking in
-   `extract_apt_packages()`.
+1. ~~Reconcile `uhd-dependencies.txt` with
+   `uhd-ubuntu2604-dependencies.txt` / `install-uhd-build-deps.sh`~~ — done
+   2026-09-25: the extra packages (`clang-format-14`, `swig`) and duplicates
+   (`libgps-dev`, `python3-ruamel.yaml`) came from an older upstream
+   Dockerfile, not a parsing bug. A fresh fetch dropped them (and added
+   `python3-setuptools`), making the lists identical; the bash script
+   needed no change.
 2. Confirm `uhd_bare_metal_installer.py`'s OS auto-detection actually works
    as intended given the 24.04-dev / 26.04-test split: on the 24.04 dev box
    it should either fail cleanly (no matching Dockerfile upstream) or be run

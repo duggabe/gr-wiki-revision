@@ -4,14 +4,12 @@ clang
 curl
 git
 sudo
-clang-format-14
 abi-dumper
 cmake
 doxygen
 dpdk
 libboost-all-dev
 libdpdk-dev
-libgps-dev
 libgps-dev
 libudev-dev
 libusb-1.0-0-dev
@@ -23,6 +21,7 @@ python3-mako
 python3-numpy
 python3-pip
 python3-requests
+python3-setuptools
 pybind11-dev
 libgrpc++-dev
 libprotobuf-dev
@@ -42,13 +41,11 @@ libqwt-qt5-dev
 libqt5opengl5-dev
 libgmp3-dev
 libfftw3-dev
-swig
 gir1.2-gtk-3.0
 libpango1.0-dev
 python3-pyqt5
 liblog4cpp5-dev
 libzmq3-dev
-python3-ruamel.yaml
 python3-click
 python3-click-plugins
 python3-zmq

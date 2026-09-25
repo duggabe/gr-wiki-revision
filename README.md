@@ -125,6 +125,7 @@ installing anything. Use it only when the packages are already installed.
 | `--uhd-deps PATH` | Package list written by `uhd_bare_metal_installer.py` to compare against (default: `uhd-dependencies.txt`). |
 | `--dry-run` | Check the dependency lists and print the build steps, without running them. |
 | `-y`, `--yes` | Do not prompt for confirmation before building. |
+| `--build` | Accepted for consistency with `uhd_bare_metal_installer.py` and ignored: building Volk is already the default. |
 | `--home HOME` | Directory to clone/build Volk into. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
 
 ### Examples

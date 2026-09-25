@@ -64,6 +64,8 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   reliable creation time), and has identical content, then runs `git clone
   --recursive` → cmake → make → `sudo make install` → `sudo ldconfig`.
   Installs no packages and doesn't need root; run as the normal user.
+  Building is the default; `--build` is accepted and ignored, for
+  consistency with the UHD installer.
   Both dependency-list filenames use hyphens, by the user's choice.
 
 - **`volk-dependencies.txt`** — output of `volk_bare_metal_installer.py`
@@ -121,6 +123,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   this Ubuntu 26.04 host), then ran `volk_bare_metal_installer.py
   --dry-run` in the repo: dependency check passed, build plan printed
   (`~/volk`, `make -j15`). Committed `volk-dependencies.txt`.
+- 2026-09-25: Ran `volk_bare_metal_installer.py` for real on the Ubuntu
+  26.04 machine: built and installed **Volk 3.3.0** successfully (same
+  version as the original machine's build).
 
 ## Key decisions
 
@@ -175,9 +180,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
-6. Run `volk_bare_metal_installer.py` for real (not `--dry-run`) on the
-   26.04 machine after UHD is built, confirm it reproduces Volk 3.3.0 (or
-   newer), then consider a similar installer for GNU Radio.
+6. ~~Run `volk_bare_metal_installer.py` for real on the 26.04 machine~~ —
+   done 2026-09-25: installed Volk 3.3.0. Still open: consider a similar
+   installer for GNU Radio.
 7. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
    for now. Revisit later if the mismatch (still named/described for GNU
    Radio wiki scripts) becomes a problem.

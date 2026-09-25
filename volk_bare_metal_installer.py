@@ -204,6 +204,13 @@ def main() -> int:
         help="Do not prompt for confirmation before building.",
     )
     parser.add_argument(
+        "--build", action="store_true",
+        help=(
+            "Accepted for consistency with uhd_bare_metal_installer.py and ignored: "
+            "building Volk is already the default."
+        ),
+    )
+    parser.add_argument(
         "--home", default=None,
         help=(
             "Directory to clone/build Volk into, overriding auto-detection. "

@@ -60,9 +60,14 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
-- **`AI_notes.txt`** — running log/notes, including the machine-migration
-  checklist (git/gh setup, CLAUDE.md, `.gitignore`, transferring `.env` and
-  `~/.claude/projects/` history) used to move this project between machines.
+- **`README.md`** — user-facing docs: project blurb, work-in-progress note,
+  and usage for `uhd_bare_metal_installer.py` (options table, `--build`
+  steps, examples). Keep its options table in sync with the script's
+  argparse help.
+
+- `AI_notes.txt` (running log incl. the machine-migration checklist) was
+  removed from the repo on 2026-09-25; its content survives in git history
+  (before commit `7472367`).
 
 ## What's been done
 
@@ -79,7 +84,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   adds an end-to-end `--build` path (clone → cmake → make → install → udev
   rules) instead of just printing next-step instructions.
 - Set this machine up for git/GitHub, following the migration checklist
-  recorded in `AI_notes.txt`: initialized git in `~/AIwork`, added
+  then recorded in `AI_notes.txt` (since removed): initialized git in `~/AIwork`, added
   `.gitignore`, committed, and pushed to the existing
   https://github.com/duggabe/gr-wiki-revision repo (merged with its
   pre-existing `README.md` via `--allow-unrelated-histories`).
@@ -136,7 +141,8 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    git identity (`duggabe` / `barry@dcsmail.net`); `gh repo clone
    duggabe/gr-wiki-revision` (clones to `~/gr-wiki-revision` by default —
    that's the working directory on LENOVO, not `AIwork`). Session-history
-   continuity (`~/.claude/projects/`, see `AI_notes.txt` step 8) won't carry
+   continuity (`~/.claude/projects/`, see `AI_notes.txt` step 8 in
+   git history) won't carry
    over automatically since the directory name is changing; rely on this
    file for context on LENOVO instead.
 5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the

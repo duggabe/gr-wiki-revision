@@ -101,6 +101,20 @@ installs no packages itself. Instead it:
 Run it as your normal user (not with `sudo`); `sudo` prompts for your
 password at the install steps, and `~/volk` stays owned by you.
 
+### Keeping the dependency lists current
+
+Both `uhd-dependencies.txt` and `volk-dependencies.txt` are committed to
+this repo. When EttusResearch updates its Dockerfile, the Volk installer's
+content check fails until `uhd-dependencies.txt` is refreshed. To install
+any new packages and refresh the list in one step:
+
+```bash
+sudo python3 uhd_bare_metal_installer.py --skip-upgrade
+```
+
+`python3 uhd_bare_metal_installer.py --list-only` refreshes the list without
+installing anything. Use it only when the packages are already installed.
+
 ### Options
 
 | Option | Description |

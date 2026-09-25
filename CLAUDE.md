@@ -66,14 +66,21 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   Installs no packages and doesn't need root; run as the normal user.
   Both dependency-list filenames use hyphens, by the user's choice.
 
+- **`volk-dependencies.txt`** — output of `volk_bare_metal_installer.py`
+  (default `-o` filename), committed 2026-09-25 from a passing `--dry-run`.
+  Rewritten on every run, so its mtime is always newer than
+  `uhd-dependencies.txt`'s and the "created before" check survives a fresh
+  clone.
+
 - **`LICENSE`** — Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
 - **`README.md`** — user-facing docs: project blurb, work-in-progress note,
-  and usage for `uhd_bare_metal_installer.py` (options table, `--build`
-  steps, examples). Keep its options table in sync with the script's
-  argparse help.
+  and usage for `uhd_bare_metal_installer.py` and
+  `volk_bare_metal_installer.py` (options tables, build steps, examples,
+  and how to keep the dependency lists current). Keep its options tables in
+  sync with the scripts' argparse help.
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
@@ -109,6 +116,11 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - 2026-09-25: Reformatted `README.md` as proper Markdown, removed
   `AI_notes.txt`, and added `volk_bare_metal_installer.py` (tested in
   `--dry-run` on Ubuntu 26.04 only; no real Volk build run yet).
+- 2026-09-25: Refreshed `uhd-dependencies.txt` with `--list-only` (OS
+  auto-detection picked `uhd-builder-ubuntu2604.Dockerfile` correctly on
+  this Ubuntu 26.04 host), then ran `volk_bare_metal_installer.py
+  --dry-run` in the repo: dependency check passed, build plan printed
+  (`~/volk`, `make -j15`). Committed `volk-dependencies.txt`.
 
 ## Key decisions
 
@@ -144,7 +156,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    it should either fail cleanly (no matching Dockerfile upstream) or be run
    with `--dockerfile-url`/`--dockerfile-path` forcing the 26.04 file; real
    dependency installs and `--build` runs should only happen on the 26.04
-   test machine where the hardware is.
+   test machine where the hardware is. (2026-09-25: auto-detection
+   confirmed working on an Ubuntu 26.04 host; 24.04 behaviour still
+   untested.)
 3. ~~Turn this directory into a git repo and push to GitHub~~ — done:
    pushed to https://github.com/duggabe/gr-wiki-revision (see note above on
    repo name mismatch).
@@ -161,6 +175,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 5. Run/validate `uhd_bare_metal_installer.py --build` end-to-end on the
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
-6. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
+6. Run `volk_bare_metal_installer.py` for real (not `--dry-run`) on the
+   26.04 machine after UHD is built, confirm it reproduces Volk 3.3.0 (or
+   newer), then consider a similar installer for GNU Radio.
+7. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
    for now. Revisit later if the mismatch (still named/described for GNU
    Radio wiki scripts) becomes a problem.

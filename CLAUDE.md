@@ -54,7 +54,21 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   packages (`clang-format-14`, `swig`) and two duplicate entries
   (`libgps-dev`, `python3-ruamel.yaml`) vs. `uhd-ubuntu2604-dependencies.txt`
   — likely because upstream's Dockerfile has been updated since the bash
-  script was written. Not yet reconciled — see Next steps.
+  script was written. Not yet reconciled — see Next steps. **Stale as of
+  2026-09-25:** a fresh upstream fetch no longer has `clang-format-14`,
+  `swig`, or the duplicates, and adds `python3-setuptools`; the committed
+  copy therefore fails `volk_bare_metal_installer.py`'s content check
+  until `uhd_bare_metal_installer.py` is re-run.
+
+- **`volk_bare_metal_installer.py`** — builds/installs Volk from source
+  after the UHD installer has installed deps. Imports parsing/build helpers
+  from `uhd_bare_metal_installer.py` (incl. the shared `run_build_steps()`).
+  Writes `volk-dependencies.txt` the same way as `--list-only`, aborts
+  unless `uhd-dependencies.txt` exists, is older (by mtime — Linux has no
+  reliable creation time), and has identical content, then runs `git clone
+  --recursive` → cmake → make → `sudo make install` → `sudo ldconfig`.
+  Installs no packages and doesn't need root; run as the normal user.
+  Both dependency-list filenames use hyphens, by the user's choice.
 
 - **`LICENSE`** — Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
@@ -96,6 +110,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   login`, `git config` identity, then `gh repo clone
   duggabe/gr-wiki-revision` — no `.env` to copy (none exists in this
   project).
+- 2026-09-25: Reformatted `README.md` as proper Markdown, removed
+  `AI_notes.txt`, and added `volk_bare_metal_installer.py` (tested in
+  `--dry-run` on Ubuntu 26.04 only; no real Volk build run yet).
 
 ## Key decisions
 

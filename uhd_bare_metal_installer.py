@@ -331,15 +331,19 @@ def get_build_steps(home: str) -> list[BuildStep]:
 
 
 def build_uhd_from_source(home: str) -> int:
+    """Runs the UHD clone/configure/build/install/verify steps from get_build_steps()."""
+    return run_build_steps(get_build_steps(home))
+
+
+def run_build_steps(steps: list[BuildStep]) -> int:
     """
-    Runs the clone/configure/build/install/verify steps from get_build_steps()
-    in order. Aborts on the first command that fails (non-zero exit, or
-    missing executable/working directory) and returns 1; returns 0 if all
-    succeed. A step with tolerate_failure=True (uhd_find_devices, which exits
-    non-zero simply when no USRP hardware is attached) only warns on failure
-    and lets the build continue.
+    Runs the given build steps in order. Aborts on the first command that
+    fails (non-zero exit, or missing executable/working directory) and
+    returns 1; returns 0 if all succeed. A step with tolerate_failure=True
+    (e.g. uhd_find_devices, which exits non-zero simply when no USRP hardware
+    is attached) only warns on failure and lets the build continue.
     """
-    for step in get_build_steps(home):
+    for step in steps:
         env = None
         if step.env_extra:
             env = os.environ.copy()

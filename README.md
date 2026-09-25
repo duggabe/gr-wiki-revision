@@ -81,3 +81,48 @@ Install dependencies, then clone, build, and install UHD itself into `$HOME/uhd`
 ```bash
 sudo python3 uhd_bare_metal_installer.py --build
 ```
+
+## Install Volk in a bare-metal environment
+
+`volk_bare_metal_installer.py` builds and installs
+[Volk](https://github.com/gnuradio/volk) from source, after
+`uhd_bare_metal_installer.py` has installed the build dependencies. It
+installs no packages itself. Instead it:
+
+1. Derives the dependency list the same way `uhd_bare_metal_installer.py
+   --list-only` does and saves it to `volk-dependencies.txt`.
+2. Aborts with an error unless `uhd-dependencies.txt` exists, was created
+   before `volk-dependencies.txt`, and has the same content (i.e. the
+   dependencies installed for UHD are still current).
+3. Clones Volk (`git clone --recursive`) into `$HOME/volk`, then runs
+   `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
+   `sudo make install`, and `sudo ldconfig`.
+
+Run it as your normal user (not with `sudo`); `sudo` prompts for your
+password at the install steps, and `~/volk` stays owned by you.
+
+### Options
+
+| Option | Description |
+| --- | --- |
+| `--dockerfile-url URL`, `--dockerfile-path PATH`, `--os-release-path PATH` | Same as for `uhd_bare_metal_installer.py`. |
+| `--list-only` | Only parse and print/save the dependency list; do not check or build anything. |
+| `-o`, `--output OUTPUT` | Path to save the extracted package list (default: `volk-dependencies.txt`). |
+| `--uhd-deps PATH` | Package list written by `uhd_bare_metal_installer.py` to compare against (default: `uhd-dependencies.txt`). |
+| `--dry-run` | Check the dependency lists and print the build steps, without running them. |
+| `-y`, `--yes` | Do not prompt for confirmation before building. |
+| `--home HOME` | Directory to clone/build Volk into. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
+
+### Examples
+
+Check the dependency lists and show the build steps, without running them:
+
+```bash
+python3 volk_bare_metal_installer.py --dry-run
+```
+
+Check the dependency lists, then clone, build, and install Volk into `$HOME/volk`:
+
+```bash
+python3 volk_bare_metal_installer.py
+```

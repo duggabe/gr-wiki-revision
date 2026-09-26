@@ -94,10 +94,12 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   Commons advises against its licenses for software; kept as-is by choice.
 
 - **`README.md`** — user-facing docs: project blurb, work-in-progress note,
-  and usage for `uhd_bare_metal_installer.py` and
-  `volk_bare_metal_installer.py` (options tables, build steps, examples,
-  and how to keep the dependency lists current). Keep its options tables in
-  sync with the scripts' argparse help.
+  "Tested builds" table (UHD/Volk/GNU Radio versions), "Run the installers
+  in order" (sudo requirements, the enforced order, refreshing in-between
+  lists after re-running an earlier installer, removing `~/uhd` etc. before
+  rebuilding), then a usage section per installer (options tables, build
+  steps, examples, keeping the dependency lists current). Keep its options
+  tables in sync with the scripts' argparse help.
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
@@ -148,6 +150,15 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   Ubuntu 26.04 machine: built and installed **GNU Radio
   v3.11.0.0git-1174-gaee9fd3f** successfully (same version as the original
   machine's build).
+- 2026-09-26: Made all three installers build as the normal user even when
+  started with sudo, and chown the dependency lists back to the user (see
+  Key decisions). Also: the UHD `--dry-run` "Build user" line now describes
+  the required sudo run, and `/usr/local/lib` is only prepended to
+  `LD_LIBRARY_PATH` if missing (no duplicate, no stray `:`). Chowned the
+  existing root-owned `~/uhd` and `~/gnuradio`. Verified the full dry-run
+  sequence in the repo: UHD `--dry-run --build` → Volk `--list-only` →
+  GNU Radio `--dry-run` passes. Added the "Run the installers in order"
+  section to `README.md`.
 
 ## Key decisions
 
@@ -172,12 +183,19 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   expected and harmless: `sudo make install` leaves a few root-owned files
   in each `build/` dir (`install_manifest.txt`, CMake `compiler_depend.*`),
   with or without starting the script via sudo. Real `sudo` runs of this
-  code not yet tested (only simulated). `uhd_find_devices` now runs as the user *before* the udev rules are
-  installed, so it couldn't see a USB USRP on a first build — irrelevant,
-  since that call only checks that the freshly built UHD runs; no device is
-  plugged in at that point (user confirmed 2026-09-26). Keep it where it is. `~/uhd` and `~/gnuradio` on the 26.04
-  machine were root-owned from builds before this change; fixed 2026-09-26
-  with `sudo chown -R barry:barry ~/uhd ~/gnuradio`.
+  code not yet tested (only simulated). `uhd_find_devices` now runs as the
+  user *before* the udev rules are installed, so it couldn't see a USB USRP
+  on a first build — irrelevant, since that call only checks that the
+  freshly built UHD runs; no device is plugged in at that point (user
+  confirmed 2026-09-26). Keep it where it is. `~/uhd` and `~/gnuradio` on
+  the 26.04 machine were root-owned from builds before this change; fixed
+  2026-09-26 with `sudo chown -R barry:barry ~/uhd ~/gnuradio`.
+- **Re-running an earlier installer breaks the later order checks** — every
+  run (even `--dry-run`/`--list-only`) rewrites that installer's list. Fix:
+  refresh the in-between lists in order with `--list-only` (e.g. Volk's
+  before GNU Radio's after a UHD re-run); the installer being run rewrites
+  its own list first. Documented in README; accepted as the workflow rather
+  than changing the check.
 - **`uhd_find_devices` failure is tolerated, not fatal**, during `--build`,
   since a non-zero exit there just means no USRP hardware is attached, not a
   build failure.

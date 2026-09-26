@@ -15,6 +15,11 @@ built and installed the following versions without errors:
 | Volk | `python3 volk_bare_metal_installer.py` | 3.3.0 |
 | GNU Radio | `python3 gnuradio_bare_metal_installer.py` | v3.11.0.0git-1174-gaee9fd3f |
 
+The installers have also been tested on Ubuntu 24.04. They work on any
+Ubuntu release for which Ettus provides a UHD build Dockerfile (in
+[`.ci/docker`](https://github.com/EttusResearch/uhd/tree/master/.ci/docker)),
+but only 24.04 and 26.04 have been tested.
+
 > **Known limitation:** the installers only install UHD's build
 > dependencies, not GNU Radio's own. CMake skips any GNU Radio component
 > whose dependencies it can't find, so this GNU Radio build does **not**
@@ -29,10 +34,30 @@ built and installed the following versions without errors:
 > gnuradio-config-info --enabled-components
 > ```
 
+## Download the installers
+
+You don't need to clone this repository. Download the three scripts from
+the `v1.0` release into one directory. The Volk and GNU Radio scripts use
+code from the UHD script, so all three must be in the same directory:
+
+```bash
+mkdir -p ~/gr-installers
+cd ~/gr-installers
+for s in uhd volk gnuradio; do
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.0/${s}_bare_metal_installer.py
+done
+```
+
+Look the scripts over before running them, and don't pipe a download
+straight into `python3`, especially with `sudo`. Use `--dry-run` to see
+what a script will do without changing anything, and `--help` for its
+options.
+
 ## Run the installers in order
 
-Run the three installers in this order. Volk builds on the dependencies the
-UHD installer installs, and GNU Radio builds on both:
+Run the three installers in this order, from the same directory. Volk
+builds on the dependencies the UHD installer installs, and GNU Radio builds
+on both:
 
 ```bash
 sudo python3 uhd_bare_metal_installer.py --build

@@ -31,16 +31,21 @@ still written for Ubuntu 24.04 + Qt5 while GNU Radio moves to Qt6.
 wiki.gnuradio.org is behind a Cloudflare challenge and can't be fetched
 from here — ask the user to paste page content.
 
-**Two different Ubuntu versions are in play:** development/authoring happens
-on **Ubuntu 24.04**, but the actual USRP hardware testing/build target is
-**Ubuntu 26.04** (matching UHD's `uhd-builder-ubuntu2604.Dockerfile`). This
-is exactly why `uhd_bare_metal_installer.py` auto-detects the host OS from
-`/etc/os-release` and fetches the matching Dockerfile rather than hardcoding
-one version — `install-uhd-build-deps.sh`, by contrast, only works correctly
-on 26.04 since its package list is hardcoded from that Dockerfile. On a
-24.04 host, expect `uhd_bare_metal_installer.py`'s auto-detect to fail (no
-`uhd-builder-ubuntu2404.Dockerfile` upstream) unless `--dockerfile-url` /
-`--dockerfile-path` is used to force the 26.04 Dockerfile explicitly.
+**Machines and Ubuntu versions:**
+
+| Machine | Ubuntu | Role |
+| --- | --- | --- |
+| Laptop | 24.04 | `~/AIwork` trial; 24.04 testing, with both the bash script + the wiki's manual steps and the Python installers |
+| LENOVO desktop | 26.04 | current working machine, `~/gr-wiki-revision`; 26.04 builds of UHD, Volk, GNU Radio |
+| Third computer (clean install) | 24.04 | planned: test the new wiki page from scratch |
+
+Ettus has Dockerfiles for both (`uhd-builder-ubuntu2404.Dockerfile` and
+`uhd-builder-ubuntu2604.Dockerfile`, plus 20.04, 22.04, 25.10, and Fedora),
+which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
+`/etc/os-release` rather than hardcoding one. The 24.04 list differs from
+26.04's: it adds `clang-format-14` and `swig` (and has duplicate
+`libgps-dev` / `python3-ruamel.yaml` lines, which apt ignores) and lacks
+`python3-setuptools`. `install-uhd-build-deps.sh` hardcodes the 26.04 list.
 
 ## Files
 
@@ -134,7 +139,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - 2026-09-22: Built `install-uhd-build-deps.sh` from UHD's Ubuntu 26.04
   Dockerfile. Used it plus the GNU Radio wiki's from-source build guide
   to successfully build, with no errors, on the original
-  machine:
+  machine (the Ubuntu 24.04 laptop):
   - UHD 4.11.0.0-0-g0d7ed3b1
   - Volk 3.3.0
   - GNU Radio v3.11.0.0git-1174-gaee9fd3f
@@ -143,7 +148,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   the Dockerfile live from GitHub instead of baking in the package list, and
   adds an end-to-end `--build` path (clone → cmake → make → install → udev
   rules) instead of just printing next-step instructions.
-- Set this machine up for git/GitHub, following the migration checklist
+- Set the laptop up for git/GitHub, following the migration checklist
   then recorded in `AI_notes.txt` (since removed): initialized git in `~/AIwork`, added
   `.gitignore`, committed, and pushed to the existing
   https://github.com/duggabe/gr-wiki-revision repo (merged with its
@@ -151,7 +156,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - 2026-09-24: Now migrating to a new machine, **LENOVO**, which will be used
   for all future work going forward. On LENOVO the working directory will be
   the repo clone itself, `~/gr-wiki-revision` (not `~/AIwork` — that name
-  only exists on this now-historical machine). Since the project is already
+  only exists on the laptop). Since the project is already
   on GitHub, the migration is just: install `git`/`gh`/Claude Code, `gh auth
   login`, `git config` identity, then `gh repo clone
   duggabe/gr-wiki-revision` — no `.env` to copy (none exists in this
@@ -251,19 +256,16 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    Dockerfile, not a parsing bug. A fresh fetch dropped them (and added
    `python3-setuptools`), making the lists identical; the bash script
    needed no change.
-2. Confirm `uhd_bare_metal_installer.py`'s OS auto-detection actually works
-   as intended given the 24.04-dev / 26.04-test split: on the 24.04 dev box
-   it should either fail cleanly (no matching Dockerfile upstream) or be run
-   with `--dockerfile-url`/`--dockerfile-path` forcing the 26.04 file; real
-   dependency installs and `--build` runs should only happen on the 26.04
-   test machine where the hardware is. (2026-09-25: auto-detection
-   confirmed working on an Ubuntu 26.04 host; 24.04 behaviour still
-   untested.)
+2. ~~Confirm `uhd_bare_metal_installer.py`'s OS auto-detection~~ — done:
+   works on 26.04 (LENOVO, 2026-09-25) and 24.04 (tested on the laptop;
+   also checked 2026-09-26 by simulating a 24.04 `/etc/os-release`, which
+   picks `uhd-builder-ubuntu2404.Dockerfile`, 60 packages). The earlier
+   belief that no 24.04 Dockerfile existed upstream was wrong.
 3. ~~Turn this directory into a git repo and push to GitHub~~ — done:
    pushed to https://github.com/duggabe/gr-wiki-revision.
-4. **Finish migrating to LENOVO** (in progress as of 2026-09-24 — LENOVO will
-   be the only machine used for future work; this machine's `~/AIwork` becomes
-   historical only): install `git`, `gh`, Claude Code; `gh auth login`; set
+4. ~~**Finish migrating to LENOVO**~~ — done: all work since 2026-09-25 has
+   been on the LENOVO desktop in `~/gr-wiki-revision`; the laptop's
+   `~/AIwork` is historical only. Original steps: install `git`, `gh`, Claude Code; `gh auth login`; set
    git identity (`duggabe` / `barry@dcsmail.net`); `gh repo clone
    duggabe/gr-wiki-revision` (clones to `~/gr-wiki-revision` by default —
    that's the working directory on LENOVO, not `AIwork`). Session-history
@@ -300,9 +302,14 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    Qwt-from-source installer between Volk and GNU Radio, and/or print the
    enabled components at the end of the GNU Radio installer so readers can
    confirm `gr-qtgui` is present.
-9. **Publish the scripts for the wiki page (after step 8).** Create the
-   first git tag / GitHub release (e.g. `v1.0`; the repo has no tags yet)
-   and point the page's raw links at it, then finish
-   `wiki-draft-download-section.txt`: fix the tag name, add a Qt GUI
-   warning or a GNU Radio dependency step, and state the supported OS
-   (currently Ubuntu 26.04, wherever Ettus has a matching Dockerfile).
+9. **Publish the scripts for the wiki page.** Tag `v1.0` created
+   2026-09-26 (the draft's raw links point at it); for fixes, tag `v1.1`
+   etc. rather than moving `v1.0`. Still to finish in the page: a Qt GUI
+   warning or a GNU Radio dependency step (after step 8), and the
+   supported OS (Ubuntu 24.04 and 26.04 tested; wherever Ettus has a
+   matching Dockerfile).
+10. **User's plan (2026-09-26):** create the "Building GNU Radio from Source
+    Code" wiki page from `wiki-draft-download-section.txt`, then test it by
+    following only the page on a third, clean Ubuntu 24.04 computer.
+    Expect: the UHD installer installs `git` itself; `gr-qtgui` likely
+    still missing (check `gnuradio-config-info --enabled-components`).

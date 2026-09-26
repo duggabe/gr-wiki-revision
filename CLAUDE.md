@@ -9,8 +9,8 @@ dependency list from EttusResearch's own Docker build environment
 repo on GitHub).
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
-and programs supporting GNU Radio Wiki documents, which the user writes
-(e.g. the from-source build guide, Draft-AN-445). This repo is the ultimate
+and programs supporting GNU Radio Wiki documents, which the user writes.
+This repo is the ultimate
 target project. The earlier `~/AIwork` project on the user's laptop was a
 trial to learn Claude and check the feasibility of these methods; its work
 was pushed here, merging with this repo's original auto-generated
@@ -112,7 +112,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 
 - 2026-09-22: Built `install-uhd-build-deps.sh` from UHD's Ubuntu 26.04
   Dockerfile. Used it plus the GNU Radio wiki's from-source build guide
-  (Draft-AN-445) to successfully build, with no errors, on the original
+  to successfully build, with no errors, on the original
   machine:
   - UHD 4.11.0.0-0-g0d7ed3b1
   - Volk 3.3.0

@@ -15,7 +15,11 @@ built and installed the following versions without errors:
 | Volk | `python3 volk_bare_metal_installer.py` | 3.3.0 |
 | GNU Radio | `python3 gnuradio_bare_metal_installer.py` | v3.11.0.0git-1174-gaee9fd3f |
 
-The installers have also been tested on Ubuntu 24.04. They work on any
+The installers have also been tested on Ubuntu 24.04. On 2026-09-26 they
+were tested on a clean Ubuntu 24.04 install, following only the
+"Building GNU Radio from Source Code" page on the GNU Radio Wiki and the
+`v1.0` scripts. Everything worked, and the resulting GNU Radio build has
+the same components as the 26.04 build above. The installers work on any
 Ubuntu release for which Ettus provides a UHD build Dockerfile (in
 [`.ci/docker`](https://github.com/EttusResearch/uhd/tree/master/.ci/docker)),
 but only 24.04 and 26.04 have been tested.

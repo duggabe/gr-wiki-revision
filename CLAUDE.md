@@ -61,18 +61,29 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   from `uhd_bare_metal_installer.py` (incl. the shared `run_build_steps()`).
   Writes `volk-dependencies.txt` the same way as `--list-only`, aborts
   unless `uhd-dependencies.txt` exists, is older (by mtime — Linux has no
-  reliable creation time), and has identical content, then runs `git clone
+  reliable creation time), and has identical content (via the generic
+  `check_dependency_lists()` over an ordered list of `DependencyList`s,
+  shared with the GNU Radio installer), then runs `git clone
   --recursive` → cmake → make → `sudo make install` → `sudo ldconfig`.
   Installs no packages and doesn't need root; run as the normal user.
   Building is the default; `--build` is accepted and ignored, for
   consistency with the UHD installer.
   Both dependency-list filenames use hyphens, by the user's choice.
 
+- **`gnuradio_bare_metal_installer.py`** — same shape as the Volk
+  installer (imports from both earlier scripts). Writes
+  `gnuradio-dependencies.txt`, aborts unless uhd → volk → gnuradio lists
+  exist, are in that mtime order, and match, then runs `git clone` (not
+  recursive) → cmake → make → `sudo make install` → `sudo ldconfig` into
+  `~/gnuradio`. Adds `--volk-deps`; `--build` accepted and ignored.
+  Caveat: git doesn't preserve mtimes, so on a fresh clone the committed
+  uhd/volk lists may be out of order — refresh them in order with
+  `--list-only` first (documented in README).
+
 - **`volk-dependencies.txt`** — output of `volk_bare_metal_installer.py`
   (default `-o` filename), committed 2026-09-25 from a passing `--dry-run`.
-  Rewritten on every run, so its mtime is always newer than
-  `uhd-dependencies.txt`'s and the "created before" check survives a fresh
-  clone.
+  Rewritten on every run, so the Volk installer's own check survives a
+  fresh clone; the GNU Radio installer's check may not (see its entry).
 
 - **`LICENSE`** — Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
@@ -181,8 +192,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
 6. ~~Run `volk_bare_metal_installer.py` for real on the 26.04 machine~~ —
-   done 2026-09-25: installed Volk 3.3.0. Still open: consider a similar
-   installer for GNU Radio.
+   done 2026-09-25: installed Volk 3.3.0. GNU Radio installer written
+   2026-09-25 (`--dry-run` tested only); next, run it for real and confirm
+   the build (original machine had v3.11.0.0git-1174-gaee9fd3f).
 7. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
    for now. Revisit later if the mismatch (still named/described for GNU
    Radio wiki scripts) becomes a problem.

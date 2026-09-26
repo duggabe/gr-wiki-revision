@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import typing
 import urllib.error
 from pathlib import Path
 
@@ -105,32 +106,52 @@ def get_dockerfile_text(args: argparse.Namespace) -> str:
         raise RuntimeError(f"failed to obtain Dockerfile: {exc}") from exc
 
 
-def check_dependency_lists(uhd_path: Path, volk_path: Path) -> list[str]:
+class DependencyList(typing.NamedTuple):
+    path: Path
+    installer: str  # the program that writes this file
+    option: str  # command-line option that points at this file
+
+
+def check_dependency_lists(lists: list[DependencyList]) -> list[str]:
     """
-    Verify that uhd_path was created before volk_path and that both files
-    have the same content. Returns a list of error messages (empty if both
-    checks pass).
+    Verify that the given dependency-list files were created in the given
+    order and all have the same content. Returns a list of error messages
+    (empty if both checks pass).
 
     Linux filesystems don't reliably expose a file's creation time, so
     "created before" is judged by modification time -- each file is written
     in full by its installer, so its mtime is when that list was created.
     """
-    if not uhd_path.exists():
-        return [
-            f"{uhd_path} not found. Run uhd_bare_metal_installer.py first (it writes "
-            f"that file), or pass --uhd-deps to point at it."
-        ]
+    missing = [
+        f"{dep.path} not found. Run {dep.installer} first (it writes that file), "
+        f"or pass {dep.option} to point at it."
+        for dep in lists
+        if not dep.path.exists()
+    ]
+    if missing:
+        return missing
 
     errors = []
-    if not uhd_path.stat().st_mtime < volk_path.stat().st_mtime:
-        errors.append(f"{uhd_path} was not created before {volk_path}.")
-    if uhd_path.read_text(encoding="utf-8") != volk_path.read_text(encoding="utf-8"):
-        errors.append(
-            f"{uhd_path} and {volk_path} have different content -- the upstream "
-            f"Dockerfile has changed since UHD's dependencies were installed. "
-            f"Re-run uhd_bare_metal_installer.py to install the current dependencies."
-        )
+    for earlier, later in zip(lists, lists[1:]):
+        if not earlier.path.stat().st_mtime < later.path.stat().st_mtime:
+            errors.append(f"{earlier.path} was not created before {later.path}.")
+
+    first = lists[0]
+    first_text = first.path.read_text(encoding="utf-8")
+    for dep in lists[1:]:
+        if dep.path.read_text(encoding="utf-8") != first_text:
+            errors.append(
+                f"{first.path} and {dep.path} have different content -- the upstream "
+                f"Dockerfile has changed since UHD's dependencies were installed. "
+                f"Re-run {first.installer} to install the current dependencies, then "
+                f"refresh the later lists in order with --list-only."
+            )
     return errors
+
+
+def format_ok_message(lists: list[DependencyList]) -> str:
+    names = ", ".join(str(dep.path) for dep in lists)
+    return f"OK: {names} were created in that order and have the same content."
 
 
 def get_build_steps(home: str) -> list[BuildStep]:
@@ -247,14 +268,17 @@ def main() -> int:
         return 0
 
     # --- 2. Compare against the list UHD's installer wrote ---
-    uhd_path = Path(args.uhd_deps)
-    errors = check_dependency_lists(uhd_path, volk_path)
+    dep_lists = [
+        DependencyList(Path(args.uhd_deps), "uhd_bare_metal_installer.py", "--uhd-deps"),
+        DependencyList(volk_path, "volk_bare_metal_installer.py", "-o"),
+    ]
+    errors = check_dependency_lists(dep_lists)
     if errors:
         for msg in errors:
             print(f"error: {msg}", file=sys.stderr)
         print("Aborting.", file=sys.stderr)
         return 1
-    print(f"OK: {uhd_path} predates {volk_path} and has the same content.")
+    print(format_ok_message(dep_lists))
 
     # --- 3. Build ---
     home, home_source = get_home_dir(args.home)

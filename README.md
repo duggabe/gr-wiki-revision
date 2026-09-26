@@ -103,9 +103,9 @@ password at the install steps, and `~/volk` stays owned by you.
 
 ### Keeping the dependency lists current
 
-Both `uhd-dependencies.txt` and `volk-dependencies.txt` are committed to
-this repo. When EttusResearch updates its Dockerfile, the Volk installer's
-content check fails until `uhd-dependencies.txt` is refreshed. To install
+`uhd-dependencies.txt` and `volk-dependencies.txt` are committed to this
+repo. When EttusResearch updates its Dockerfile, the Volk and GNU Radio
+installers' content checks fail until `uhd-dependencies.txt` is refreshed. To install
 any new packages and refresh the list in one step:
 
 ```bash
@@ -114,6 +114,15 @@ sudo python3 uhd_bare_metal_installer.py --skip-upgrade
 
 `python3 uhd_bare_metal_installer.py --list-only` refreshes the list without
 installing anything. Use it only when the packages are already installed.
+
+Git doesn't preserve file timestamps, so on a fresh clone the committed
+lists may not be in the order the checks expect. Refresh them in order
+first:
+
+```bash
+python3 uhd_bare_metal_installer.py --list-only
+python3 volk_bare_metal_installer.py --list-only
+```
 
 ### Options
 
@@ -140,4 +149,45 @@ Check the dependency lists, then clone, build, and install Volk into `$HOME/volk
 
 ```bash
 python3 volk_bare_metal_installer.py
+```
+
+## Install GNU Radio in a bare-metal environment
+
+`gnuradio_bare_metal_installer.py` builds and installs
+[GNU Radio](https://github.com/gnuradio/gnuradio) from source, after the UHD
+and Volk installers have run. Like the Volk installer, it installs no
+packages itself. Instead it:
+
+1. Derives the dependency list the same way `uhd_bare_metal_installer.py
+   --list-only` does and saves it to `gnuradio-dependencies.txt`.
+2. Aborts with an error unless `uhd-dependencies.txt`,
+   `volk-dependencies.txt`, and `gnuradio-dependencies.txt` exist, were
+   created in that order, and all have the same content.
+3. Clones GNU Radio into `$HOME/gnuradio`, then runs
+   `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
+   `sudo make install`, and `sudo ldconfig`.
+
+Run it as your normal user (not with `sudo`).
+
+### Options
+
+Same as for `volk_bare_metal_installer.py` (default `-o` is
+`gnuradio-dependencies.txt`), plus:
+
+| Option | Description |
+| --- | --- |
+| `--volk-deps PATH` | Package list written by `volk_bare_metal_installer.py` to compare against (default: `volk-dependencies.txt`). |
+
+### Examples
+
+Check the dependency lists and show the build steps, without running them:
+
+```bash
+python3 gnuradio_bare_metal_installer.py --dry-run
+```
+
+Check the dependency lists, then clone, build, and install GNU Radio into `$HOME/gnuradio`:
+
+```bash
+python3 gnuradio_bare_metal_installer.py
 ```

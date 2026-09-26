@@ -4,6 +4,17 @@ Scripts and programs to support GNU Radio Wiki documents.
 
 > **Note:** This is a work in progress.
 
+## Tested builds
+
+On 2026-09-25, the three installers were run in order on Ubuntu 26.04 and
+built and installed the following versions without errors:
+
+| Component | Installer | Version |
+| --- | --- | --- |
+| UHD | `sudo python3 uhd_bare_metal_installer.py --build` | 4.11.0.0-0-g0d7ed3b1 |
+| Volk | `python3 volk_bare_metal_installer.py` | 3.3.0 |
+| GNU Radio | `python3 gnuradio_bare_metal_installer.py` | v3.11.0.0git-1174-gaee9fd3f |
+
 ## Install UHD in a bare-metal environment
 
 `uhd_bare_metal_installer.py` adapts the build environment from

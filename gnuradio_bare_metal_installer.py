@@ -56,6 +56,7 @@ from uhd_bare_metal_installer import (
     get_home_dir,
     get_make_jobs,
     run_build_steps,
+    write_package_list,
 )
 from volk_bare_metal_installer import (
     DEFAULT_PACKAGE_LIST_OUTPUT as VOLK_PACKAGE_LIST_OUTPUT,
@@ -179,7 +180,11 @@ def main() -> int:
     print(f"Extracted {len(packages)} apt packages.")
 
     gnuradio_path = Path(args.output)
-    gnuradio_path.write_text("\n".join(packages) + "\n", encoding="utf-8")
+    try:
+        write_package_list(gnuradio_path, packages)
+    except OSError as exc:
+        print(f"error: could not write {gnuradio_path}: {exc}", file=sys.stderr)
+        return 1
     print(f"Package list written to: {gnuradio_path.resolve()}")
 
     if args.list_only:

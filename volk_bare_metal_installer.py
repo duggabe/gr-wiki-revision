@@ -64,6 +64,7 @@ from uhd_bare_metal_installer import (
     get_make_jobs,
     read_dockerfile,
     run_build_steps,
+    write_package_list,
 )
 
 DEFAULT_PACKAGE_LIST_OUTPUT = "volk-dependencies.txt"
@@ -259,7 +260,11 @@ def main() -> int:
     print(f"Extracted {len(packages)} apt packages.")
 
     volk_path = Path(args.output)
-    volk_path.write_text("\n".join(packages) + "\n", encoding="utf-8")
+    try:
+        write_package_list(volk_path, packages)
+    except OSError as exc:
+        print(f"error: could not write {volk_path}: {exc}", file=sys.stderr)
+        return 1
     print(f"Package list written to: {volk_path.resolve()}")
 
     if args.list_only:

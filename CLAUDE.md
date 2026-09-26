@@ -166,7 +166,13 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   `$SUDO_USER` (uid/gid/groups + `HOME`/`USER`/`LOGNAME`) when the script
   runs as root via sudo, so `~/uhd`, `~/volk`, `~/gnuradio` aren't
   root-owned. `sudo` steps run as root. Real root (no `SUDO_USER`) builds as
-  root. `uhd_find_devices` now runs as the user *before* the udev rules are
+  root. The dependency lists are written via the shared
+  `write_package_list()`, which chowns them to `$SUDO_USER` under sudo (a
+  newly created root-owned list would break a later non-sudo run). Still
+  expected and harmless: `sudo make install` leaves a few root-owned files
+  in each `build/` dir (`install_manifest.txt`, CMake `compiler_depend.*`),
+  with or without starting the script via sudo. Real `sudo` runs of this
+  code not yet tested (only simulated). `uhd_find_devices` now runs as the user *before* the udev rules are
   installed, so it couldn't see a USB USRP on a first build — irrelevant,
   since that call only checks that the freshly built UHD runs; no device is
   plugged in at that point (user confirmed 2026-09-26). Keep it where it is. `~/uhd` and `~/gnuradio` on the 26.04

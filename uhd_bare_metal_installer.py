@@ -305,8 +305,14 @@ def get_build_steps(home: str) -> list[BuildStep]:
 
     # `export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH` is a shell builtin,
     # not a command -- it's applied here as an env overlay for the steps after it,
-    # rather than a subprocess call.
-    ld_library_path = "/usr/local/lib:" + os.environ.get("LD_LIBRARY_PATH", "")
+    # rather than a subprocess call. /usr/local/lib is only prepended if it isn't
+    # already there (the user may already export it from their shell startup
+    # file), and empty entries are dropped: a stray ":" would add the current
+    # directory to the library search path.
+    ld_dirs = [d for d in os.environ.get("LD_LIBRARY_PATH", "").split(":") if d]
+    if "/usr/local/lib" not in ld_dirs:
+        ld_dirs.insert(0, "/usr/local/lib")
+    ld_library_path = ":".join(ld_dirs)
     post_ldconfig_env = {"LD_LIBRARY_PATH": ld_library_path}
 
     return [
@@ -354,8 +360,13 @@ def get_build_user() -> pwd.struct_passwd | None:
         return None
 
 
-def describe_build_user() -> str:
-    """One-line summary, for the build-step preview, of who runs which steps."""
+def describe_build_user(requires_sudo: bool = False) -> str:
+    """
+    One-line summary, for the build-step preview, of who runs which steps.
+    With requires_sudo=True (the UHD installer, whose real run must use
+    sudo), a dry-run by a normal user describes that real sudo run rather
+    than the dry-run itself.
+    """
     build_user = get_build_user()
     if build_user:
         return (
@@ -364,10 +375,29 @@ def describe_build_user() -> str:
         )
     if os.geteuid() == 0:
         return "Build user: root (not started via sudo, so every step runs as root)"
+    if requires_sudo:
+        name = pwd.getpwuid(os.geteuid()).pw_name
+        return (
+            f"Build user: {name} (when run with sudo, as required: steps without "
+            f"'sudo' run as {name}; 'sudo' steps run as root)"
+        )
     return (
         f"Build user: {pwd.getpwuid(os.geteuid()).pw_name} (you'll be prompted for "
         f"your sudo password at the 'sudo' steps)"
     )
+
+
+def write_package_list(path: Path, packages: list[str]) -> None:
+    """
+    Write the package list, one per line. When running as root via sudo, give
+    the file to the invoking user (see get_build_user()) -- otherwise a newly
+    created list would be root-owned and a later run without sudo couldn't
+    overwrite it.
+    """
+    path.write_text("\n".join(packages) + "\n", encoding="utf-8")
+    build_user = get_build_user()
+    if build_user:
+        os.chown(path, build_user.pw_uid, build_user.pw_gid)
 
 
 def run_build_steps(steps: list[BuildStep]) -> int:
@@ -564,7 +594,11 @@ def main() -> int:
 
     # Save the extracted list for reference regardless of mode.
     out_path = Path(args.output)
-    out_path.write_text("\n".join(packages) + "\n", encoding="utf-8")
+    try:
+        write_package_list(out_path, packages)
+    except OSError as exc:
+        print(f"error: could not write {out_path}: {exc}", file=sys.stderr)
+        return 1
     print(f"Package list written to: {out_path.resolve()}")
 
     if args.list_only:
@@ -595,7 +629,7 @@ def main() -> int:
     print(f"\nBuild home directory: {home} (from {home_source})")
     if args.build:
         print("\n--build set: after dependencies install, will also run:")
-        print(f"  {describe_build_user()}")
+        print(f"  {describe_build_user(requires_sudo=True)}")
         for step in get_build_steps(home):
             env_note = f"  [env: {step.env_extra}]" if step.env_extra else ""
             print(f"  $ (cd {step.cwd} && {' '.join(step.cmd)}){env_note}")

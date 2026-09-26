@@ -115,7 +115,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 
 - **`README.md`** — user-facing docs: project blurb, work-in-progress note,
   "Tested builds" table (UHD/Volk/GNU Radio versions, plus tested Ubuntu
-  releases 24.04 and 26.04) and the "Known limitation" note on missing
+  releases 24.04 and 26.04, including the clean-install test from the new
+  wiki page) and the "Known limitation" note on missing
   GNU Radio components, "Download the installers" (`wget` loop from the
   `v1.0` raw links into `~/gr-installers`; review before running, never
   pipe into `python3`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
@@ -207,7 +208,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 - 2026-09-26: The user created the "Building GNU Radio from Source Code"
   wiki page and tested it on the GMKtec (clean Ubuntu 24.04) using only the
   page and the `v1.0` scripts: everything worked. Enabled GNU Radio
-  components match the LENOVO's exactly.
+  components match the LENOVO's exactly. Noted the clean-install test in
+  `README.md`'s "Tested builds" (commit `e96de90`).
 
 ## Key decisions
 

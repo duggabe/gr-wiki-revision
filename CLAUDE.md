@@ -1,4 +1,4 @@
-# AIwork — UHD Bare-Metal Build Tooling
+# gr-wiki-revision — Bare-Metal UHD / Volk / GNU Radio Build Tooling
 
 ## Project summary
 
@@ -8,13 +8,16 @@ dependency list from EttusResearch's own Docker build environment
 (`.ci/docker/uhd-builder-ubuntu2604.Dockerfile` in the `EttusResearch/uhd`
 repo on GitHub).
 
-Pushed to **https://github.com/duggabe/gr-wiki-revision** (public). Note:
-that repo was originally created for GNU Radio wiki scripts (its
-description still says so) — it was reused for this UHD project by explicit
-choice rather than creating a separate repo, so the name/description don't
-match this project's actual content. The repo's original auto-generated
-`README.md` was merged in (`--allow-unrelated-histories`) rather than
-overwritten.
+Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
+and programs supporting GNU Radio Wiki documents, which the user writes
+(e.g. the from-source build guide, Draft-AN-445). This repo is the ultimate
+target project. The earlier `~/AIwork` project on the user's laptop was a
+trial to learn Claude and check the feasibility of these methods; its work
+was pushed here, merging with this repo's original auto-generated
+`README.md` (`--allow-unrelated-histories`) rather than overwriting it.
+Since the installers back wiki instructions for other GNU Radio users,
+favour clarity, reproducibility, and reader choice over personal
+convenience.
 
 **Two different Ubuntu versions are in play:** development/authoring happens
 on **Ubuntu 24.04**, but the actual USRP hardware testing/build target is
@@ -199,10 +202,12 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - **`uhd_find_devices` failure is tolerated, not fatal**, during `--build`,
   since a non-zero exit there just means no USRP hardware is attached, not a
   build failure.
-- **Reused the existing `gr-wiki-revision` repo instead of creating a new
-  one**, on explicit instruction, even though its name/description are for
-  GNU Radio wiki scripts, not this UHD tooling. Its original `README.md` was
-  merged in rather than overwritten.
+- **`gr-wiki-revision` is the target repo; `~/AIwork` was the trial.**
+  The feasibility work from `~/AIwork` was pushed into this existing repo
+  (on explicit instruction) rather than a new one, and its original
+  `README.md` was merged in rather than overwritten. The repo's name and
+  description (GNU Radio wiki support) fit its purpose (clarified by the
+  user 2026-09-26).
 
 ## Next steps
 
@@ -222,8 +227,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    confirmed working on an Ubuntu 26.04 host; 24.04 behaviour still
    untested.)
 3. ~~Turn this directory into a git repo and push to GitHub~~ — done:
-   pushed to https://github.com/duggabe/gr-wiki-revision (see note above on
-   repo name mismatch).
+   pushed to https://github.com/duggabe/gr-wiki-revision.
 4. **Finish migrating to LENOVO** (in progress as of 2026-09-24 — LENOVO will
    be the only machine used for future work; this machine's `~/AIwork` becomes
    historical only): install `git`, `gh`, Claude Code; `gh auth login`; set
@@ -243,6 +247,5 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    `gnuradio_bare_metal_installer.py` for real~~ — done 2026-09-25:
    installed GNU Radio v3.11.0.0git-1174-gaee9fd3f, matching the original
    machine.
-7. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
-   for now. Revisit later if the mismatch (still named/described for GNU
-   Radio wiki scripts) becomes a problem.
+7. Repo visibility: confirmed 2026-09-24 to leave public. (The name and
+   description aren't a mismatch — see Key decisions.)

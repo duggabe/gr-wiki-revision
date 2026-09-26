@@ -19,6 +19,18 @@ Since the installers back wiki instructions for other GNU Radio users,
 favour clarity, reproducibility, and reader choice over personal
 convenience.
 
+**Goal:** replace all of the wiki's build-from-source instructions with one
+new page, "Building GNU Radio from Source Code". The current path (as of
+17 Sept 2026) is: InstallingGR → LinuxInstall#From_Source →
+UbuntuInstall#Install_Dependencies → LinuxInstall#Installing_UHD → the
+draft page's "Building and installing UHD from source code" section →
+LinuxInstall#Installing_Volk → LinuxInstall#Installing_GNU_Radio. The
+installers cover the UHD, Volk, and GNU Radio build steps; nothing yet
+covers UbuntuInstall#Install_Dependencies (GNU Radio's own deps), which is
+still written for Ubuntu 24.04 + Qt5 while GNU Radio moves to Qt6.
+wiki.gnuradio.org is behind a Cloudflare challenge and can't be fetched
+from here — ask the user to paste page content.
+
 **Two different Ubuntu versions are in play:** development/authoring happens
 on **Ubuntu 24.04**, but the actual USRP hardware testing/build target is
 **Ubuntu 26.04** (matching UHD's `uhd-builder-ubuntu2604.Dockerfile`). This
@@ -152,7 +164,10 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - 2026-09-25: Ran `gnuradio_bare_metal_installer.py` for real on the same
   Ubuntu 26.04 machine: built and installed **GNU Radio
   v3.11.0.0git-1174-gaee9fd3f** successfully (same version as the original
-  machine's build).
+  machine's build). Found 2026-09-26: this build lacks `gr-qtgui`,
+  `gr-soapy`, `gr-iio`, and the JACK/PortAudio audio back-ends — cmake
+  silently skipped them because only UHD's deps were installed (see Next
+  step 8).
 - 2026-09-26: Made all three installers build as the normal user even when
   started with sudo, and chown the dependency lists back to the user (see
   Key decisions). Also: the UHD `--dry-run` "Build user" line now describes
@@ -249,3 +264,21 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    machine.
 7. Repo visibility: confirmed 2026-09-24 to leave public. (The name and
    description aren't a mismatch — see Key decisions.)
+8. **GNU Radio's own dependencies (open, 2026-09-26).** Per
+   `gnuradio-config-info --enabled-components`, the installers' build lacks:
+   - `gr-qtgui` — needs Qt6 (Core/Gui/Widgets, optional OpenGL), PyQt6, and
+     Qwt built for Qt6 (`FindQwt.cmake` looks for `Qt6Qwt6`). On Ubuntu
+     26.04, `qt6-base-dev` and `python3-pyqt6` are in the archive but there
+     is **no Qwt-for-Qt6 package** (only `libqwt-qt5-*`).
+   - `gr-soapy` (`libsoapysdr-dev`), `gr-iio` (`libiio-dev`), JACK
+     (`libjack-jackd2-dev`), PortAudio (`portaudio19-dev`) — all available
+     in the 26.04 archive, just not installed.
+
+   GNU Radio's CI uses prebuilt container images (no Ubuntu 26.04 one), so
+   there's no upstream Dockerfile to parse as for UHD. **Waiting on the
+   user**, who is asking the GNU Radio developers how Qwt for Qt6 should be
+   provided on Ubuntu 26.04 (build from source, PPA, …). Options after that:
+   add a GNU Radio dependency-install step (needs sudo) before cmake, a new
+   Qwt-from-source installer between Volk and GNU Radio, and/or print the
+   enabled components at the end of the GNU Radio installer so readers can
+   confirm `gr-qtgui` is present.

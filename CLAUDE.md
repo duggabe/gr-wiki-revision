@@ -37,7 +37,7 @@ from here — ask the user to paste page content.
 | --- | --- | --- |
 | Laptop | 24.04 | `~/AIwork` trial; 24.04 testing, with both the bash script + the wiki's manual steps and the Python installers |
 | LENOVO desktop | 26.04 | current working machine, `~/gr-wiki-revision`; 26.04 builds of UHD, Volk, GNU Radio |
-| Third computer (clean install) | 24.04 | planned: test the new wiki page from scratch |
+| GMKtec (clean install) | 24.04 | tested the new wiki page from scratch (2026-09-26): everything worked |
 
 Ettus has Dockerfiles for both (`uhd-builder-ubuntu2404.Dockerfile` and
 `uhd-builder-ubuntu2604.Dockerfile`, plus 20.04, 22.04, 25.10, and Fedora),
@@ -204,6 +204,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   to `README.md` (after the tag, so `v1.0`'s own README lacks them; the
   scripts are unchanged).
 
+- 2026-09-26: The user created the "Building GNU Radio from Source Code"
+  wiki page and tested it on the GMKtec (clean Ubuntu 24.04) using only the
+  page and the `v1.0` scripts: everything worked. Enabled GNU Radio
+  components match the LENOVO's exactly.
+
 ## Key decisions
 
 - **Parse the Dockerfile instead of hardcoding packages.** Keeps the
@@ -320,8 +325,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    warning or a GNU Radio dependency step (after step 8), and the
    supported OS (Ubuntu 24.04 and 26.04 tested; wherever Ettus has a
    matching Dockerfile).
-10. **User's plan (2026-09-26):** create the "Building GNU Radio from Source
-    Code" wiki page from `wiki-draft-download-section.txt`, then test it by
-    following only the page on a third, clean Ubuntu 24.04 computer.
-    Expect: the UHD installer installs `git` itself; `gr-qtgui` likely
-    still missing (check `gnuradio-config-info --enabled-components`).
+10. ~~Create the "Building GNU Radio from Source Code" wiki page from
+    `wiki-draft-download-section.txt` and test it on the GMKtec (clean
+    Ubuntu 24.04)~~ — done 2026-09-26: the user followed only the new page
+    and "everything went perfectly". `gnuradio-config-info
+    --enabled-components` on the GMKtec is identical to the LENOVO's (same
+    32 components; `gr-qtgui`, `gr-soapy`, `gr-iio`, JACK, PortAudio
+    missing on both), so step 8 is the remaining gap on 24.04 too.

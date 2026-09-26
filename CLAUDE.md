@@ -116,6 +116,15 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   steps, examples, keeping the dependency lists current). Keep its options
   tables in sync with the scripts' argparse help.
 
+- **`wiki-draft-download-section.txt`** — local-only (in `.gitignore`, so
+  not on GitHub or other machines): MediaWiki-markup draft of the
+  "Building GNU Radio from Source Code" page's download/run sections —
+  downloading the three scripts via tag-pinned raw GitHub links into
+  `~/gr-installers`, running them in order, re-running/rebuilding, and
+  checking `gnuradio-config-info --enabled-components`. Uses `v1.0` as a
+  placeholder tag. Deliberately omits the Qt GUI gap and supported-OS note
+  (to settle before publishing).
+
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
   (before commit `7472367`).
@@ -217,6 +226,15 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - **`uhd_find_devices` failure is tolerated, not fatal**, during `--build`,
   since a non-zero exit there just means no USRP hardware is attached, not a
   build failure.
+- **Distribute the scripts via tag-pinned raw GitHub links** (2026-09-26)
+  so wiki readers needn't clone the repo:
+  `https://raw.githubusercontent.com/duggabe/gr-wiki-revision/<tag>/<script>`.
+  Link a tag, not `main`, so pushes don't change what readers run (often
+  with sudo). The Volk script imports from the UHD script, and GNU Radio
+  from both, so readers must download all three into one directory (also
+  where the dependency lists land) — chosen over making each script
+  self-contained or merging them into one. Tell readers to download then
+  run, never pipe into `sudo python3`.
 - **`gr-wiki-revision` is the target repo; `~/AIwork` was the trial.**
   The feasibility work from `~/AIwork` was pushed into this existing repo
   (on explicit instruction) rather than a new one, and its original
@@ -282,3 +300,9 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    Qwt-from-source installer between Volk and GNU Radio, and/or print the
    enabled components at the end of the GNU Radio installer so readers can
    confirm `gr-qtgui` is present.
+9. **Publish the scripts for the wiki page (after step 8).** Create the
+   first git tag / GitHub release (e.g. `v1.0`; the repo has no tags yet)
+   and point the page's raw links at it, then finish
+   `wiki-draft-download-section.txt`: fix the tag name, add a Qt GUI
+   warning or a GNU Radio dependency step, and state the supported OS
+   (currently Ubuntu 26.04, wherever Ettus has a matching Dockerfile).

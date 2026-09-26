@@ -65,7 +65,7 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   `check_dependency_lists()` over an ordered list of `DependencyList`s,
   shared with the GNU Radio installer), then runs `git clone
   --recursive` → cmake → make → `sudo make install` → `sudo ldconfig`.
-  Installs no packages and doesn't need root; run as the normal user.
+  Installs no packages and doesn't need root; can run with or without sudo.
   Building is the default; `--build` is accepted and ignored, for
   consistency with the UHD installer.
   Both dependency-list filenames use hyphens, by the user's choice.
@@ -161,6 +161,17 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   Dockerfile itself only sets up the build environment, so building UHD from
   source is treated as an additional, explicit step (matches the Dockerfile's
   own scope).
+- **Build as the normal user, even under sudo** (2026-09-26): the shared
+  `run_build_steps()` runs every step not starting with `sudo` as
+  `$SUDO_USER` (uid/gid/groups + `HOME`/`USER`/`LOGNAME`) when the script
+  runs as root via sudo, so `~/uhd`, `~/volk`, `~/gnuradio` aren't
+  root-owned. `sudo` steps run as root. Real root (no `SUDO_USER`) builds as
+  root. `uhd_find_devices` now runs as the user *before* the udev rules are
+  installed, so it couldn't see a USB USRP on a first build — irrelevant,
+  since that call only checks that the freshly built UHD runs; no device is
+  plugged in at that point (user confirmed 2026-09-26). Keep it where it is. `~/uhd` and `~/gnuradio` on the 26.04
+  machine were root-owned from builds before this change; fixed 2026-09-26
+  with `sudo chown -R barry:barry ~/uhd ~/gnuradio`.
 - **`uhd_find_devices` failure is tolerated, not fatal**, during `--build`,
   since a non-zero exit there just means no USRP hardware is attached, not a
   build failure.

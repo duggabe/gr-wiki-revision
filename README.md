@@ -54,6 +54,10 @@ python3 uhd_bare_metal_installer.py [options]
 5. `sudo uhd_images_downloader`
 6. Install the udev rules and trigger `udevadm`, so USRPs are usable without root
 
+Although the installer runs with `sudo`, the steps without `sudo` (clone,
+`cmake`, `make`, `uhd_find_devices`) run as the user who invoked `sudo`, so
+`<home>/uhd` belongs to you, not root. Only the `sudo` steps run as root.
+
 ### Examples
 
 Auto-detect the host OS and just print/save the dependency list (no install):
@@ -109,8 +113,10 @@ installs no packages itself. Instead it:
    `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
    `sudo make install`, and `sudo ldconfig`.
 
-Run it as your normal user (not with `sudo`); `sudo` prompts for your
-password at the install steps, and `~/volk` stays owned by you.
+Run it either as your normal user or with `sudo`. Either way, the clone and
+build steps run as you, so `~/volk` belongs to you; only `sudo make install`
+and `sudo ldconfig` run as root. Without `sudo`, you're prompted for your
+password when the build reaches the install step.
 
 ### Keeping the dependency lists current
 
@@ -178,7 +184,11 @@ packages itself. Instead it:
    `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
    `sudo make install`, and `sudo ldconfig`.
 
-Run it as your normal user (not with `sudo`).
+Run it either as your normal user or with `sudo`; as with Volk, the clone
+and build steps run as you either way. The GNU Radio build usually takes
+longer than `sudo`'s 15-minute password cache, so without `sudo` expect a
+password prompt at the install step (the build waits there, even with `-y`).
+Starting with `sudo` avoids that.
 
 ### Options
 

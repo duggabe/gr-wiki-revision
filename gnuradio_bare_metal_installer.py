@@ -50,6 +50,7 @@ from uhd_bare_metal_installer import (
     BuildStep,
     DockerfileParseError,
     _confirm,
+    describe_build_user,
     extract_apt_packages,
     extract_base_image,
     get_home_dir,
@@ -206,6 +207,7 @@ def main() -> int:
     print(f"\nBuild home directory: {home} (from {home_source})")
     steps = get_build_steps(home)
     print("\nThe following build steps will run:")
+    print(f"  {describe_build_user()}")
     for step in steps:
         print(f"  $ (cd {step.cwd} && {' '.join(step.cmd)})")
 

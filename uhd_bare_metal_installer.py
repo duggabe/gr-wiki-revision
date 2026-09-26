@@ -335,6 +335,41 @@ def build_uhd_from_source(home: str) -> int:
     return run_build_steps(get_build_steps(home))
 
 
+def get_build_user() -> pwd.struct_passwd | None:
+    """
+    When running as root via sudo, return the invoking (normal) user, whom
+    the build steps without "sudo" should run as -- so the cloned source and
+    build directories belong to that user, not root. Returns None when not
+    running as root (the steps already run as the normal user) or when root
+    wasn't reached via sudo (there's no normal user to switch to).
+    """
+    if os.geteuid() != 0:
+        return None
+    sudo_user = os.environ.get("SUDO_USER")
+    if not sudo_user or sudo_user == "root":
+        return None
+    try:
+        return pwd.getpwnam(sudo_user)
+    except KeyError:
+        return None
+
+
+def describe_build_user() -> str:
+    """One-line summary, for the build-step preview, of who runs which steps."""
+    build_user = get_build_user()
+    if build_user:
+        return (
+            f"Build user: {build_user.pw_name} (steps without 'sudo' run as "
+            f"{build_user.pw_name}; 'sudo' steps run as root)"
+        )
+    if os.geteuid() == 0:
+        return "Build user: root (not started via sudo, so every step runs as root)"
+    return (
+        f"Build user: {pwd.getpwuid(os.geteuid()).pw_name} (you'll be prompted for "
+        f"your sudo password at the 'sudo' steps)"
+    )
+
+
 def run_build_steps(steps: list[BuildStep]) -> int:
     """
     Runs the given build steps in order. Aborts on the first command that
@@ -342,19 +377,34 @@ def run_build_steps(steps: list[BuildStep]) -> int:
     returns 1; returns 0 if all succeed. A step with tolerate_failure=True
     (e.g. uhd_find_devices, which exits non-zero simply when no USRP hardware
     is attached) only warns on failure and lets the build continue.
+
+    When running as root via sudo, steps that don't start with "sudo" run as
+    the invoking user (see get_build_user()), so the clone and build
+    directories aren't owned by root; "sudo" steps run as root.
     """
+    build_user = get_build_user()
     for step in steps:
         env = None
         if step.env_extra:
             env = os.environ.copy()
             env.update(step.env_extra)
 
+        user_kwargs: dict = {}
+        if build_user and step.cmd[0] != "sudo":
+            env = env or os.environ.copy()
+            env.update(HOME=build_user.pw_dir, USER=build_user.pw_name, LOGNAME=build_user.pw_name)
+            user_kwargs = dict(
+                user=build_user.pw_uid,
+                group=build_user.pw_gid,
+                extra_groups=os.getgrouplist(build_user.pw_name, build_user.pw_gid),
+            )
+
         print(f"\n$ (cd {step.cwd} && {' '.join(step.cmd)})")
         try:
             if step.capture:
                 result = subprocess.run(
                     step.cmd, cwd=step.cwd, env=env, check=True,
-                    capture_output=True, text=True,
+                    capture_output=True, text=True, **user_kwargs,
                 )
                 heading = step.label or " ".join(step.cmd)
                 print(f"\n----- {heading} -----")
@@ -363,7 +413,7 @@ def run_build_steps(steps: list[BuildStep]) -> int:
                     sys.stderr.write(result.stderr)
                 print(f"----- end {heading} -----")
             else:
-                subprocess.run(step.cmd, cwd=step.cwd, env=env, check=True)
+                subprocess.run(step.cmd, cwd=step.cwd, env=env, check=True, **user_kwargs)
         except subprocess.CalledProcessError as exc:
             if step.capture:
                 if exc.stdout:
@@ -545,6 +595,7 @@ def main() -> int:
     print(f"\nBuild home directory: {home} (from {home_source})")
     if args.build:
         print("\n--build set: after dependencies install, will also run:")
+        print(f"  {describe_build_user()}")
         for step in get_build_steps(home):
             env_note = f"  [env: {step.env_extra}]" if step.env_extra else ""
             print(f"  $ (cd {step.cwd} && {' '.join(step.cmd)}){env_note}")

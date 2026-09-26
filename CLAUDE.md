@@ -114,8 +114,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   Commons advises against its licenses for software; kept as-is by choice.
 
 - **`README.md`** — user-facing docs: project blurb, work-in-progress note,
-  "Tested builds" table (UHD/Volk/GNU Radio versions), "Run the installers
-  in order" (sudo requirements, the enforced order, refreshing in-between
+  "Tested builds" table (UHD/Volk/GNU Radio versions, plus tested Ubuntu
+  releases 24.04 and 26.04) and the "Known limitation" note on missing
+  GNU Radio components, "Download the installers" (`wget` loop from the
+  `v1.0` raw links into `~/gr-installers`; review before running, never
+  pipe into `python3`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
   lists after re-running an earlier installer, removing `~/uhd` etc. before
   rebuilding), then a usage section per installer (options tables, build
   steps, examples, keeping the dependency lists current). Keep its options
@@ -191,6 +194,15 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   sequence in the repo: UHD `--dry-run --build` → Volk `--list-only` →
   GNU Radio `--dry-run` passes. Added the "Run the installers in order"
   section to `README.md`.
+- 2026-09-26: Recorded the wiki consolidation goal and the GNU Radio
+  dependency gap (Next step 8); drafted the wiki page's download/run
+  sections (`wiki-draft-download-section.txt`, local only); corrected the
+  machine/Ubuntu-version facts. Created and pushed tag **`v1.0`** (commit
+  `24ef53f`) and verified the draft's `wget` loop from the `v1.0` raw links
+  in an empty directory (all three downloaded, `--help` works, order check
+  passes). Then added "Download the installers" and the tested-Ubuntu note
+  to `README.md` (after the tag, so `v1.0`'s own README lacks them; the
+  scripts are unchanged).
 
 ## Key decisions
 

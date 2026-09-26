@@ -15,6 +15,43 @@ built and installed the following versions without errors:
 | Volk | `python3 volk_bare_metal_installer.py` | 3.3.0 |
 | GNU Radio | `python3 gnuradio_bare_metal_installer.py` | v3.11.0.0git-1174-gaee9fd3f |
 
+## Run the installers in order
+
+Run the three installers in this order. Volk builds on the dependencies the
+UHD installer installs, and GNU Radio builds on both:
+
+```bash
+sudo python3 uhd_bare_metal_installer.py --build
+python3 volk_bare_metal_installer.py
+python3 gnuradio_bare_metal_installer.py
+```
+
+The UHD installer needs `sudo`, because it installs packages. The Volk and
+GNU Radio installers work with or without `sudo`. Either way, the clone and
+build steps run as you, so `~/uhd`, `~/volk`, and `~/gnuradio` belong to
+you.
+
+The order is enforced. Each installer writes its own dependency list
+(`uhd-dependencies.txt`, `volk-dependencies.txt`,
+`gnuradio-dependencies.txt`), and the Volk and GNU Radio installers abort
+unless the lists before theirs are older and have the same content.
+
+**Re-running an earlier installer.** Every run, including `--dry-run` and
+`--list-only`, rewrites that installer's list, making it newer than the
+later ones. The installer you run next always rewrites its own list first,
+so only the lists in between need refreshing. For example, after
+re-running the UHD installer, refresh the Volk list before running the
+GNU Radio installer:
+
+```bash
+python3 volk_bare_metal_installer.py --list-only
+python3 gnuradio_bare_metal_installer.py
+```
+
+**Rebuilding.** Each installer clones into a new directory and stops if it
+already exists. To rebuild, remove or rename `~/uhd`, `~/volk`, or
+`~/gnuradio` first.
+
 ## Install UHD in a bare-metal environment
 
 `uhd_bare_metal_installer.py` adapts the build environment from

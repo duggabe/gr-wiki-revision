@@ -15,6 +15,20 @@ built and installed the following versions without errors:
 | Volk | `python3 volk_bare_metal_installer.py` | 3.3.0 |
 | GNU Radio | `python3 gnuradio_bare_metal_installer.py` | v3.11.0.0git-1174-gaee9fd3f |
 
+> **Known limitation:** the installers only install UHD's build
+> dependencies, not GNU Radio's own. CMake skips any GNU Radio component
+> whose dependencies it can't find, so this GNU Radio build does **not**
+> include `gr-qtgui` (the QT GUI blocks), `gr-soapy`, `gr-iio`, or the JACK
+> and PortAudio audio back-ends. `gr-qtgui` now requires Qt6, PyQt6, and
+> Qwt built for Qt6, and Ubuntu 26.04 has no packaged Qwt for Qt6. The
+> recommended way to provide it is still being worked out.
+>
+> To see which components your build includes:
+>
+> ```bash
+> gnuradio-config-info --enabled-components
+> ```
+
 ## Run the installers in order
 
 Run the three installers in this order. Volk builds on the dependencies the

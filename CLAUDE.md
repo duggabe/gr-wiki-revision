@@ -85,6 +85,10 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
   Rewritten on every run, so the Volk installer's own check survives a
   fresh clone; the GNU Radio installer's check may not (see its entry).
 
+- **`gnuradio-dependencies.txt`** — output of
+  `gnuradio_bare_metal_installer.py` (default `-o` filename), committed
+  2026-09-25 from a passing `--dry-run`. Rewritten on every run.
+
 - **`LICENSE`** — Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
@@ -137,6 +141,10 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
 - 2026-09-25: Ran `volk_bare_metal_installer.py` for real on the Ubuntu
   26.04 machine: built and installed **Volk 3.3.0** successfully (same
   version as the original machine's build).
+- 2026-09-25: Ran `gnuradio_bare_metal_installer.py` for real on the same
+  Ubuntu 26.04 machine: built and installed **GNU Radio
+  v3.11.0.0git-1174-gaee9fd3f** successfully (same version as the original
+  machine's build).
 
 ## Key decisions
 
@@ -192,9 +200,10 @@ on 26.04 since its package list is hardcoded from that Dockerfile. On a
    Ubuntu 26.04 test machine to confirm it reproduces the successful
    UHD/Volk/GNU Radio build from the original machine.
 6. ~~Run `volk_bare_metal_installer.py` for real on the 26.04 machine~~ —
-   done 2026-09-25: installed Volk 3.3.0. GNU Radio installer written
-   2026-09-25 (`--dry-run` tested only); next, run it for real and confirm
-   the build (original machine had v3.11.0.0git-1174-gaee9fd3f).
+   done 2026-09-25: installed Volk 3.3.0. ~~Run
+   `gnuradio_bare_metal_installer.py` for real~~ — done 2026-09-25:
+   installed GNU Radio v3.11.0.0git-1174-gaee9fd3f, matching the original
+   machine.
 7. Repo naming/description/visibility: confirmed 2026-09-24 to leave public
    for now. Revisit later if the mismatch (still named/described for GNU
    Radio wiki scripts) becomes a problem.

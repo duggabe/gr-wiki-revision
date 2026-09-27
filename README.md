@@ -43,6 +43,22 @@ but only 24.04 and 26.04 have been tested.
 > gnuradio-config-info --enabled-components
 > ```
 
+## Planned changes
+
+These are under discussion with the GNU Radio developers and aren't in
+`v1.0`:
+
+- **Which GNU Radio branch to build:** the released 3.10 series
+  (`maint-3.10`, Qt5) or `main` (3.11 development, Qt6).
+- **Installing GNU Radio's own dependencies,** so that `gr-qtgui`,
+  `gr-soapy`, `gr-iio`, JACK, and PortAudio are included.
+- **Installing UHD from the
+  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd)**
+  instead of building it from source. The PPA has UHD 4.11.0.0 for Ubuntu
+  24.04 and 26.04.
+
+`v1.0` will stay available at its current links.
+
 ## Download the installers
 
 You don't need to clone this repository. Download the three scripts from
@@ -99,6 +115,24 @@ python3 gnuradio_bare_metal_installer.py
 **Rebuilding.** Each installer clones into a new directory and stops if it
 already exists. To rebuild, remove or rename `~/uhd`, `~/volk`, or
 `~/gnuradio` first.
+
+## Environment variables
+
+Everything is installed under `/usr/local`. On Ubuntu 24.04 and 26.04 you
+don't need to set `LD_LIBRARY_PATH`: Ubuntu already lists `/usr/local/lib`
+in `/etc/ld.so.conf.d`, and the installers run `sudo ldconfig`. GNU Radio's
+Python modules (including `from gnuradio import uhd`) are found without
+`PYTHONPATH` too.
+
+The one exception is UHD's own Python API (`import uhd`). The UHD source
+build installs it in `/usr/local/lib/python3.X/site-packages`, which Ubuntu's
+Python doesn't search. If you need it, add that directory to `PYTHONPATH`
+in your shell startup file (for example `~/.bashrc` or `~/.bash_aliases`),
+replacing `3.X` with your Python version:
+
+```bash
+export PYTHONPATH=/usr/local/lib/python3.X/site-packages:$PYTHONPATH
+```
 
 ## Install UHD in a bare-metal environment
 

@@ -94,8 +94,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   installer (imports from both earlier scripts). Writes
   `gnuradio-dependencies.txt`, aborts unless uhd → volk → gnuradio lists
   exist, are in that mtime order, and match, then runs `git clone` (not
-  recursive) → cmake → make → `sudo make install` → `sudo ldconfig` into
-  `~/gnuradio`. Adds `--volk-deps`; `--build` accepted and ignored.
+  recursive; default branch `main`, i.e. 3.11 development) → cmake → make →
+  `sudo make install` → `sudo ldconfig` into `~/gnuradio`. Adds `--volk-deps`; `--build` accepted and ignored.
   Caveat: git doesn't preserve mtimes, so on a fresh clone the committed
   uhd/volk lists may be out of order — refresh them in order with
   `--list-only` first (documented in README).
@@ -117,7 +117,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   "Tested builds" table (UHD/Volk/GNU Radio versions, plus tested Ubuntu
   releases 24.04 and 26.04, including the clean-install test from the new
   wiki page) and the "Known limitation" note on missing
-  GNU Radio components, "Download the installers" (`wget` loop from the
+  GNU Radio components (incl. that the installer builds `main` = 3.11git
+  with Qt6, while released `maint-3.10` uses Qt5), "Download the installers" (`wget` loop from the
   `v1.0` raw links into `~/gr-installers`; review before running, never
   pipe into `python3`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
   lists after re-running an earlier installer, removing `~/uhd` etc. before
@@ -210,6 +211,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   page and the `v1.0` scripts: everything worked. Enabled GNU Radio
   components match the LENOVO's exactly. Noted the clean-install test in
   `README.md`'s "Tested builds" (commit `e96de90`).
+
+- 2026-09-27: Investigated GNU Radio's own dependencies (Next step 8):
+  found GNU Radio's CI Dockerfiles in `gnuradio/gnuradio-docker`, that the
+  GNU Radio installer builds `main` (3.11git, Qt6) rather than the released
+  `maint-3.10` (Qt5), and that Qwt for Qt6 is packaged only in Ubuntu 26.10.
+  Updated step 8 and `README.md`'s "Known limitation" and GNU Radio section
+  to explain the branch and Qt5/Qt6 split. The user is asking the GNU Radio
+  developers which branch the wiki page should build.
 
 ## Key decisions
 

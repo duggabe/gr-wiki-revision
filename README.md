@@ -28,9 +28,14 @@ but only 24.04 and 26.04 have been tested.
 > dependencies, not GNU Radio's own. CMake skips any GNU Radio component
 > whose dependencies it can't find, so this GNU Radio build does **not**
 > include `gr-qtgui` (the QT GUI blocks), `gr-soapy`, `gr-iio`, or the JACK
-> and PortAudio audio back-ends. `gr-qtgui` now requires Qt6, PyQt6, and
-> Qwt built for Qt6, and Ubuntu 26.04 has no packaged Qwt for Qt6. The
-> recommended way to provide it is still being worked out.
+> and PortAudio audio back-ends.
+>
+> The installer builds GNU Radio's `main` branch, the 3.11 development
+> version, whose `gr-qtgui` requires Qt6, PyQt6, and Qwt built for Qt6.
+> Ubuntu 24.04 and 26.04 have no packaged Qwt for Qt6. The released 3.10
+> series (`maint-3.10`) uses Qt5 instead, which both releases package in
+> full. Which branch these instructions should build, and how to provide
+> the missing dependencies, is still being worked out.
 >
 > To see which components your build includes:
 >
@@ -260,7 +265,8 @@ packages itself. Instead it:
 2. Aborts with an error unless `uhd-dependencies.txt`,
    `volk-dependencies.txt`, and `gnuradio-dependencies.txt` exist, were
    created in that order, and all have the same content.
-3. Clones GNU Radio into `$HOME/gnuradio`, then runs
+3. Clones GNU Radio's default branch, `main` (the 3.11 development
+   version), into `$HOME/gnuradio`, then runs
    `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
    `sudo make install`, and `sudo ldconfig`.
 

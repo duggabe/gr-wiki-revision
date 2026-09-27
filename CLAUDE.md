@@ -218,7 +218,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   `maint-3.10` (Qt5), and that Qwt for Qt6 is packaged only in Ubuntu 26.10.
   Updated step 8 and `README.md`'s "Known limitation" and GNU Radio section
   to explain the branch and Qt5/Qt6 split. The user is asking the GNU Radio
-  developers which branch the wiki page should build.
+  developers which branch the wiki page should build. Later: evaluated the
+  main developer's proposal to install UHD from the Ettus PPA, and checked
+  that the `/usr/local` prefix needs no env vars except for UHD's own
+  Python API (recorded in step 8).
 
 ## Key decisions
 
@@ -350,6 +353,42 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    copies in `/usr` could be picked up by cmake) and the packaging/docs/test
    tools (`debhelper-compat`, `dh-python`, `graphviz`, `xmlto`,
    `libjs-mathjax`, `python3-pytest`).
+
+   **UHD from the Ettus PPA (proposed by the main GNU Radio developer,
+   2026-09-27).** `ppa:ettusresearch/uhd` publishes UHD **4.11.0.0** (same as
+   the source builds) for 24.04 (noble) and 26.04 (resolute), 2026-09-17;
+   packages include `libuhd-dev`, `uhd-host` (utilities incl.
+   `uhd_images_downloader`), `python3-uhd`, `uhd-rfnoc-dev`. Impact if
+   adopted:
+   - UHD installer's source build replaced by `add-apt-repository` +
+     `apt-get install libuhd-dev uhd-host python3-uhd` +
+     `uhd_images_downloader` (check whether `uhd-host` installs the udev
+     rules). Keep `--build` as an optional from-source path, or retire it.
+   - Volk/GNU Radio currently get their build tools (cmake, g++, Boost,
+     mako, NumPy, pybind11, …) from the *Ettus* build Dockerfile's list; with
+     no UHD source build, GNU Radio's own dependency list (above) becomes
+     the base, and the uhd→volk→gnuradio file-order check must be rebuilt
+     around the new first step or simplified.
+   - Machines with the source-built UHD in `/usr/local` (LENOVO, GMKtec)
+     must remove it first (`cd ~/uhd/host/build && sudo xargs rm -f <
+     install_manifest.txt && sudo ldconfig`), or GNU Radio's cmake
+     (searches `/usr/local` first) may pick the old copy.
+   - Lost: building a specific UHD commit/branch. Release as a new version
+     (e.g. `v2.0`), keeping `v1.0` for the current wiki links.
+
+   **Install prefix: keep `/usr/local` (recommended 2026-09-27).** Checked on
+   the LENOVO in a clean environment (no `LD_LIBRARY_PATH`/`PYTHONPATH`):
+   Ubuntu's `/etc/ld.so.conf.d` already lists `/usr/local/lib`, so
+   `ldconfig` finds libuhd/libvolk/libgnuradio; `uhd_find_devices` runs;
+   GNU Radio's Python (`/usr/local/lib/python3.14/dist-packages`) imports
+   fine, incl. `from gnuradio import uhd`. Only UHD's own Python API fails
+   (`import uhd`: installed to `.../site-packages`, which Debian/Ubuntu
+   Python doesn't search) — the PPA's `python3-uhd` fixes that. So the
+   wiki's `LD_LIBRARY_PATH` step isn't needed for these libs; `PYTHONPATH`
+   only if UHD is built from source. `/usr` was rejected: it's apt-managed
+   (untracked `make install` files can be overwritten or break packages),
+   Volk would collide with Ubuntu's `libvolk` in `/usr/lib/x86_64-linux-gnu`,
+   removal is harder, and `/usr/local` is the from-source convention.
 
    **Waiting on the user**, who is asking the GNU Radio developers (a) which
    branch a from-source wiki page for 24.04/26.04 should build (`maint-3.10`

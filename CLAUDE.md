@@ -303,25 +303,52 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    machine.
 7. ~~Repo visibility~~ — done: confirmed 2026-09-24 to leave public. (The
    name and description aren't a mismatch — see Key decisions.)
-8. **GNU Radio's own dependencies (open, 2026-09-26).** Per
-   `gnuradio-config-info --enabled-components`, the installers' build lacks:
-   - `gr-qtgui` — needs Qt6 (Core/Gui/Widgets, optional OpenGL), PyQt6, and
-     Qwt built for Qt6 (`FindQwt.cmake` looks for `Qt6Qwt6`). On Ubuntu
-     26.04, `qt6-base-dev` and `python3-pyqt6` are in the archive but there
-     is **no Qwt-for-Qt6 package** (only `libqwt-qt5-*`).
-   - `gr-soapy` (`libsoapysdr-dev`), `gr-iio` (`libiio-dev`), JACK
-     (`libjack-jackd2-dev`), PortAudio (`portaudio19-dev`) — all available
-     in the 26.04 archive, just not installed.
+8. **GNU Radio's own dependencies and branch choice (open; updated
+   2026-09-27).** Per `gnuradio-config-info --enabled-components` (identical
+   on the LENOVO and the GMKtec), the installers' build lacks `gr-qtgui`,
+   `gr-soapy`, `gr-iio`, and the JACK/PortAudio audio back-ends.
 
-   GNU Radio's CI uses prebuilt container images (no Ubuntu 26.04 one), so
-   there's no upstream Dockerfile to parse as for UHD. **Waiting on the
-   user**, who is asking the GNU Radio developers how Qwt for Qt6 should be
-   provided on Ubuntu 26.04 (build from source, PPA, …). Options after that:
-   add a GNU Radio dependency-install step (needs sudo) before cmake, a new
-   Qwt-from-source installer between Volk and GNU Radio, and/or print the
-   enabled components at the end of the GNU Radio installer so readers can
-   confirm `gr-qtgui` is present. Then update the wiki page to match (a Qt
-   GUI warning or the new dependency step) and tag a new release.
+   **Key finding — which branch is built:** `gnuradio_bare_metal_installer.py`
+   does a plain `git clone`, i.e. the default branch `main` = 3.11.0git
+   (development, pre-release). Its `gr-qtgui` requires **Qt6**. The released
+   series is `maint-3.10` (3.10.12.x), whose `gr-qtgui` requires **Qt5**.
+   The user's impression (to confirm with the developers): released GNU Radio
+   through 3.10.12 is Qt5 only on 24.04. Two paths:
+   - **Build `maint-3.10` (Qt5).** Everything `gr-qtgui` needs is packaged on
+     24.04 and 26.04 (Qt5, PyQt5, `libqwt-qt5-dev`); the existing
+     UbuntuInstall#Install_Dependencies list (24.04, Qt5) fits. Installer
+     change: clone with `--branch maint-3.10` (or a release tag) plus a
+     GNU Radio dependency-install step.
+   - **Build `main` (Qt6).** Needs the Qt6 package list plus **Qwt 6.3 built
+     from source against Qt6**: Launchpad shows `libqwt-qt6-dev` only in
+     Ubuntu 26.10 ("stonking", Qwt 6.3.0); 24.04 (noble) and 26.04
+     (resolute) have Qwt 6.1.4 for Qt5 only.
+   - Middle option: a `--branch` option on the GNU Radio installer (page uses
+     the release; `main` still buildable for testing).
+
+   **GNU Radio's CI Dockerfiles** are in `gnuradio/gnuradio-docker` under
+   `ci/`. `ci-ubuntu-24.04-3.10` has no package list (just `apt-get build-dep
+   gnuradio`, i.e. Ubuntu's packaged 3.10/Qt5 deps), so it can't be parsed.
+   `ci-ubuntu-26.10-3.11` (and `ci-debian-14-3.11`) list their packages
+   explicitly (69 in 26.10's build + Python blocks) and could be parsed like
+   the Ettus Dockerfile for the `main`/Qt6 path. Every package on the 26.10
+   list exists on 26.04 (checked with apt; `libqt6opengl6-dev` /
+   `libqt6svg6-dev` / `debhelper-compat` are virtual, provided by
+   `qt6-base-dev` / `qt6-svg-dev` / `debhelper`) and on 24.04 (checked the
+   key ones via Launchpad: Qt 6.4.2, PyQt6 6.6.1, SoapySDR, IIO, JACK,
+   PortAudio), except `libqwt-qt6-dev`. If used, exclude `libuhd-dev` and
+   `libvolk-dev` (UHD/Volk are built from source into `/usr/local`; distro
+   copies in `/usr` could be picked up by cmake) and the packaging/docs/test
+   tools (`debhelper-compat`, `dh-python`, `graphviz`, `xmlto`,
+   `libjs-mathjax`, `python3-pytest`).
+
+   **Waiting on the user**, who is asking the GNU Radio developers (a) which
+   branch a from-source wiki page for 24.04/26.04 should build (`maint-3.10`
+   or `main`) and (b) for `main`, how Qwt for Qt6 should be provided. Then:
+   add the GNU Radio dependency step (needs sudo) and branch handling, a
+   Qwt-from-source installer if needed, and/or print the enabled components
+   at the end of the GNU Radio installer; update the wiki page to match and
+   tag a new release.
 
    Also add to the wiki page (independent of the Qwt answer): which Ubuntu
    releases are supported — 24.04 and 26.04 tested; the installers work

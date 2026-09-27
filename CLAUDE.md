@@ -120,9 +120,12 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   GNU Radio components (incl. that the installer builds `main` = 3.11git
   with Qt6, while released `maint-3.10` uses Qt5), "Download the installers" (`wget` loop from the
   `v1.0` raw links into `~/gr-installers`; review before running, never
-  pipe into `python3`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
+  pipe into `python3`), "Planned changes" (branch choice, GNU Radio deps,
+  UHD from the Ettus PPA; not in `v1.0`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
   lists after re-running an earlier installer, removing `~/uhd` etc. before
-  rebuilding), then a usage section per installer (options tables, build
+  rebuilding), "Environment variables" (no `LD_LIBRARY_PATH` needed on
+  24.04/26.04; `PYTHONPATH` only for UHD's own `import uhd` from a source
+  build, startup file left to the reader), then a usage section per installer (options tables, build
   steps, examples, keeping the dependency lists current). Keep its options
   tables in sync with the scripts' argparse help.
 
@@ -221,7 +224,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   developers which branch the wiki page should build. Later: evaluated the
   main developer's proposal to install UHD from the Ettus PPA, and checked
   that the `/usr/local` prefix needs no env vars except for UHD's own
-  Python API (recorded in step 8).
+  Python API (recorded in step 8). Added "Planned changes" and
+  "Environment variables" sections to `README.md` (commit `001d029`).
 
 ## Key decisions
 

@@ -301,8 +301,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    `gnuradio_bare_metal_installer.py` for real~~ — done 2026-09-25:
    installed GNU Radio v3.11.0.0git-1174-gaee9fd3f, matching the original
    machine.
-7. Repo visibility: confirmed 2026-09-24 to leave public. (The name and
-   description aren't a mismatch — see Key decisions.)
+7. ~~Repo visibility~~ — done: confirmed 2026-09-24 to leave public. (The
+   name and description aren't a mismatch — see Key decisions.)
 8. **GNU Radio's own dependencies (open, 2026-09-26).** Per
    `gnuradio-config-info --enabled-components`, the installers' build lacks:
    - `gr-qtgui` — needs Qt6 (Core/Gui/Widgets, optional OpenGL), PyQt6, and
@@ -320,13 +320,18 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    add a GNU Radio dependency-install step (needs sudo) before cmake, a new
    Qwt-from-source installer between Volk and GNU Radio, and/or print the
    enabled components at the end of the GNU Radio installer so readers can
-   confirm `gr-qtgui` is present.
-9. **Publish the scripts for the wiki page.** Tag `v1.0` created
-   2026-09-26 (the draft's raw links point at it); for fixes, tag `v1.1`
-   etc. rather than moving `v1.0`. Still to finish in the page: a Qt GUI
-   warning or a GNU Radio dependency step (after step 8), and the
-   supported OS (Ubuntu 24.04 and 26.04 tested; wherever Ettus has a
-   matching Dockerfile).
+   confirm `gr-qtgui` is present. Then update the wiki page to match (a Qt
+   GUI warning or the new dependency step) and tag a new release.
+
+   Also add to the wiki page (independent of the Qwt answer): which Ubuntu
+   releases are supported — 24.04 and 26.04 tested; the installers work
+   wherever Ettus has a matching Dockerfile. The README already says this,
+   but wiki readers may never see the README.
+9. ~~Publish the scripts for the wiki page~~ — done 2026-09-26: tag `v1.0`
+   created and the page's raw links point at it; the page is live and
+   tested (step 10). For fixes, tag `v1.1` etc. rather than moving `v1.0`.
+   The page's Qt GUI warning or GNU Radio dependency step is now part of
+   step 8.
 10. ~~Create the "Building GNU Radio from Source Code" wiki page from
     `wiki-draft-download-section.txt` and test it on the GMKtec (clean
     Ubuntu 24.04)~~ — done 2026-09-26: the user followed only the new page

@@ -240,6 +240,16 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   `--branch`, default `main`, with `git checkout` after the clone; cmake /
   make / make test tee'd to logs like UHD). Dry-run tested; README and this
   file updated. See Next step 11.
+- 2026-10-02: Real test of the revised GNU Radio installer on the LENOVO
+  (`sudo python3 gnuradio_bare_metal_installer.py --branch main`, after
+  removing the source-built Volk from `/usr/local` and moving `~/gnuradio`
+  to `~/gnuradio.old`): no errors. `make_test.log`: 100% of 266 tests
+  passed (128 s), without `xvfb`. cmake found Volk via `Volk::volk`;
+  `libgnuradio-runtime.so` links Ubuntu's `/usr/lib/x86_64-linux-gnu/
+  libvolk.so.3.3` (`libvolk-dev` 3.3.0-2); no Volk left in `/usr/local`.
+  Built v3.11.0.0git-1174-gaee9fd3f (`main` unchanged since 2026-08-28);
+  same 32 enabled components as before. `~/gnuradio`, `build/`, and the
+  three logs owned by barry; root-owned files only inside `build/`.
 
 ## Key decisions
 
@@ -444,12 +454,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       would mask the clean-machine problem). Remove it first:
       `cd ~/volk/build && sudo xargs rm -f < install_manifest.txt && sudo
       ldconfig`.
-    - GNU Radio's `make test` is far bigger than UHD's, and its CI runs it
-      under `xvfb`; some tests may fail without a display, and any failure
-      stops the build before install. Check on the first real run.
-    - First real run of the new GNU Radio installer (after moving
-      `~/gnuradio` aside), ideally with both `--branch main` and
-      `--branch maint-3.10`.
+    - ~~GNU Radio's `make test` might fail without `xvfb`~~ — all 266
+      passed on the LENOVO with `--branch main` (2026-10-02).
+    - ~~First real run~~ — done for `--branch main` on the LENOVO
+      (2026-10-02). Still to try: `--branch maint-3.10`, and a clean
+      machine (the GMKtec, after removing its source-built Volk).
     - `v1.0` and the current wiki links stay unchanged; ship as the next tag
       with a wiki page update. The local `wiki-draft-download-section.txt`
       still describes `v1.0` (three scripts) — update it for the next tag.

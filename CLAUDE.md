@@ -237,8 +237,19 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   shared `BuildStep`/`run_build_steps()` (`run_logged()`: streams output to
   the terminal and the log, log owned by the build user) and
   `describe_step()` for previews. Tested with harmless commands, a
-  simulated sudo run, and the dry-run preview; no real UHD build yet. Not in
-  `v1.0`.
+  simulated sudo run, and the dry-run preview. Not in `v1.0`.
+- 2026-10-02: Real test on the LENOVO: `sudo python3
+  uhd_bare_metal_installer.py --build --skip-upgrade` (old `~/uhd` moved to
+  `~/uhd.old`) finished with no errors. `make_test.log`: 100% of 109 UHD
+  unit tests passed. Installed UHD 4.11.0.0-0-g0d7ed3b1 (`master` was at
+  tag `v4.11.0.0`); `uhd_find_devices` runs; udev rules installed. First
+  real sudo run of the normal-user build: `~/uhd`, `~/uhd/host/build`, the
+  three logs (380/1149/224 lines), and `uhd-dependencies.txt` are all owned
+  by barry; root-owned files only inside `build/` (from `sudo make
+  install`). Refreshed the Volk list afterwards.
+- 2026-10-02: User announced Volk will be removed from the install process
+  completely and the GNU Radio installer revised (details to come). See
+  Next step 11.
 
 ## Key decisions
 
@@ -261,9 +272,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   `write_package_list()`, which chowns them to `$SUDO_USER` under sudo (a
   newly created root-owned list would break a later non-sudo run). Still
   expected and harmless: `sudo make install` leaves a few root-owned files
-  in each `build/` dir (`install_manifest.txt`, CMake `compiler_depend.*`),
-  with or without starting the script via sudo. Real `sudo` runs of this
-  code not yet tested (only simulated). `uhd_find_devices` now runs as the
+  in each `build/` dir (`install_manifest.txt`, CMake `compiler_depend.*`;
+  for UHD, ~417 files incl. `python/usrp_mpm/*` and `utils/rfnoc-newmod/`
+  that `make install` generates), with or without starting the script via
+  sudo — never outside `build/`. Confirmed by a real `sudo ... --build` run
+  on the LENOVO 2026-10-02. `uhd_find_devices` now runs as the
   user *before* the udev rules are installed, so it couldn't see a USB USRP
   on a first build — irrelevant, since that call only checks that the
   freshly built UHD runs; no device is plugged in at that point (user
@@ -378,7 +391,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    key ones via Launchpad: Qt 6.4.2, PyQt6 6.6.1, SoapySDR, IIO, JACK,
    PortAudio), except `libqwt-qt6-dev`. If used, exclude `libuhd-dev` and
    `libvolk-dev` (UHD/Volk are built from source into `/usr/local`; distro
-   copies in `/usr` could be picked up by cmake) and the packaging/docs/test
+   copies in `/usr` could be picked up by cmake — but see step 11: with Volk
+   no longer built, `libvolk-dev` should be *installed* instead) and the packaging/docs/test
    tools (`debhelper-compat`, `dh-python`, `graphviz`, `xmlto`,
    `libjs-mathjax`, `python3-pytest`).
 
@@ -423,3 +437,27 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     --enabled-components` on the GMKtec is identical to the LENOVO's (same
     32 components; `gr-qtgui`, `gr-soapy`, `gr-iio`, JACK, PortAudio
     missing on both), so step 8 is the remaining gap on 24.04 too.
+11. **Remove Volk from the install process; revise the GNU Radio installer
+    (open, announced by the user 2026-10-02; waiting for the user's GNU
+    Radio revisions before changing code).** Findings:
+    - GNU Radio `main` has no bundled Volk (no `.gitmodules`); its
+      `CMakeLists.txt` does `gr_find_package(Volk)` and requires
+      `VOLK_MIN_VERSION` 2.4.1 (`cmake/Modules/GrMinReq.cmake`).
+    - Ubuntu's `libvolk-dev` satisfies it: 3.1.2 on 24.04 (noble), 3.3.0 on
+      26.04 (resolute) (Launchpad). So Volk would come from apt, probably in
+      the GNU Radio dependency step — reversing the step-8 exclusion of
+      `libvolk-dev`.
+    - `gnuradio_bare_metal_installer.py` imports `DependencyList`,
+      `check_dependency_lists`, `format_ok_message`, and
+      `get_dockerfile_text` (and `VOLK_PACKAGE_LIST_OUTPUT`) from
+      `volk_bare_metal_installer.py`; move those into
+      `uhd_bare_metal_installer.py` before deleting the Volk script. The
+      uhd → volk → gnuradio order check becomes uhd → gnuradio (or changes
+      with the revision). Drop `--volk-deps`, `volk-dependencies.txt`, and
+      the Volk sections of README.
+    - LENOVO and GMKtec have source-built Volk 3.3.0 in `/usr/local`, which
+      GNU Radio's cmake would find before Ubuntu's in `/usr`. Remove it first:
+      `cd ~/volk/build && sudo xargs rm -f < install_manifest.txt && sudo
+      ldconfig`.
+    - `v1.0` and the current wiki links stay unchanged; ship as the next tag
+      with a wiki page update.

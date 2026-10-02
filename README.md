@@ -6,8 +6,9 @@ Scripts and programs to support GNU Radio Wiki documents.
 
 ## Tested builds
 
-On 2026-09-25, the three installers were run in order on Ubuntu 26.04 and
-built and installed the following versions without errors:
+On 2026-09-25, the three `v1.0` installers (UHD, Volk, GNU Radio) were run
+in order on Ubuntu 26.04 and built and installed the following versions
+without errors:
 
 | Component | Installer | Version |
 | --- | --- | --- |
@@ -30,12 +31,12 @@ but only 24.04 and 26.04 have been tested.
 > include `gr-qtgui` (the QT GUI blocks), `gr-soapy`, `gr-iio`, or the JACK
 > and PortAudio audio back-ends.
 >
-> The installer builds GNU Radio's `main` branch, the 3.11 development
-> version, whose `gr-qtgui` requires Qt6, PyQt6, and Qwt built for Qt6.
-> Ubuntu 24.04 and 26.04 have no packaged Qwt for Qt6. The released 3.10
-> series (`maint-3.10`) uses Qt5 instead, which both releases package in
-> full. Which branch these instructions should build, and how to provide
-> the missing dependencies, is still being worked out.
+> By default the installer builds GNU Radio's `main` branch, the 3.11
+> development version, whose `gr-qtgui` requires Qt6, PyQt6, and Qwt built
+> for Qt6. Ubuntu 24.04 and 26.04 have no packaged Qwt for Qt6. The
+> released 3.10 series (`maint-3.10`, selectable with `--branch`) uses Qt5
+> instead, which both releases package in full. How to provide the missing
+> dependencies is still being worked out.
 >
 > To see which components your build includes:
 >
@@ -43,28 +44,37 @@ but only 24.04 and 26.04 have been tested.
 > gnuradio-config-info --enabled-components
 > ```
 
-## Planned changes
+## Changes since v1.0
 
-These are under discussion with the GNU Radio developers and aren't in
-`v1.0`. UHD will continue to be built from source.
+`v1.0` is the release the "Building GNU Radio from Source Code" wiki page
+uses, and it stays available at its current links. The scripts on `main`
+have changed since then and will be in the next release:
 
-- **Which GNU Radio branch to build:** the released 3.10 series
-  (`maint-3.10`, Qt5) or `main` (3.11 development, Qt6).
-- **Installing GNU Radio's own dependencies,** so that `gr-qtgui`,
-  `gr-soapy`, `gr-iio`, JACK, and PortAudio are included.
+- **Volk is no longer built from source.** `volk_bare_metal_installer.py`
+  has been removed. GNU Radio still needs Volk (2.4.1 or later), so the
+  GNU Radio installer now installs Ubuntu's `libvolk-dev`; see
+  [Volk](#volk) below.
+- **Simpler GNU Radio installer.** It no longer compares dependency lists;
+  it only checks that `uhd-dependencies.txt` exists, i.e. that the UHD
+  installer has been run.
+- **`--branch` option for GNU Radio,** to build `main` (the default) or
+  another branch or tag, such as `maint-3.10`.
+- **Build logs and tests.** The UHD and GNU Radio builds run `make test`
+  and save the `cmake`, `make`, and `make test` output to `cmake.log`,
+  `make.log`, and `make_test.log` in their `build` directories. Any failure,
+  including a failing test, stops the build before `sudo make install`.
 
-Already changed on `main` since `v1.0`, and coming in the next release: the
-UHD build now runs `make test` (UHD's unit tests) and saves the `cmake`,
-`make`, and `make test` output to log files. See
-[What `--build` does](#what---build-does).
-
-`v1.0` will stay available at its current links.
+Still under discussion with the GNU Radio developers: which GNU Radio branch
+the wiki page should build, and installing GNU Radio's own dependencies so
+that `gr-qtgui`, `gr-soapy`, `gr-iio`, JACK, and PortAudio are included. UHD
+will continue to be built from source.
 
 ## Download the installers
 
-You don't need to clone this repository. Download the three scripts from
-the `v1.0` release into one directory. The Volk and GNU Radio scripts use
-code from the UHD script, so all three must be in the same directory:
+You don't need to clone this repository. For the current release, `v1.0`,
+download its three scripts into one directory. The Volk and GNU Radio
+scripts use code from the UHD script, so all three must be in the same
+directory:
 
 ```bash
 mkdir -p ~/gr-installers
@@ -74,6 +84,11 @@ for s in uhd volk gnuradio; do
 done
 ```
 
+For `v1.0`, follow the wiki page, or the
+[`v1.0` README](https://github.com/duggabe/gr-wiki-revision/blob/v1.0/README.md).
+The rest of this README describes the scripts on `main` (see
+[Changes since v1.0](#changes-since-v10)).
+
 Look the scripts over before running them, and don't pipe a download
 straight into `python3`, especially with `sudo`. Use `--dry-run` to see
 what a script will do without changing anything, and `--help` for its
@@ -81,41 +96,43 @@ options.
 
 ## Run the installers in order
 
-Run the three installers in this order, from the same directory. Volk
-builds on the dependencies the UHD installer installs, and GNU Radio builds
-on both:
+Run the two installers in this order, from the same directory. GNU Radio
+builds on the dependencies (and UHD) that the UHD installer installs:
 
 ```bash
 sudo python3 uhd_bare_metal_installer.py --build
-python3 volk_bare_metal_installer.py
 python3 gnuradio_bare_metal_installer.py
 ```
 
-The UHD installer needs `sudo`, because it installs packages. The Volk and
-GNU Radio installers work with or without `sudo`. Either way, the clone and
-build steps run as you, so `~/uhd`, `~/volk`, and `~/gnuradio` belong to
-you.
+The UHD installer needs `sudo`, because it installs packages. The GNU Radio
+installer works with or without `sudo`. Either way, the clone and build
+steps run as you, so `~/uhd` and `~/gnuradio` belong to you.
 
-The order is enforced. Each installer writes its own dependency list
-(`uhd-dependencies.txt`, `volk-dependencies.txt`,
-`gnuradio-dependencies.txt`), and the Volk and GNU Radio installers abort
-unless the lists before theirs are older and have the same content.
-
-**Re-running an earlier installer.** Every run, including `--dry-run` and
-`--list-only`, rewrites that installer's list, making it newer than the
-later ones. The installer you run next always rewrites its own list first,
-so only the lists in between need refreshing. For example, after
-re-running the UHD installer, refresh the Volk list before running the
-GNU Radio installer:
-
-```bash
-python3 volk_bare_metal_installer.py --list-only
-python3 gnuradio_bare_metal_installer.py
-```
+The UHD installer writes `uhd-dependencies.txt` into the directory it runs
+from. The GNU Radio installer stops with an error unless that file exists,
+so run both from the same directory (or point the GNU Radio installer at
+the file with `--uhd-deps`).
 
 **Rebuilding.** Each installer clones into a new directory and stops if it
-already exists. To rebuild, remove or rename `~/uhd`, `~/volk`, or
-`~/gnuradio` first.
+already exists. To rebuild, remove or rename `~/uhd` or `~/gnuradio` first.
+
+### Volk
+
+GNU Radio needs Volk 2.4.1 or later. The installers no longer build it;
+instead, the GNU Radio installer's first step installs Ubuntu's package
+(3.1.2 on Ubuntu 24.04, 3.3.0 on 26.04):
+
+```bash
+sudo apt-get install -y libvolk-dev
+```
+
+If you built Volk from source earlier (for example with `v1.0`), remove
+that copy first. GNU Radio's `cmake` looks in `/usr/local` before `/usr`,
+so it would otherwise keep using it:
+
+```bash
+cd ~/volk/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
+```
 
 ## Environment variables
 
@@ -222,119 +239,60 @@ Install dependencies, then clone, build, and install UHD itself into `$HOME/uhd`
 sudo python3 uhd_bare_metal_installer.py --build
 ```
 
-## Install Volk in a bare-metal environment
-
-`volk_bare_metal_installer.py` builds and installs
-[Volk](https://github.com/gnuradio/volk) from source, after
-`uhd_bare_metal_installer.py` has installed the build dependencies. It
-installs no packages itself. Instead it:
-
-1. Derives the dependency list the same way `uhd_bare_metal_installer.py
-   --list-only` does and saves it to `volk-dependencies.txt`.
-2. Aborts with an error unless `uhd-dependencies.txt` exists, was created
-   before `volk-dependencies.txt`, and has the same content (i.e. the
-   dependencies installed for UHD are still current).
-3. Clones Volk (`git clone --recursive`) into `$HOME/volk`, then runs
-   `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
-   `sudo make install`, and `sudo ldconfig`.
-
-Run it either as your normal user or with `sudo`. Either way, the clone and
-build steps run as you, so `~/volk` belongs to you; only `sudo make install`
-and `sudo ldconfig` run as root. Without `sudo`, you're prompted for your
-password when the build reaches the install step.
-
-### Keeping the dependency lists current
-
-`uhd-dependencies.txt` and `volk-dependencies.txt` are committed to this
-repo. When EttusResearch updates its Dockerfile, the Volk and GNU Radio
-installers' content checks fail until `uhd-dependencies.txt` is refreshed. To install
-any new packages and refresh the list in one step:
-
-```bash
-sudo python3 uhd_bare_metal_installer.py --skip-upgrade
-```
-
-`python3 uhd_bare_metal_installer.py --list-only` refreshes the list without
-installing anything. Use it only when the packages are already installed.
-
-Git doesn't preserve file timestamps, so on a fresh clone the committed
-lists may not be in the order the checks expect. Refresh them in order
-first:
-
-```bash
-python3 uhd_bare_metal_installer.py --list-only
-python3 volk_bare_metal_installer.py --list-only
-```
-
-### Options
-
-| Option | Description |
-| --- | --- |
-| `--dockerfile-url URL`, `--dockerfile-path PATH`, `--os-release-path PATH` | Same as for `uhd_bare_metal_installer.py`. |
-| `--list-only` | Only parse and print/save the dependency list; do not check or build anything. |
-| `-o`, `--output OUTPUT` | Path to save the extracted package list (default: `volk-dependencies.txt`). |
-| `--uhd-deps PATH` | Package list written by `uhd_bare_metal_installer.py` to compare against (default: `uhd-dependencies.txt`). |
-| `--dry-run` | Check the dependency lists and print the build steps, without running them. |
-| `-y`, `--yes` | Do not prompt for confirmation before building. |
-| `--build` | Accepted for consistency with `uhd_bare_metal_installer.py` and ignored: building Volk is already the default. |
-| `--home HOME` | Directory to clone/build Volk into. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
-
-### Examples
-
-Check the dependency lists and show the build steps, without running them:
-
-```bash
-python3 volk_bare_metal_installer.py --dry-run
-```
-
-Check the dependency lists, then clone, build, and install Volk into `$HOME/volk`:
-
-```bash
-python3 volk_bare_metal_installer.py
-```
-
 ## Install GNU Radio in a bare-metal environment
 
 `gnuradio_bare_metal_installer.py` builds and installs
 [GNU Radio](https://github.com/gnuradio/gnuradio) from source, after the UHD
-and Volk installers have run. Like the Volk installer, it installs no
-packages itself. Instead it:
+installer has run. It:
 
-1. Derives the dependency list the same way `uhd_bare_metal_installer.py
-   --list-only` does and saves it to `gnuradio-dependencies.txt`.
-2. Aborts with an error unless `uhd-dependencies.txt`,
-   `volk-dependencies.txt`, and `gnuradio-dependencies.txt` exist, were
-   created in that order, and all have the same content.
-3. Clones GNU Radio's default branch, `main` (the 3.11 development
-   version), into `$HOME/gnuradio`, then runs
-   `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
-   `sudo make install`, and `sudo ldconfig`.
+1. Aborts with an error unless `uhd-dependencies.txt` exists (the UHD
+   installer writes it).
+2. Installs Volk with `sudo apt-get install -y libvolk-dev` (see [Volk](#volk)).
+3. Clones GNU Radio into `$HOME/gnuradio` and checks out the chosen branch
+   (`main`, the 3.11 development version, by default).
+4. Runs `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
+   and `make test` (GNU Radio's tests), then `sudo make install` and
+   `sudo ldconfig`.
 
-Run it either as your normal user or with `sudo`; as with Volk, the clone
-and build steps run as you either way. The GNU Radio build usually takes
-longer than `sudo`'s 15-minute password cache, so without `sudo` expect a
-password prompt at the install step (the build waits there, even with `-y`).
+The output of `cmake`, `make`, and `make test` is shown as it runs and also
+saved to `cmake.log`, `make.log`, and `make_test.log` in
+`$HOME/gnuradio/build`. If any of them fails, the installer stops, so a
+failing test prevents installing that build.
+
+Run it either as your normal user or with `sudo`; the clone and build steps
+run as you either way. The GNU Radio build usually takes longer than
+`sudo`'s 15-minute password cache, so without `sudo` expect a password
+prompt at the `sudo` steps (Volk's install at the start, and
+`sudo make install` at the end, where the build waits even with `-y`).
 Starting with `sudo` avoids that.
 
 ### Options
 
-Same as for `volk_bare_metal_installer.py` (default `-o` is
-`gnuradio-dependencies.txt`), plus:
-
 | Option | Description |
 | --- | --- |
-| `--volk-deps PATH` | Package list written by `volk_bare_metal_installer.py` to compare against (default: `volk-dependencies.txt`). |
+| `--branch BRANCH` | GNU Radio branch (or tag) to check out and build, e.g. `main` or `maint-3.10` (default: `main`). |
+| `--uhd-deps PATH` | Package list written by `uhd_bare_metal_installer.py`, which must exist (default: `uhd-dependencies.txt`). |
+| `--dry-run` | Check for the UHD package list and print the build steps, without running them. |
+| `-y`, `--yes` | Do not prompt for confirmation before building. |
+| `--build` | Accepted for consistency with `uhd_bare_metal_installer.py` and ignored: building GNU Radio is already the default. |
+| `--home HOME` | Directory to clone/build GNU Radio into. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
 
 ### Examples
 
-Check the dependency lists and show the build steps, without running them:
+Show the build steps without running them:
 
 ```bash
 python3 gnuradio_bare_metal_installer.py --dry-run
 ```
 
-Check the dependency lists, then clone, build, and install GNU Radio into `$HOME/gnuradio`:
+Clone, build, and install GNU Radio's `main` branch into `$HOME/gnuradio`:
 
 ```bash
 python3 gnuradio_bare_metal_installer.py
+```
+
+Build the 3.10 release series instead:
+
+```bash
+python3 gnuradio_bare_metal_installer.py --branch maint-3.10
 ```

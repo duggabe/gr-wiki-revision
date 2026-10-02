@@ -4,38 +4,42 @@ gnuradio_bare_metal_installer.py
 
 Builds and installs GNU Radio (https://github.com/gnuradio/gnuradio) from
 source on bare metal, after uhd_bare_metal_installer.py has installed the
-build dependencies and volk_bare_metal_installer.py has installed Volk.
+build dependencies (and UHD).
 
-Like the Volk installer, this program does not install any packages. It:
+The only package it installs is Ubuntu's libvolk-dev (Volk, which GNU Radio
+requires). It:
 
-  1. Re-derives the dependency list the same way `uhd_bare_metal_installer.py
-     --list-only` does (auto-detecting the host OS and parsing the matching
-     EttusResearch/uhd Dockerfile) and saves it to gnuradio-dependencies.txt.
-  2. Verifies that uhd-dependencies.txt, volk-dependencies.txt, and
-     gnuradio-dependencies.txt were created in that order and all have the
-     same content -- i.e. that UHD's dependencies and Volk were installed
-     first, against the current dependency list. Aborts with an error if
-     either check fails.
-  3. Clones, builds, and installs GNU Radio:
+  1. Checks that uhd-dependencies.txt (written by uhd_bare_metal_installer.py)
+     exists, i.e. that the UHD installer has been run. Aborts with an error
+     if it doesn't.
+  2. Installs Volk, then clones, builds, and installs GNU Radio from the
+     chosen branch:
 
          cd $HOME
+         sudo apt-get install -y libvolk-dev
          git clone https://github.com/gnuradio/gnuradio.git
-         cd $HOME/gnuradio && mkdir build && cd build
-         cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
-         make -j$(nproc)-1
+         cd $HOME/gnuradio
+         git checkout <branch>
+         mkdir build && cd build
+         cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
+         make -j$(nproc)-1 2>&1 | tee make.log
+         make test 2>&1 | tee make_test.log
          sudo make install
          sudo ldconfig
 
+     Any failure, including a failing test, stops the build; the logs in
+     $HOME/gnuradio/build show what went wrong.
+
 Examples
 --------
-  # Just print/save the dependency list to gnuradio-dependencies.txt (no build):
-  python3 gnuradio_bare_metal_installer.py --list-only
-
-  # Check the dependency lists and show the build steps, without running them:
+  # Show the build steps without running them:
   python3 gnuradio_bare_metal_installer.py --dry-run
 
-  # Check the dependency lists, then clone/build/install GNU Radio into $HOME/gnuradio:
+  # Clone/build/install GNU Radio's main branch into $HOME/gnuradio:
   python3 gnuradio_bare_metal_installer.py
+
+  # Build the 3.10 release series instead:
+  python3 gnuradio_bare_metal_installer.py --branch maint-3.10
 """
 
 from __future__ import annotations
@@ -48,37 +52,30 @@ from pathlib import Path
 from uhd_bare_metal_installer import (
     DEFAULT_PACKAGE_LIST_OUTPUT as UHD_PACKAGE_LIST_OUTPUT,
     BuildStep,
-    DockerfileParseError,
     _confirm,
     describe_build_user,
     describe_step,
-    extract_apt_packages,
-    extract_base_image,
     get_home_dir,
     get_make_jobs,
     run_build_steps,
-    write_package_list,
-)
-from volk_bare_metal_installer import (
-    DEFAULT_PACKAGE_LIST_OUTPUT as VOLK_PACKAGE_LIST_OUTPUT,
-    DependencyList,
-    check_dependency_lists,
-    format_ok_message,
-    get_dockerfile_text,
 )
 
-DEFAULT_PACKAGE_LIST_OUTPUT = "gnuradio-dependencies.txt"
+DEFAULT_BRANCH = "main"
 
 
-def get_build_steps(home: str) -> list[BuildStep]:
+def get_build_steps(home: str, branch: str) -> list[BuildStep]:
     """
     Return the steps equivalent to:
 
         cd $HOME
+        sudo apt-get install -y libvolk-dev
         git clone https://github.com/gnuradio/gnuradio.git
-        cd $HOME/gnuradio && mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
-        make -j$(nproc)-1
+        cd $HOME/gnuradio
+        git checkout <branch>
+        mkdir build && cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
+        make -j$(nproc)-1 2>&1 | tee make.log
+        make test 2>&1 | tee make_test.log
         sudo make install
         sudo ldconfig
     """
@@ -87,10 +84,15 @@ def get_build_steps(home: str) -> list[BuildStep]:
     jobs = get_make_jobs()
 
     return [
+        # GNU Radio needs an external Volk (>= 2.4.1); Ubuntu's package is new enough.
+        # -y because this is an unattended build (the installer already asked).
+        BuildStep(["sudo", "apt-get", "install", "-y", "libvolk-dev"], home),
         BuildStep(["git", "clone", "https://github.com/gnuradio/gnuradio.git"], home),
+        BuildStep(["git", "checkout", branch], gnuradio_dir),
         BuildStep(["mkdir", "build"], gnuradio_dir),
-        BuildStep(["cmake", "-DCMAKE_INSTALL_PREFIX=/usr/local", "../"], build_dir),
-        BuildStep(["make", f"-j{jobs}"], build_dir),
+        BuildStep(["cmake", "-DCMAKE_INSTALL_PREFIX=/usr/local", "../"], build_dir, log="cmake.log"),
+        BuildStep(["make", f"-j{jobs}"], build_dir, log="make.log"),
+        BuildStep(["make", "test"], build_dir, log="make_test.log"),
         BuildStep(["sudo", "make", "install"], build_dir),
         BuildStep(["sudo", "ldconfig"], build_dir),
     ]
@@ -98,50 +100,27 @@ def get_build_steps(home: str) -> list[BuildStep]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Build and install GNU Radio from source on bare metal, after UHD and Volk.",
+        description="Build and install GNU Radio from source on bare metal, after UHD.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
     parser.add_argument(
-        "--dockerfile-url", default=None,
+        "--branch", default=DEFAULT_BRANCH,
         help=(
-            "URL of the Dockerfile to fetch. Default: auto-detect from /etc/os-release "
-            "and look up the matching file in EttusResearch/uhd's .ci/docker directory."
+            "GNU Radio branch (or tag) to check out and build, e.g. main or maint-3.10 "
+            f"(default: {DEFAULT_BRANCH})."
         ),
-    )
-    parser.add_argument(
-        "--dockerfile-path", default=None,
-        help="Read the Dockerfile from a local path instead of fetching it.",
-    )
-    parser.add_argument(
-        "--os-release-path", default="/etc/os-release",
-        help="Path to read NAME/VERSION_ID from for OS auto-detection (default: /etc/os-release).",
-    )
-    parser.add_argument(
-        "--list-only", action="store_true",
-        help="Only parse and print/save the dependency list; do not check or build anything.",
-    )
-    parser.add_argument(
-        "-o", "--output", default=DEFAULT_PACKAGE_LIST_OUTPUT,
-        help=f"Path to save the extracted package list (default: {DEFAULT_PACKAGE_LIST_OUTPUT}).",
     )
     parser.add_argument(
         "--uhd-deps", default=UHD_PACKAGE_LIST_OUTPUT,
         help=(
-            "Package list written by uhd_bare_metal_installer.py to compare against "
+            "Package list written by uhd_bare_metal_installer.py, which must exist "
             f"(default: {UHD_PACKAGE_LIST_OUTPUT})."
         ),
     )
     parser.add_argument(
-        "--volk-deps", default=VOLK_PACKAGE_LIST_OUTPUT,
-        help=(
-            "Package list written by volk_bare_metal_installer.py to compare against "
-            f"(default: {VOLK_PACKAGE_LIST_OUTPUT})."
-        ),
-    )
-    parser.add_argument(
         "--dry-run", action="store_true",
-        help="Check the dependency lists and print the build steps, without running them.",
+        help="Check for the UHD package list and print the build steps, without running them.",
     )
     parser.add_argument(
         "-y", "--yes", action="store_true",
@@ -163,55 +142,23 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    # --- 1. Derive the dependency list and save it ---
-    try:
-        dockerfile_text = get_dockerfile_text(args)
-    except RuntimeError as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        return 1
-
-    try:
-        base_image = extract_base_image(dockerfile_text)
-        packages = extract_apt_packages(dockerfile_text)
-    except DockerfileParseError as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        return 1
-
-    print(f"Base image declared in Dockerfile: {base_image}")
-    print(f"Extracted {len(packages)} apt packages.")
-
-    gnuradio_path = Path(args.output)
-    try:
-        write_package_list(gnuradio_path, packages)
-    except OSError as exc:
-        print(f"error: could not write {gnuradio_path}: {exc}", file=sys.stderr)
-        return 1
-    print(f"Package list written to: {gnuradio_path.resolve()}")
-
-    if args.list_only:
-        print("\n--list-only set: not checking or building anything.")
-        for pkg in packages:
-            print(f"  {pkg}")
-        return 0
-
-    # --- 2. Compare against the lists the UHD and Volk installers wrote ---
-    dep_lists = [
-        DependencyList(Path(args.uhd_deps), "uhd_bare_metal_installer.py", "--uhd-deps"),
-        DependencyList(Path(args.volk_deps), "volk_bare_metal_installer.py", "--volk-deps"),
-        DependencyList(gnuradio_path, "gnuradio_bare_metal_installer.py", "-o"),
-    ]
-    errors = check_dependency_lists(dep_lists)
-    if errors:
-        for msg in errors:
-            print(f"error: {msg}", file=sys.stderr)
+    # --- 1. Check that the UHD installer has been run ---
+    uhd_path = Path(args.uhd_deps)
+    if not uhd_path.exists():
+        print(
+            f"error: {uhd_path} not found. Run uhd_bare_metal_installer.py first (it writes "
+            f"that file), or pass --uhd-deps to point at it.",
+            file=sys.stderr,
+        )
         print("Aborting.", file=sys.stderr)
         return 1
-    print(format_ok_message(dep_lists))
+    print(f"OK: found {uhd_path}.")
 
-    # --- 3. Build ---
+    # --- 2. Build ---
     home, home_source = get_home_dir(args.home)
     print(f"\nBuild home directory: {home} (from {home_source})")
-    steps = get_build_steps(home)
+    print(f"GNU Radio branch: {args.branch}")
+    steps = get_build_steps(home, args.branch)
     print("\nThe following build steps will run:")
     print(f"  {describe_build_user()}")
     for step in steps:

@@ -105,7 +105,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 - **`README.md`** — user-facing docs (describes `main`, not `v1.0`):
   project blurb, work-in-progress note, "Tested builds" (the `v1.0` builds
   of UHD/Volk/GNU Radio on 26.04, tested Ubuntu releases 24.04 and 26.04,
-  the clean-install wiki test) and the "Known limitation" note on missing
+  the clean-install wiki test, and a 2026-10-02 table for the `main`
+  scripts: UHD 109/109 and GNU Radio 266/266 tests, Volk 3.3.0 from
+  `libvolk-dev`; notes clean-install and `maint-3.10` not yet tested) and the "Known limitation" note on missing
   GNU Radio components (`main` = 3.11git with Qt6 vs `maint-3.10` with Qt5,
   selectable with `--branch`); "Changes since v1.0" (Volk removed, simpler
   GNU Radio check, `--branch`, logs and `make test`; still under discussion:
@@ -250,6 +252,7 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   Built v3.11.0.0git-1174-gaee9fd3f (`main` unchanged since 2026-08-28);
   same 32 enabled components as before. `~/gnuradio`, `build/`, and the
   three logs owned by barry; root-owned files only inside `build/`.
+  Added these results to `README.md`'s "Tested builds" (commit `55551aa`).
 
 ## Key decisions
 

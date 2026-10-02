@@ -25,6 +25,20 @@ Ubuntu release for which Ettus provides a UHD build Dockerfile (in
 [`.ci/docker`](https://github.com/EttusResearch/uhd/tree/master/.ci/docker)),
 but only 24.04 and 26.04 have been tested.
 
+On 2026-10-02, the revised installers on `main` (see
+[Changes since v1.0](#changes-since-v10)) were run on Ubuntu 26.04, with
+`sudo`, and built, tested, and installed the following without errors:
+
+| Component | Installer | Version | `make test` |
+| --- | --- | --- | --- |
+| UHD | `sudo python3 uhd_bare_metal_installer.py --build` | 4.11.0.0-0-g0d7ed3b1 | 109 of 109 passed |
+| Volk | installed by the GNU Radio installer (`libvolk-dev`) | 3.3.0 (Ubuntu package) | — |
+| GNU Radio | `sudo python3 gnuradio_bare_metal_installer.py --branch main` | v3.11.0.0git-1174-gaee9fd3f | 266 of 266 passed |
+
+The clone and build directories and the build logs were owned by the
+normal user, not root. The `main` scripts haven't yet been tested on a
+clean install or with `--branch maint-3.10`.
+
 > **Known limitation:** the installers only install UHD's build
 > dependencies, not GNU Radio's own. CMake skips any GNU Radio component
 > whose dependencies it can't find, so this GNU Radio build does **not**

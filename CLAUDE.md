@@ -56,8 +56,12 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   - `--list-only`: just print/save the parsed package list
   - `--dry-run`: show the commands that would run, no root needed
   - (default, run as root): actually `apt-get install` the dependencies
-  - `--build`: additionally clone, `cmake`/`make`, install UHD from source,
-    install udev rules, and run `uhd_find_devices` / `uhd_images_downloader`
+  - `--build`: additionally clone, `cmake`/`make`/`make test` (each
+    `2>&1 | tee`'d to `cmake.log` / `make.log` / `make_test.log` in
+    `~/uhd/host/build`, since 2026-10-02), install UHD from source, install
+    udev rules, and run `uhd_find_devices` / `uhd_images_downloader`. Any
+    failure, including a failing unit test, stops the build before
+    `sudo make install`.
   - Does not hardcode the package list or assume Ubuntu 26.04 — aborts if no
     matching Dockerfile is found rather than guessing.
 
@@ -120,8 +124,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   GNU Radio components (incl. that the installer builds `main` = 3.11git
   with Qt6, while released `maint-3.10` uses Qt5), "Download the installers" (`wget` loop from the
   `v1.0` raw links into `~/gr-installers`; review before running, never
-  pipe into `python3`), "Planned changes" (branch choice, GNU Radio deps,
-  UHD from the Ettus PPA; not in `v1.0`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
+  pipe into `python3`), "Planned changes" (branch choice, GNU Radio deps;
+  UHD stays a source build; plus changes already on `main` since `v1.0`), "Run the installers in order" (sudo requirements, the enforced order, refreshing in-between
   lists after re-running an earlier installer, removing `~/uhd` etc. before
   rebuilding), "Environment variables" (no `LD_LIBRARY_PATH` needed on
   24.04/26.04; `PYTHONPATH` only for UHD's own `import uhd` from a source
@@ -226,6 +230,15 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   that the `/usr/local` prefix needs no env vars except for UHD's own
   Python API (recorded in step 8). Added "Planned changes" and
   "Environment variables" sections to `README.md` (commit `001d029`).
+- 2026-10-02: Decided (user) not to use the Ettus PPA; UHD stays a source
+  build. Changed the UHD `--build` steps (user's list) to
+  `cmake ... 2>&1 | tee cmake.log`, `make -j... 2>&1 | tee make.log`,
+  `make test 2>&1 | tee make_test.log`. Added a general `log` option to the
+  shared `BuildStep`/`run_build_steps()` (`run_logged()`: streams output to
+  the terminal and the log, log owned by the build user) and
+  `describe_step()` for previews. Tested with harmless commands, a
+  simulated sudo run, and the dry-run preview; no real UHD build yet. Not in
+  `v1.0`.
 
 ## Key decisions
 
@@ -263,6 +276,17 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   before GNU Radio's after a UHD re-run); the installer being run rewrites
   its own list first. Documented in README; accepted as the workflow rather
   than changing the check.
+- **No Ettus PPA; build UHD from source** (user, 2026-10-02), despite the
+  main GNU Radio developer's proposal. The PPA (`ppa:ettusresearch/uhd`)
+  had UHD 4.11.0.0 for 24.04 and 26.04; the evaluation is in git history
+  (CLAUDE.md before this change).
+- **Any build-step failure stops the automated build** (user,
+  2026-10-02), including `cmake`, `make`, and a failing `make test` unit
+  test (so a failing build is never installed). The user's manual wiki
+  commands (`cmd 2>&1 | tee log`) ran one at a time with the user deciding
+  what to do next; the script checks each command's own exit status
+  (a shell `| tee` without `pipefail` would mask it). Only
+  `uhd_find_devices` is tolerated.
 - **`uhd_find_devices` failure is tolerated, not fatal**, during `--build`,
   since a non-zero exit there just means no USRP hardware is attached, not a
   build failure.
@@ -358,27 +382,7 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    tools (`debhelper-compat`, `dh-python`, `graphviz`, `xmlto`,
    `libjs-mathjax`, `python3-pytest`).
 
-   **UHD from the Ettus PPA (proposed by the main GNU Radio developer,
-   2026-09-27).** `ppa:ettusresearch/uhd` publishes UHD **4.11.0.0** (same as
-   the source builds) for 24.04 (noble) and 26.04 (resolute), 2026-09-17;
-   packages include `libuhd-dev`, `uhd-host` (utilities incl.
-   `uhd_images_downloader`), `python3-uhd`, `uhd-rfnoc-dev`. Impact if
-   adopted:
-   - UHD installer's source build replaced by `add-apt-repository` +
-     `apt-get install libuhd-dev uhd-host python3-uhd` +
-     `uhd_images_downloader` (check whether `uhd-host` installs the udev
-     rules). Keep `--build` as an optional from-source path, or retire it.
-   - Volk/GNU Radio currently get their build tools (cmake, g++, Boost,
-     mako, NumPy, pybind11, …) from the *Ettus* build Dockerfile's list; with
-     no UHD source build, GNU Radio's own dependency list (above) becomes
-     the base, and the uhd→volk→gnuradio file-order check must be rebuilt
-     around the new first step or simplified.
-   - Machines with the source-built UHD in `/usr/local` (LENOVO, GMKtec)
-     must remove it first (`cd ~/uhd/host/build && sudo xargs rm -f <
-     install_manifest.txt && sudo ldconfig`), or GNU Radio's cmake
-     (searches `/usr/local` first) may pick the old copy.
-   - Lost: building a specific UHD commit/branch. Release as a new version
-     (e.g. `v2.0`), keeping `v1.0` for the current wiki links.
+   **UHD from the Ettus PPA — rejected 2026-10-02** (see Key decisions).
 
    **Install prefix: keep `/usr/local` (recommended 2026-09-27).** Checked on
    the LENOVO in a clean environment (no `LD_LIBRARY_PATH`/`PYTHONPATH`):
@@ -387,9 +391,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    GNU Radio's Python (`/usr/local/lib/python3.14/dist-packages`) imports
    fine, incl. `from gnuradio import uhd`. Only UHD's own Python API fails
    (`import uhd`: installed to `.../site-packages`, which Debian/Ubuntu
-   Python doesn't search) — the PPA's `python3-uhd` fixes that. So the
-   wiki's `LD_LIBRARY_PATH` step isn't needed for these libs; `PYTHONPATH`
-   only if UHD is built from source. `/usr` was rejected: it's apt-managed
+   Python doesn't search). With UHD staying a source build, `import uhd`
+   needs `PYTHONPATH` (documented in README; a UHD CMake option to install
+   into `dist-packages` might avoid it — not yet checked). The wiki's
+   `LD_LIBRARY_PATH` step isn't needed for these libs. `/usr` was rejected: it's apt-managed
    (untracked `make install` files can be overwritten or break packages),
    Volk would collide with Ubuntu's `libvolk` in `/usr/lib/x86_64-linux-gnu`,
    removal is harder, and `/usr/local` is the from-source convention.

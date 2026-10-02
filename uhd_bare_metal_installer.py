@@ -277,6 +277,13 @@ class BuildStep(typing.NamedTuple):
     capture: bool = False  # if True, capture stdout/stderr and print in a labeled block
     label: str | None = None  # heading used when capture=True
     tolerate_failure: bool = False  # if True, a non-zero exit is a warning, not an abort
+    log: str | None = None  # if set, like `2>&1 | tee <log>`: output is shown and saved to cwd/<log>
+
+
+def describe_step(step: BuildStep) -> str:
+    """The step's command as a shell user would type it, including any tee log."""
+    cmd = " ".join(step.cmd)
+    return f"{cmd} 2>&1 | tee {step.log}" if step.log else cmd
 
 
 def get_build_steps(home: str) -> list[BuildStep]:
@@ -286,8 +293,9 @@ def get_build_steps(home: str) -> list[BuildStep]:
         cd $HOME/
         git clone https://github.com/EttusResearch/uhd.git
         cd $HOME/uhd/host && mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
-        make -j$(nproc)-1
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
+        make -j$(nproc)-1 2>&1 | tee make.log
+        make test 2>&1 | tee make_test.log
         sudo make install
         sudo ldconfig
         export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
@@ -318,8 +326,9 @@ def get_build_steps(home: str) -> list[BuildStep]:
     return [
         BuildStep(["git", "clone", "https://github.com/EttusResearch/uhd.git"], home),
         BuildStep(["mkdir", "build"], host_dir),
-        BuildStep(["cmake", "-DCMAKE_INSTALL_PREFIX=/usr/local", "../"], build_dir),
-        BuildStep(["make", f"-j{jobs}"], build_dir),
+        BuildStep(["cmake", "-DCMAKE_INSTALL_PREFIX=/usr/local", "../"], build_dir, log="cmake.log"),
+        BuildStep(["make", f"-j{jobs}"], build_dir, log="make.log"),
+        BuildStep(["make", "test"], build_dir, log="make_test.log"),
         BuildStep(["sudo", "make", "install"], build_dir),
         BuildStep(["sudo", "ldconfig"], build_dir),
         BuildStep(
@@ -400,6 +409,30 @@ def write_package_list(path: Path, packages: list[str]) -> None:
         os.chown(path, build_user.pw_uid, build_user.pw_gid)
 
 
+def run_logged(step: BuildStep, env: dict | None, user_kwargs: dict,
+               build_user: pwd.struct_passwd | None) -> None:
+    """
+    Run step.cmd like `cmd 2>&1 | tee <step.log>`: stream its combined
+    stdout/stderr to the terminal and to the log file in step.cwd. Raises
+    CalledProcessError if the command exits non-zero.
+    """
+    log_path = os.path.join(step.cwd, step.log)
+    with open(log_path, "w", encoding="utf-8") as log_file:
+        if build_user:
+            os.chown(log_path, build_user.pw_uid, build_user.pw_gid)
+        proc = subprocess.Popen(
+            step.cmd, cwd=step.cwd, env=env, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, errors="replace", **user_kwargs,
+        )
+        for line in proc.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            log_file.write(line)
+        returncode = proc.wait()
+    if returncode != 0:
+        raise subprocess.CalledProcessError(returncode, step.cmd)
+
+
 def run_build_steps(steps: list[BuildStep]) -> int:
     """
     Runs the given build steps in order. Aborts on the first command that
@@ -411,6 +444,11 @@ def run_build_steps(steps: list[BuildStep]) -> int:
     When running as root via sudo, steps that don't start with "sudo" run as
     the invoking user (see get_build_user()), so the clone and build
     directories aren't owned by root; "sudo" steps run as root.
+
+    A step with log set behaves like `cmd 2>&1 | tee <log>`: its combined
+    output is shown and also saved to <log> in the step's directory (owned
+    by the build user). Unlike a shell pipeline without `pipefail`, a failing
+    command still fails the step rather than taking tee's exit status.
     """
     build_user = get_build_user()
     for step in steps:
@@ -429,9 +467,11 @@ def run_build_steps(steps: list[BuildStep]) -> int:
                 extra_groups=os.getgrouplist(build_user.pw_name, build_user.pw_gid),
             )
 
-        print(f"\n$ (cd {step.cwd} && {' '.join(step.cmd)})")
+        print(f"\n$ (cd {step.cwd} && {describe_step(step)})")
         try:
-            if step.capture:
+            if step.log:
+                run_logged(step, env, user_kwargs, build_user)
+            elif step.capture:
                 result = subprocess.run(
                     step.cmd, cwd=step.cwd, env=env, check=True,
                     capture_output=True, text=True, **user_kwargs,
@@ -524,7 +564,9 @@ def main() -> int:
         "--build", action="store_true",
         help=(
             "After dependencies install successfully, also clone and build UHD itself "
-            "into <home>/uhd (git clone, cmake, make -j(nproc-1), sudo make install, sudo ldconfig, "
+            "into <home>/uhd (git clone, cmake, make -j(nproc-1), make test -- each saving its "
+            "output to cmake.log, make.log, or make_test.log in the build directory -- then "
+            "sudo make install, sudo ldconfig, "
             "uhd_find_devices, sudo uhd_images_downloader, then installs the udev rules and "
             "triggers udevadm so USRPs are usable without root). "
             "Aborts with exit code 1 if any build step fails."
@@ -632,7 +674,7 @@ def main() -> int:
         print(f"  {describe_build_user(requires_sudo=True)}")
         for step in get_build_steps(home):
             env_note = f"  [env: {step.env_extra}]" if step.env_extra else ""
-            print(f"  $ (cd {step.cwd} && {' '.join(step.cmd)}){env_note}")
+            print(f"  $ (cd {step.cwd} && {describe_step(step)}){env_note}")
 
     if args.dry_run:
         print("\n--dry-run set: no commands executed.")
@@ -670,8 +712,9 @@ def main() -> int:
         print(f"  cd {home}/")
         print("  git clone https://github.com/EttusResearch/uhd.git")
         print(f"  cd {home}/uhd/host && mkdir build && cd build")
-        print("  cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../")
-        print(f"  make -j{get_make_jobs()}")
+        print("  cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log")
+        print(f"  make -j{get_make_jobs()} 2>&1 | tee make.log")
+        print("  make test 2>&1 | tee make_test.log")
         print("  sudo make install")
         print("  sudo ldconfig")
         print("  export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH")

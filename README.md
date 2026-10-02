@@ -46,16 +46,17 @@ but only 24.04 and 26.04 have been tested.
 ## Planned changes
 
 These are under discussion with the GNU Radio developers and aren't in
-`v1.0`:
+`v1.0`. UHD will continue to be built from source.
 
 - **Which GNU Radio branch to build:** the released 3.10 series
   (`maint-3.10`, Qt5) or `main` (3.11 development, Qt6).
 - **Installing GNU Radio's own dependencies,** so that `gr-qtgui`,
   `gr-soapy`, `gr-iio`, JACK, and PortAudio are included.
-- **Installing UHD from the
-  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd)**
-  instead of building it from source. The PPA has UHD 4.11.0.0 for Ubuntu
-  24.04 and 26.04.
+
+Already changed on `main` since `v1.0`, and coming in the next release: the
+UHD build now runs `make test` (UHD's unit tests) and saves the `cmake`,
+`make`, and `make test` output to log files. See
+[What `--build` does](#what---build-does).
 
 `v1.0` will stay available at its current links.
 
@@ -167,14 +168,19 @@ python3 uhd_bare_metal_installer.py [options]
 #### What `--build` does
 
 1. `git clone` UHD into `<home>/uhd`
-2. `cmake`, then `make -j$(nproc-1)`
+2. `cmake`, then `make -j$(nproc-1)`, then `make test` (UHD's unit tests)
 3. `sudo make install` and `sudo ldconfig`
 4. `uhd_find_devices` (a failure here just means no USRP is attached)
 5. `sudo uhd_images_downloader`
 6. Install the udev rules and trigger `udevadm`, so USRPs are usable without root
 
+The output of `cmake`, `make`, and `make test` is shown as it runs and also
+saved to `cmake.log`, `make.log`, and `make_test.log` in `<home>/uhd/host/build`,
+as with `2>&1 | tee <file>`. If any of them fails, the installer stops, so a
+failing unit test prevents installing that build.
+
 Although the installer runs with `sudo`, the steps without `sudo` (clone,
-`cmake`, `make`, `uhd_find_devices`) run as the user who invoked `sudo`, so
+`cmake`, `make`, `make test`, `uhd_find_devices`) run as the user who invoked `sudo`, so
 `<home>/uhd` belongs to you, not root. Only the `sudo` steps run as root.
 
 ### Examples

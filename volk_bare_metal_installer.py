@@ -55,6 +55,7 @@ from uhd_bare_metal_installer import (
     DockerfileParseError,
     _confirm,
     describe_build_user,
+    describe_step,
     extract_apt_packages,
     extract_base_image,
     fetch_dockerfile,
@@ -293,7 +294,7 @@ def main() -> int:
     print("\nThe following build steps will run:")
     print(f"  {describe_build_user()}")
     for step in steps:
-        print(f"  $ (cd {step.cwd} && {' '.join(step.cmd)})")
+        print(f"  $ (cd {step.cwd} && {describe_step(step)})")
 
     if args.dry_run:
         print("\n--dry-run set: no commands executed.")

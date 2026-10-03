@@ -25,9 +25,11 @@ new page, "Building GNU Radio from Source Code". The current path (as of
 UbuntuInstall#Install_Dependencies → LinuxInstall#Installing_UHD → the
 draft page's "Building and installing UHD from source code" section →
 LinuxInstall#Installing_Volk → LinuxInstall#Installing_GNU_Radio. The
-installers cover the UHD, Volk, and GNU Radio build steps; nothing yet
-covers UbuntuInstall#Install_Dependencies (GNU Radio's own deps), which is
-still written for Ubuntu 24.04 + Qt5 while GNU Radio moves to Qt6.
+installers cover the UHD and GNU Radio build steps (Volk comes from apt),
+and since 2026-10-03 the GNU Radio installer also covers
+UbuntuInstall#Install_Dependencies (GNU Radio's own deps) for the Qt5-based
+`maint-3.10`. The wiki's manual list is still written for Ubuntu 20.04–24.04
++ Qt5 while GNU Radio `main` moves to Qt6.
 wiki.gnuradio.org is behind a Cloudflare challenge and can't be fetched
 from here — ask the user to paste page content.
 
@@ -79,60 +81,77 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   `uhd-ubuntu2604-dependencies.txt`. Since 2026-10-02 the GNU Radio
   installer only checks that this file exists (no content/order checks).
 
-- **`gnuradio_bare_metal_installer.py`** — builds/installs GNU Radio from
-  source after the UHD installer (revised 2026-10-02 per the user's spec).
-  Imports `BuildStep`, `run_build_steps()` etc. from
-  `uhd_bare_metal_installer.py`; no Dockerfile parsing. Aborts unless
-  `uhd-dependencies.txt` (`--uhd-deps`) exists, then: `sudo apt-get
-  install -y libvolk-dev` (user's addition; `-y` added for the unattended
-  build) → `git clone` → `git checkout <--branch>` (default `main` = 3.11
-  development; e.g. `maint-3.10`) → `mkdir build` → `cmake ... 2>&1 | tee
-  cmake.log` → `make -j... 2>&1 | tee make.log` → `make test 2>&1 | tee
-  make_test.log` → `sudo make install` → `sudo ldconfig`, in `~/gnuradio`.
-  Any failure (incl. a failing test) stops the build. Options: `--branch`,
-  `--uhd-deps`, `--dry-run`, `-y`, `--home`, `--build` (ignored). Dry-run
-  tested only; no real build with this version yet.
+- **`gnuradio_bare_metal_installer.py`** — installs GNU Radio's own
+  dependencies, then builds/installs GNU Radio from source, after the UHD
+  installer. Imports `BuildStep`, `run_build_steps()`, `write_package_list()`
+  etc. from `uhd_bare_metal_installer.py`. Flow:
+  1. Fetch `debian/control` of Ubuntu's `gnuradio` source package for the
+     host's codename (`VERSION_CODENAME` in `/etc/os-release`) from
+     `https://git.launchpad.net/ubuntu/+source/gnuradio/plain/debian/control?h=ubuntu/<codename>`
+     (or `--control-url` / `--control-path`), parse `Build-Depends`
+     (`extract_build_depends()`: drops version constraints and build
+     profiles, evaluates arch restrictions like `[linux-any]` /
+     `[kfreebsd-any]`, first of `a | b`; ignores `Build-Depends-Indep`).
+  2. `select_packages()`: drop `SKIP_PACKAGES` (`libuhd-dev`,
+     `debhelper-compat`, `dh-python`, `dpkg-dev`, `graphviz`, `xmlto`,
+     `libjs-mathjax`), add `EXTRA_PACKAGES` (`libvolk-dev`,
+     `python3-packaging` if missing; `python3-qtpy`, `python3-pyqtgraph`,
+     `python3-matplotlib`, `soapysdr-tools`). 26.04: 69 → 66 packages;
+     24.04: 70 → 67. Saved to `gnuradio-dependencies.txt` (`-o`).
+     `--list-only` stops here.
+  3. Abort unless `uhd-dependencies.txt` (`--uhd-deps`) exists.
+  4. Abort if `find_stale_install_dirs()` finds empty `gnuradio`
+     directories from a removed install under `/usr/local` (prints the
+     `sudo rm -rf` command).
+  5. `sudo apt-get update` → `sudo apt-get install -y <packages>` →
+     `git clone` → `git checkout <--branch>` (**default `maint-3.10`** since
+     2026-10-03; `main` = 3.11 development) → `mkdir build` → `cmake ...
+     2>&1 | tee cmake.log` → `make -j... 2>&1 | tee make.log` → `make test
+     2>&1 | tee make_test.log` → `sudo make install` → `sudo ldconfig`, in
+     `~/gnuradio`. Any failure (incl. a failing test) stops the build.
+  Options: `--branch`, `--control-url`, `--control-path`,
+  `--os-release-path`, `--list-only`, `-o`, `--uhd-deps`, `--dry-run`, `-y`,
+  `--home`, `--build` (ignored).
 
-- **Removed 2026-10-02:** `volk_bare_metal_installer.py`,
-  `volk-dependencies.txt`, `gnuradio-dependencies.txt` (still in `v1.0`
-  and git history). Volk now has to come from Ubuntu's `libvolk-dev` (see
-  Next step 11).
+- **`gnuradio-dependencies.txt`** — output of the GNU Radio installer
+  (default `-o`): the 66-package list for Ubuntu 26.04, written 2026-10-03.
+  (An earlier file of this name, a copy of the Ettus list, was removed
+  2026-10-02.)
+
+- **Removed 2026-10-02:** `volk_bare_metal_installer.py` and
+  `volk-dependencies.txt` (still in `v1.0` and git history). Volk comes
+  from Ubuntu's `libvolk-dev`, which is on the GNU Radio dependency list.
 
 - **`LICENSE`** — Creative Commons Attribution-ShareAlike 4.0
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
-- **`README.md`** — user-facing docs (describes `v1.1`/`main`, not `v1.0`):
-  project blurb, work-in-progress note, "Tested builds" (the `v1.0` builds
-  of UHD/Volk/GNU Radio on 26.04, tested Ubuntu releases 24.04 and 26.04,
-  the clean-install wiki test, and a 2026-10-02 table for the `main`
-  scripts: UHD 109/109 and GNU Radio 266/266 tests, Volk 3.3.0 from
-  `libvolk-dev`; notes clean-install and `maint-3.10` not yet tested) and the "Known limitation" note on missing
-  GNU Radio components (`main` = 3.11git with Qt6 vs `maint-3.10` with Qt5,
-  selectable with `--branch`); "Changes since v1.0" (Volk removed, simpler
-  GNU Radio check, `--branch`, logs and `make test`; still under discussion:
-  branch for the wiki page, GNU Radio's own deps; UHD stays a source
-  build); "Download the installers" (`v1.1` `wget` loop for the two
-  scripts; notes `v1.1` is tested on 26.04 only, and that the wiki page
-  still uses `v1.0`, pointing `v1.0` users to the wiki page / `v1.0`
-  README);
-  "Run the installers in order" (two scripts, sudo, the
-  `uhd-dependencies.txt` existence check, rebuilding) with a "Volk"
-  subsection (`sudo apt-get install libvolk-dev`; remove a source-built
-  Volk first); "Environment variables"; then UHD and GNU Radio usage
-  sections (options tables, build steps, examples). Keep its options tables
-  in sync with the scripts' argparse help.
+- **`README.md`** — user-facing docs (describes `main`; `v1.1` is the
+  latest tag and lacks the dependency step): "Tested builds" (current
+  scripts on 26.04: UHD 4.11.0.0 109/109, GNU Radio 3.10.12.0 269/269, no
+  disabled components, incl. the `grc_tests` leftover-directory story;
+  earlier `v1.1` and `v1.0` results; supported Ubuntu releases; "Known
+  limitation": `--branch main` still lacks `gr-qtgui`, needs Qt6 + Qwt for
+  Qt6); "Releases and changes" (on `main` since `v1.1`; in `v1.1`);
+  "Download the installers" (`v1.1` links; swap in `main` to try the new
+  changes); "Run the installers in order" with "Removing an earlier
+  install" (manifest removal, then delete the leftover empty directories,
+  and the old source-built Volk); "Environment variables"; UHD usage
+  section; GNU Radio usage section with "GNU Radio's dependencies", options
+  table, examples. Keep its options tables in sync with the scripts'
+  argparse help.
 
 - **`wiki-draft-download-section.txt`** — local-only (in `.gitignore`, so
   not on GitHub or other machines): MediaWiki-markup draft of the
-  "Building GNU Radio from Source Code" page's download/run sections.
-  Updated 2026-10-03 for **`v1.1`**: two scripts via tag-pinned raw links
-  into `~/gr-installers`, both run with `sudo`, `--branch` (with a
-  `maint-3.10` example), build logs and `make test`, rebuilding, removing a
-  source-built Volk, and checking `gnuradio-config-info
-  --enabled-components`. (The `v1.0` version is what the live page uses.)
-  Still omits the supported Ubuntu releases and the missing-components
-  (Qt GUI) note — see Next step 8.
+  "Building GNU Radio from Source Code" page. Rewritten 2026-10-03 for the
+  upcoming **`v1.2`**: supported systems, two scripts via tag-pinned raw
+  links, both run with `sudo`, where the dependency lists come from (no
+  manual package lines), `--branch` (default `maint-3.10`; `main` lacks
+  `gr-qtgui`), build logs and `make test`, replacing an earlier install
+  (manifest removal + leftover directories + old Volk), checking the
+  result. Contains two bold "Draft note" markers to resolve before
+  publishing: the `v1.2` tag doesn't exist yet, and 24.04 is untested with
+  these scripts. (The live page uses `v1.0`.)
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
@@ -268,6 +287,41 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   "Tested builds". Then tagged **`v1.1`** (user's choice of name), updated
   the local wiki draft for `v1.1`, and switched README's download section
   to `v1.1` (commit `2149651`).
+- 2026-10-03: **GNU Radio's own dependencies solved for `maint-3.10`.**
+  The user focused on `maint-3.10` (Qt5) and supplied the wiki's manual
+  dependency lines (46 packages for 3.8 + 3.9 + 3.10). Findings: the
+  LENOVO's `cmake.log` showed `gr-iio` (no `libiio`), `gr-soapy` (no
+  SoapySDR), `gr-qtgui` (no Qt6/PyQt6/Qwt-Qt6 on `main`) disabled and
+  JACK/PortAudio not found. The Ettus Dockerfile's "Install GNURadio
+  dependencies" block is only 22 packages for Ettus's own testing (and
+  stale: `liblog4cpp5-dev`). Ubuntu's `gnuradio` package `Build-Depends`
+  (what `apt-get build-dep gnuradio` and GNU Radio's 24.04 CI image use) is
+  the authoritative list for 3.10. Of the 46 manual packages: 31 are on
+  that list, 10 only on the Ettus list, 2 come in as dependencies (`g++`,
+  `libusb-1.0-0`), 3 uncovered: `python3-matplotlib` and `soapysdr-tools`
+  (added as extras) and `swig` (3.8-only, dropped). Rewrote the GNU Radio
+  installer to fetch/parse/install that list and made `maint-3.10` the
+  default branch.
+- 2026-10-03: Real run on the LENOVO (`sudo python3
+  gnuradio_bare_metal_installer.py`, default `maint-3.10`, after removing
+  the installed 3.11 via `install_manifest.txt`): compiled fine on 26.04;
+  cmake listed **no disabled components**; first `make test` 268/269 —
+  `grc_tests` failed because the manifest removal left 67 *empty*
+  directories under `/usr/local/lib/python3.14/dist-packages/gnuradio`,
+  which Python imports as empty namespace packages
+  (`gnuradio.grc.workflows.python_nogui` has no attribute
+  `PythonNoGuiGenerator`), defeating GNU Radio's ModuleNotFoundError
+  fallback in `grc/core/generator/Generator.py`. After `sudo rm -rf` of the
+  empty dirs (also `/usr/local/include/gnuradio`, `share/gnuradio`,
+  `lib/cmake/gnuradio`, `share/doc/gnuradio-3.11.0git`) and re-running
+  `make test`, `sudo make install`, `sudo ldconfig` by hand: **269/269**,
+  GNU Radio **3.10.12.0** (v3.10.12.0-92-gc1a73dc34), **42 enabled
+  components** (was 32): adds `gr-qtgui`, `gr-iio` + `libad9361`,
+  `gr-soapy`, JACK, PortAudio, Thrift, codec2/freedv/gsm. `from gnuradio
+  import qtgui, iio, soapy, uhd, audio` works with no env vars. Added the
+  leftover-directory check to the installer; rewrote README; updated the
+  local wiki draft. `~/gnuradio.main` and `~/gnuradio.old` are old build
+  trees on the LENOVO and can be deleted.
 
 ## Key decisions
 
@@ -305,6 +359,20 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   (user, 2026-10-02) — replaced the uhd → volk → gnuradio content and
   mtime-order cross-checks (and their re-run/fresh-clone ordering
   workarounds), which are gone along with the Volk installer.
+- **GNU Radio's dependencies come from Ubuntu's `gnuradio` package
+  `Build-Depends`** (2026-10-03), fetched per release from Launchpad, minus
+  a skip list, plus a few run-time extras — same "parse upstream's list"
+  idea as the Ettus Dockerfile, and it tracks each Ubuntu release, so the
+  wiki's hand-maintained package lines can go. Fits `maint-3.10`/Qt5 only;
+  works for Ubuntu releases whose `gnuradio` package is 3.10 (22.04+;
+  20.04 ships 3.8). The UHD installer must still run first (the list
+  relies on the Ettus list for basics like `git`, and `gr-uhd` needs UHD).
+- **Default GNU Radio branch is `maint-3.10`** (user, 2026-10-03), the
+  released Qt5 series; `--branch main` remains for 3.11 development.
+- **Removing an install needs two steps:** `xargs rm -f <
+  install_manifest.txt` leaves empty directories, which break `grc_tests`
+  on the next build (see 2026-10-03). Always also `rm -rf` the leftover
+  `gnuradio` directories; the installer refuses to build while they exist.
 - **No Ettus PPA; build UHD from source** (user, 2026-10-02), despite the
   main GNU Radio developer's proposal. The PPA (`ppa:ettusresearch/uhd`)
   had UHD 4.11.0.0 for 24.04 and 26.04; the evaluation is in git history
@@ -372,8 +440,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    machine.
 7. ~~Repo visibility~~ — done: confirmed 2026-09-24 to leave public. (The
    name and description aren't a mismatch — see Key decisions.)
-8. **GNU Radio's own dependencies and branch choice (open; updated
-   2026-09-27).** Per `gnuradio-config-info --enabled-components` (identical
+8. **GNU Radio's own dependencies and branch choice — resolved for
+   `maint-3.10` on 2026-10-03** (dependency step + default branch; see
+   What's been done). **Still open: `--branch main` (Qt6)**, whose
+   `gr-qtgui` needs `qt6-base-dev`, `python3-pyqt6`, and Qwt ≥ 6.2 built
+   from source for Qt6 (not packaged on 24.04/26.04; untested), and stating
+   the supported Ubuntu releases on the wiki page. The notes below are the
+   2026-09-27 background. Per `gnuradio-config-info --enabled-components` (identical
    on the LENOVO and the GMKtec), the installers' build lacks `gr-qtgui`,
    `gr-soapy`, `gr-iio`, and the JACK/PortAudio audio back-ends.
 
@@ -487,3 +560,12 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     - `v1.0` and the current wiki links stay unchanged; ship as the next tag
       with a wiki page update. The local `wiki-draft-download-section.txt`
       still describes `v1.0` (three scripts) — update it for the next tag.
+12. **Next (as of 2026-10-03):**
+    - Clean-install test of the current `main` scripts on the GMKtec (the
+      LENOVO run needed manual cleanup), and a 24.04 test (untested since
+      `v1.0`; 24.04's list is 67 packages).
+    - Then tag `v1.2` and update the wiki page: two scripts, `maint-3.10`
+      default, no manual dependency lines needed, supported releases
+      (24.04, 26.04), removal procedure. The local draft is already written
+      for `v1.2` (its links 404 until the tag exists).
+    - Later: the `main`/Qt6 path (Qwt from source) if wanted.

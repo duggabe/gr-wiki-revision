@@ -123,12 +123,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 
 - **`wiki-draft-download-section.txt`** — local-only (in `.gitignore`, so
   not on GitHub or other machines): MediaWiki-markup draft of the
-  "Building GNU Radio from Source Code" page's download/run sections —
-  downloading the three scripts via tag-pinned raw GitHub links into
-  `~/gr-installers`, running them in order, re-running/rebuilding, and
-  checking `gnuradio-config-info --enabled-components`. Uses `v1.0` as a
-  placeholder tag. Deliberately omits the Qt GUI gap and supported-OS note
-  (to settle before publishing).
+  "Building GNU Radio from Source Code" page's download/run sections.
+  Updated 2026-10-03 for **`v1.1`**: two scripts via tag-pinned raw links
+  into `~/gr-installers`, both run with `sudo`, `--branch` (with a
+  `maint-3.10` example), build logs and `make test`, rebuilding, removing a
+  source-built Volk, and checking `gnuradio-config-info
+  --enabled-components`. (The `v1.0` version is what the live page uses.)
+  Still omits the supported Ubuntu releases and the missing-components
+  (Qt GUI) note — see Next step 8.
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history

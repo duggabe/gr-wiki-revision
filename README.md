@@ -91,23 +91,24 @@ will continue to be built from source.
 
 ## Download the installers
 
-You don't need to clone this repository. For the current release, `v1.0`,
-download its three scripts into one directory. The Volk and GNU Radio
-scripts use code from the UHD script, so all three must be in the same
-directory:
+You don't need to clone this repository. Download the two `v1.1` scripts
+into one directory. The GNU Radio script uses code from the UHD script, so
+both must be in the same directory:
 
 ```bash
 mkdir -p ~/gr-installers
 cd ~/gr-installers
-for s in uhd volk gnuradio; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.0/${s}_bare_metal_installer.py
+for s in uhd gnuradio; do
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.1/${s}_bare_metal_installer.py
 done
 ```
 
-For `v1.0`, follow the wiki page, or the
+`v1.1` has been tested on Ubuntu 26.04 (see [Tested builds](#tested-builds)).
+The wiki page currently uses `v1.0`, which has three scripts (UHD, Volk, and
+GNU Radio) and was tested on 24.04 and 26.04. For `v1.0`, follow the wiki
+page or the
 [`v1.0` README](https://github.com/duggabe/gr-wiki-revision/blob/v1.0/README.md).
-The rest of this README describes the scripts on `main` (see
-[Changes since v1.0](#changes-since-v10)).
+The rest of this README describes `v1.1`.
 
 Look the scripts over before running them, and don't pipe a download
 straight into `python3`, especially with `sudo`. Use `--dry-run` to see

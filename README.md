@@ -36,8 +36,14 @@ On 2026-10-02, the revised installers on `main` (see
 | GNU Radio | `sudo python3 gnuradio_bare_metal_installer.py --branch main` | v3.11.0.0git-1174-gaee9fd3f | 266 of 266 passed |
 
 The clone and build directories and the build logs were owned by the
-normal user, not root. The `main` scripts haven't yet been tested on a
-clean install or with `--branch maint-3.10`.
+normal user, not root.
+
+On 2026-10-03 the same `main` scripts were tested on a fresh install of
+Ubuntu 26.04.1, downloading the two scripts from `main`. Both builds
+finished without errors, and all tests passed: 109 of 109 for UHD and 266 of
+266 for GNU Radio (the same GNU Radio version, v3.11.0.0git-1174-gaee9fd3f,
+with the same enabled components as the build above). The `main` scripts
+haven't yet been tested on Ubuntu 24.04 or with `--branch maint-3.10`.
 
 > **Known limitation:** the installers only install UHD's build
 > dependencies, not GNU Radio's own. CMake skips any GNU Radio component
@@ -61,8 +67,8 @@ clean install or with `--branch maint-3.10`.
 ## Changes since v1.0
 
 `v1.0` is the release the "Building GNU Radio from Source Code" wiki page
-uses, and it stays available at its current links. The scripts on `main`
-have changed since then and will be in the next release:
+uses, and it stays available at its current links. These changes are in
+`v1.1` (tagged 2026-10-03):
 
 - **Volk is no longer built from source.** `volk_bare_metal_installer.py`
   has been removed. GNU Radio still needs Volk (2.4.1 or later), so the

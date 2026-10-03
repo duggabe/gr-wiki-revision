@@ -37,7 +37,7 @@ from here — ask the user to paste page content.
 | --- | --- | --- |
 | Laptop | 24.04 | `~/AIwork` trial; 24.04 testing, with both the bash script + the wiki's manual steps and the Python installers |
 | LENOVO desktop | 26.04 | current working machine, `~/gr-wiki-revision`; 26.04 builds of UHD, Volk, GNU Radio |
-| GMKtec (clean install) | 24.04 | tested the new wiki page from scratch (2026-09-26): everything worked |
+| GMKtec (clean install) | 24.04, then 26.04.1 | 24.04: tested the new wiki page (`v1.0`) from scratch (2026-09-26), everything worked. Reinstalled from scratch with Ubuntu 26.04.1 for the 2026-10-03 test of the `main` scripts |
 
 Ettus has Dockerfiles for both (`uhd-builder-ubuntu2404.Dockerfile` and
 `uhd-builder-ubuntu2604.Dockerfile`, plus 20.04, 22.04, 25.10, and Fedora),
@@ -253,6 +253,15 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   same 32 enabled components as before. `~/gnuradio`, `build/`, and the
   three logs owned by barry; root-owned files only inside `build/`.
   Added these results to `README.md`'s "Tested builds" (commit `55551aa`).
+- 2026-10-03: Clean-install test of the `main` scripts on the GMKtec,
+  freshly loaded with **Ubuntu 26.04.1** from scratch (not 24.04, and not
+  the uninstall route): `wget` the two scripts from `main`, then
+  `sudo ... uhd --build` and `sudo ... gnuradio --branch main`. No errors;
+  UHD 109/109 and GNU Radio 266/266 tests passed; GNU Radio
+  v3.11.0.0git-1174-gaee9fd3f; enabled components identical to the
+  LENOVO's (same 32, still no `gr-qtgui`/`gr-soapy`/`gr-iio`/JACK/
+  PortAudio). The `main` scripts are untested on 24.04. Added to README
+  "Tested builds". Then tagged **`v1.1`** (user's choice of name).
 
 ## Key decisions
 
@@ -460,8 +469,15 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     - ~~GNU Radio's `make test` might fail without `xvfb`~~ — all 266
       passed on the LENOVO with `--branch main` (2026-10-02).
     - ~~First real run~~ — done for `--branch main` on the LENOVO
-      (2026-10-02). Still to try: `--branch maint-3.10`, and a clean
-      machine (the GMKtec, after removing its source-built Volk).
+      (2026-10-02) and on the GMKtec with a fresh Ubuntu 26.04.1 install
+      (2026-10-03; all tests passed on both). Still to try: Ubuntu 24.04
+      and `--branch maint-3.10`.
+    - **Tagged `v1.1`** (user, 2026-10-03; I'd suggested `v2.0` since the
+      changes break `v1.0`'s instructions, but the user chose `v1.1` while
+      still researching GNU Radio's missing dependencies). `v1.1` has two
+      scripts (no Volk). The wiki page still links `v1.0`; switching it to
+      `v1.1` (and updating the local draft to two scripts) is the user's
+      call.
     - `v1.0` and the current wiki links stay unchanged; ship as the next tag
       with a wiki page update. The local `wiki-draft-download-section.txt`
       still describes `v1.0` (three scripts) — update it for the next tag.

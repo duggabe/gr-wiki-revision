@@ -100,9 +100,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
      24.04: 70 → 67. Saved to `gnuradio-dependencies.txt` (`-o`).
      `--list-only` stops here.
   3. Abort unless `uhd-dependencies.txt` (`--uhd-deps`) exists.
-  4. Abort if `find_stale_install_dirs()` finds empty `gnuradio`
-     directories from a removed install under `/usr/local` (prints the
-     `sudo rm -rf` command).
+  4. Abort if `find_stale_install_dirs()` finds empty `gnuradio` (or
+     `pmt`, `etc/gnuradio`) directories from a removed install under
+     `/usr/local` (`INSTALL_DIR_PATTERNS`; prints the `sudo rm -rf`
+     command). Keep that pattern list, README's "Removing an earlier
+     install" command, and the wiki draft's command in sync.
   5. `sudo apt-get update` → `sudo apt-get install -y <packages>` →
      `git clone` → `git checkout <--branch>` (**default `maint-3.10`** since
      2026-10-03; `main` = 3.11 development) → `mkdir build` → `cmake ...

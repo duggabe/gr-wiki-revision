@@ -122,9 +122,13 @@ KNOWN_OSES = ("linux", "kfreebsd", "hurd")
 INSTALL_PREFIX = "/usr/local"
 INSTALL_DIR_PATTERNS = (
     "lib/python3*/dist-packages/gnuradio",
+    "lib/python3*/dist-packages/pmt",
     "lib/python3*/site-packages/gnuradio",
+    "lib/python3*/site-packages/pmt",
     "include/gnuradio",
+    "include/pmt",
     "share/gnuradio",
+    "etc/gnuradio",
     "lib/cmake/gnuradio",
     "share/doc/gnuradio-*",
 )

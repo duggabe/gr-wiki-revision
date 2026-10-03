@@ -160,7 +160,9 @@ too:
 
 ```bash
 sudo rm -rf /usr/local/lib/python3*/dist-packages/gnuradio \
-            /usr/local/include/gnuradio /usr/local/share/gnuradio \
+            /usr/local/lib/python3*/dist-packages/pmt \
+            /usr/local/include/gnuradio /usr/local/include/pmt \
+            /usr/local/share/gnuradio /usr/local/etc/gnuradio \
             /usr/local/lib/cmake/gnuradio /usr/local/share/doc/gnuradio-*
 ```
 

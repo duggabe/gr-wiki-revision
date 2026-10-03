@@ -102,7 +102,7 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
-- **`README.md`** — user-facing docs (describes `main`, not `v1.0`):
+- **`README.md`** — user-facing docs (describes `v1.1`/`main`, not `v1.0`):
   project blurb, work-in-progress note, "Tested builds" (the `v1.0` builds
   of UHD/Volk/GNU Radio on 26.04, tested Ubuntu releases 24.04 and 26.04,
   the clean-install wiki test, and a 2026-10-02 table for the `main`
@@ -112,8 +112,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   selectable with `--branch`); "Changes since v1.0" (Volk removed, simpler
   GNU Radio check, `--branch`, logs and `make test`; still under discussion:
   branch for the wiki page, GNU Radio's own deps; UHD stays a source
-  build); "Download the installers" (`v1.0` `wget` loop for the three
-  `v1.0` scripts, pointing `v1.0` users to the wiki page / `v1.0` README);
+  build); "Download the installers" (`v1.1` `wget` loop for the two
+  scripts; notes `v1.1` is tested on 26.04 only, and that the wiki page
+  still uses `v1.0`, pointing `v1.0` users to the wiki page / `v1.0`
+  README);
   "Run the installers in order" (two scripts, sudo, the
   `uhd-dependencies.txt` existence check, rebuilding) with a "Volk"
   subsection (`sudo apt-get install libvolk-dev`; remove a source-built
@@ -263,7 +265,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   v3.11.0.0git-1174-gaee9fd3f; enabled components identical to the
   LENOVO's (same 32, still no `gr-qtgui`/`gr-soapy`/`gr-iio`/JACK/
   PortAudio). The `main` scripts are untested on 24.04. Added to README
-  "Tested builds". Then tagged **`v1.1`** (user's choice of name).
+  "Tested builds". Then tagged **`v1.1`** (user's choice of name), updated
+  the local wiki draft for `v1.1`, and switched README's download section
+  to `v1.1` (commit `2149651`).
 
 ## Key decisions
 

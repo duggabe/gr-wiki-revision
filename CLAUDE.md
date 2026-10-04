@@ -2,11 +2,20 @@
 
 ## Project summary
 
-Tooling to build and install Ettus Research's UHD (USRP Hardware Driver) —
-plus Volk and GNU Radio — directly on bare metal (no Docker), by reusing the
-dependency list from EttusResearch's own Docker build environment
-(`.ci/docker/uhd-builder-ubuntu2604.Dockerfile` in the `EttusResearch/uhd`
-repo on GitHub).
+Tooling to build and install Ettus Research's UHD (USRP Hardware Driver)
+and GNU Radio directly on bare metal (no Docker) on Ubuntu, with two Python
+installers that derive their package lists from upstream instead of
+hardcoding them: UHD's from EttusResearch's own Docker build environment
+(`.ci/docker/uhd-builder-ubuntu<NNNN>.Dockerfile` in the `EttusResearch/uhd`
+repo), GNU Radio's from the `Build-Depends` of Ubuntu's own `gnuradio`
+package. Volk comes from Ubuntu's `libvolk-dev`.
+
+**Current state (2026-10-04):** release **`v1.2`** is tagged and tested on
+Ubuntu 24.04 (clean install) and 26.04: UHD 4.11.0.0 and GNU Radio 3.10.12.0
+(`maint-3.10`) with all 42 components, all tests passing. Releases `v1.0`
+(three scripts, Volk from source; what the live wiki page links) and `v1.1`
+stay available. Open: the user updating the wiki page to `v1.2` from the
+local draft; the `main`/Qt6 path.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
 and programs supporting GNU Radio Wiki documents, which the user writes.
@@ -331,7 +340,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   in the Ettus PPA; B200/B210 is separate and enabled) and "RFNoC/FPGA
   Development Files" (off by default) as disabled on both machines —
   expected. Still untested: a clean 26.04 install with the current scripts.
-  Then tagged **`v1.2`** and pointed README's download links at it.
+  Then tagged **`v1.2`** (commit `b4327fa`) and pointed README's download
+  links at it. Verified: `v1.0`, `v1.1`, and `v1.2` raw links all respond;
+  the two `v1.2` scripts downloaded into an empty directory run
+  (`--list-only`, GNU Radio `--dry-run`: 66 packages, `maint-3.10`).
 
 ## Key decisions
 
@@ -536,8 +548,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     --enabled-components` on the GMKtec is identical to the LENOVO's (same
     32 components; `gr-qtgui`, `gr-soapy`, `gr-iio`, JACK, PortAudio
     missing on both), so step 8 is the remaining gap on 24.04 too.
-11. **Volk removed; GNU Radio installer revised (done 2026-10-02, code
-    dry-run tested only).** Deleted the Volk installer and the volk/gnuradio
+11. ~~**Volk removed; GNU Radio installer revised**~~ — done 2026-10-02,
+    released as `v1.1`, then superseded by the `v1.2` dependency step (see
+    step 12). The notes below are the 2026-10-02/03 record. Deleted the Volk installer and the volk/gnuradio
     lists; rewrote the GNU Radio installer (existence check, `--branch`,
     logged cmake/make/make test). Updated README ("Changes since v1.0", a
     two-script "Run the installers in order", a "Volk" subsection, rewritten
@@ -567,16 +580,19 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       scripts (no Volk). The wiki page still links `v1.0`; switching it to
       `v1.1` (and updating the local draft to two scripts) is the user's
       call.
-    - `v1.0` and the current wiki links stay unchanged; ship as the next tag
-      with a wiki page update. The local `wiki-draft-download-section.txt`
-      still describes `v1.0` (three scripts) — update it for the next tag.
+    - `v1.0` and the current wiki links stay unchanged. (The local wiki
+      draft has since been rewritten for `v1.2`.)
 12. **Next (as of 2026-10-04):**
     - ~~Clean-install test and a 24.04 test~~ — done 2026-10-04 on the
       GMKtec (fresh 24.04, all tests passed, 42 components). Optional: a
       clean 26.04 install with the current scripts.
-    - ~~Tag `v1.2`~~ — done 2026-10-04 (user's go-ahead). Remaining, the
+    - ~~Tag `v1.2`~~ — done 2026-10-04 (user's go-ahead; for fixes tag
+      `v1.3` etc. rather than moving a tag). Remaining, the
       user's call: update the wiki page from the local draft (written for
       `v1.2`): two scripts, `maint-3.10` default, no manual dependency
       lines, supported releases (24.04, 26.04), removal procedure. The live
       page still links `v1.0`.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
+    - Minor, unresolved: which GNU Radio test accounts for 268 tests on
+      24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`;
+      `~/gnuradio.main` and `~/gnuradio.old` on the LENOVO can be deleted.

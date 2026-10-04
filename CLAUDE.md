@@ -12,10 +12,13 @@ package. Volk comes from Ubuntu's `libvolk-dev`.
 
 **Current state (2026-10-04):** release **`v1.2`** is tagged and tested on
 Ubuntu 24.04 (clean install) and 26.04: UHD 4.11.0.0 and GNU Radio 3.10.12.0
-(`maint-3.10`) with all 42 components, all tests passing. Releases `v1.0`
-(three scripts, Volk from source; what the live wiki page links) and `v1.1`
-stay available. Open: the user updating the wiki page to `v1.2` from the
-local draft; the `main`/Qt6 path.
+(`maint-3.10`) with all 42 components, all tests passing. Tags `v1.0`
+(three scripts, Volk from source) and `v1.1` stay available. The user has
+revised the live "Building GNU Radio from Source Code" wiki page for `v1.2`
+and asked the GNU Radio developers and documentation people to review it.
+**Waiting on the reviewers' comments**; then make any changes (tag `v1.3`
+if the scripts change) and create a GitHub Release. Also open: the
+`main`/Qt6 path.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
 and programs supporting GNU Radio Wiki documents, which the user writes.
@@ -162,8 +165,12 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   manual package lines), `--branch` (default `maint-3.10`; `main` lacks
   `gr-qtgui`), build logs and `make test`, replacing an earlier install
   (manifest removal + leftover directories + old Volk), checking the
-  result. No draft notes remain: `v1.2` is tagged and 24.04 is tested.
-  (The live page still uses `v1.0`.)
+  result. Since 2026-10-04 the file is the user's copy of the **live,
+  revised wiki page** (pasted from the wiki): the user's own introduction
+  (lines 1–11: when a source build is needed — unsupported distribution, or
+  a developer testing code outside a container; notes on OOT modules, the
+  README link, and "bare-metal" = non-container) followed by the `v1.2`
+  text above, unchanged. Treat the wiki as the master copy.
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
@@ -350,6 +357,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   Afterwards added an overview and quick start to the top of `README.md`
   (commit `65d333c`, after the tag, so `v1.2`'s own README lacks it; the
   scripts are unchanged).
+- 2026-10-04: The user revised the live wiki page for `v1.2`, added an
+  introduction, copied the page text into
+  `wiki-draft-download-section.txt`, and asked the GNU Radio developers and
+  documentation people to review it. Explained how to create a GitHub
+  Release; the user is waiting for the reviewers' comments first. Reviewed
+  the introduction and gave four comments (see Next step 12); no files
+  changed.
 
 ## Key decisions
 
@@ -593,11 +607,29 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       GMKtec (fresh 24.04, all tests passed, 42 components). Optional: a
       clean 26.04 install with the current scripts.
     - ~~Tag `v1.2`~~ — done 2026-10-04 (user's go-ahead; for fixes tag
-      `v1.3` etc. rather than moving a tag). Remaining, the
-      user's call: update the wiki page from the local draft (written for
-      `v1.2`): two scripts, `maint-3.10` default, no manual dependency
-      lines, supported releases (24.04, 26.04), removal procedure. The live
-      page still links `v1.0`.
+      `v1.3` etc. rather than moving a tag).
+    - ~~Update the wiki page to `v1.2`~~ — done 2026-10-04 by the user,
+      who added an introduction and asked the GNU Radio developers and
+      documentation people to review the page. **Waiting on their
+      comments.**
+    - **GitHub Release (after the review).** No Release has been created
+      yet, only tags (not verified with `gh release list`). Process
+      explained to the user 2026-10-04: write release notes, then
+      `gh release create <tag> --title ... --notes-file ...`, optionally
+      attaching the two scripts as they are at that tag. The user chose to
+      wait for the reviewers' comments so the Release is built on whichever
+      version the reviewed page ends up using.
+    - My review comments on the user's introduction (given 2026-10-04, not
+      yet acted on; the file is unchanged): (1) the Notes lines start with
+      spaces then `*`, which MediaWiki renders as preformatted text with
+      literal asterisks rather than bullets; (2) scenario (a), "your
+      distribution does not support GNU Radio", doesn't fit a page that
+      only works on Ubuntu 24.04/26.04, which both package GNU Radio;
+      (3) scenario (b), developers: the script always clones fresh from
+      `gnuradio/gnuradio` and stops if `~/gnuradio` exists, so it is a
+      first-time setup (later rebuilds are manual in `~/gnuradio/build`),
+      and developers mostly use `main`, which this path builds without
+      `gr-qtgui`; (4) the README link points at `main`, not `v1.2`.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`;

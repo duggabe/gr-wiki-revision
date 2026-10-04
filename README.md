@@ -129,7 +129,10 @@ and `v1.1` stay available at their links.
   `make.log`, and `make_test.log` in their `build` directories. Any failure,
   including a failing test, stops the build before `sudo make install`.
 
-UHD will continue to be built from source.
+The `v1.x` releases build UHD from source. A later release, `v2.0`, is
+planned to install UHD from the
+[Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd)
+instead.
 
 ## Download the installers
 

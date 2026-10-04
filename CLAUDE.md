@@ -17,8 +17,9 @@ Ubuntu 24.04 (clean install) and 26.04: UHD 4.11.0.0 and GNU Radio 3.10.12.0
 revised the live "Building GNU Radio from Source Code" wiki page for `v1.2`
 and asked the GNU Radio developers and documentation people to review it.
 **Waiting on the reviewers' comments**; then make any changes (tag `v1.3`
-if the scripts change) and create a GitHub Release. Also open: the
-`main`/Qt6 path.
+if the scripts change) and create a GitHub Release. This is **Phase 1**
+(`v1.x`, UHD from source); **Phase 2** will be `v2.0`, installing UHD from
+the Ettus PPA. Also open: the `main`/Qt6 path.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
 and programs supporting GNU Radio Wiki documents, which the user writes.
@@ -419,10 +420,15 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   install_manifest.txt` leaves empty directories, which break `grc_tests`
   on the next build (see 2026-10-03). Always also `rm -rf` the leftover
   `gnuradio` directories; the installer refuses to build while they exist.
-- **No Ettus PPA; build UHD from source** (user, 2026-10-02), despite the
-  main GNU Radio developer's proposal. The PPA (`ppa:ettusresearch/uhd`)
-  had UHD 4.11.0.0 for 24.04 and 26.04; the evaluation is in git history
-  (CLAUDE.md before this change).
+- **Two phases** (user, 2026-10-04). **Phase 1** is the current `v1.x`
+  line: UHD built from source. **Phase 2** will be a different version,
+  **`v2.0`**, installing UHD from the Ettus PPA (`ppa:ettusresearch/uhd`),
+  as the main GNU Radio developer proposed. So the 2026-10-02 "no Ettus
+  PPA" decision applies to Phase 1 only: don't add PPA support to `v1.x`,
+  and reserve the `v2.0` tag for the PPA version. The PPA had UHD 4.11.0.0
+  for 24.04 and 26.04 (checked 2026-09-27); the full evaluation (packages,
+  effect on each installer, removing a source-built UHD first) is in git
+  history, `CLAUDE.md` before commit `1036aeb`.
 - **Any build-step failure stops the automated build** (user,
   2026-10-02), including `cmake`, `make`, and a failing `make test` unit
   test (so a failing build is never installed). The user's manual wiki
@@ -531,7 +537,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
    tools (`debhelper-compat`, `dh-python`, `graphviz`, `xmlto`,
    `libjs-mathjax`, `python3-pytest`).
 
-   **UHD from the Ettus PPA — rejected 2026-10-02** (see Key decisions).
+   **UHD from the Ettus PPA — not in Phase 1 (2026-10-02); planned for
+   Phase 2, `v2.0`** (see Key decisions).
 
    **Install prefix: keep `/usr/local` (recommended 2026-09-27).** Checked on
    the LENOVO in a clean environment (no `LD_LIBRARY_PATH`/`PYTHONPATH`):
@@ -636,6 +643,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       first-time setup (later rebuilds are manual in `~/gnuradio/build`),
       and developers mostly use `main`, which this path builds without
       `gr-qtgui`; (4) the README link points at `main`, not `v1.2`.
+    - **Phase 2 (later): `v2.0`, UHD from the Ettus PPA** (user,
+      2026-10-04; see Key decisions). Not started; no scope or timing given
+      beyond that. Start from the PPA evaluation in git history.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`;

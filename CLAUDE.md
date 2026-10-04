@@ -39,7 +39,7 @@ from here — ask the user to paste page content.
 | --- | --- | --- |
 | Laptop | 24.04 | `~/AIwork` trial; 24.04 testing, with both the bash script + the wiki's manual steps and the Python installers |
 | LENOVO desktop | 26.04 | current working machine, `~/gr-wiki-revision`; 26.04 builds of UHD, Volk, GNU Radio |
-| GMKtec (clean install) | 24.04, then 26.04.1 | 24.04: tested the new wiki page (`v1.0`) from scratch (2026-09-26), everything worked. Reinstalled from scratch with Ubuntu 26.04.1 for the 2026-10-03 test of the `main` scripts |
+| GMKtec (clean install) | reloaded per test: 24.04, 26.04.1, 24.04 | 2026-09-26: 24.04, tested the wiki page (`v1.0`) from scratch. 2026-10-03: fresh 26.04.1, tested `v1.1`. 2026-10-04: fresh 24.04, tested the current `main` scripts (dependency step, `maint-3.10`) — all passed |
 
 Ettus has Dockerfiles for both (`uhd-builder-ubuntu2404.Dockerfile` and
 `uhd-builder-ubuntu2604.Dockerfile`, plus 20.04, 22.04, 25.10, and Fedora),
@@ -128,15 +128,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
-- **`README.md`** — user-facing docs (describes `main`; `v1.1` is the
-  latest tag and lacks the dependency step): "Tested builds" (current
+- **`README.md`** — user-facing docs (describes `v1.2`, the current
+  release): "Tested builds" (clean 24.04 and 26.04 results; current
   scripts on 26.04: UHD 4.11.0.0 109/109, GNU Radio 3.10.12.0 269/269, no
   disabled components, incl. the `grc_tests` leftover-directory story;
   earlier `v1.1` and `v1.0` results; supported Ubuntu releases; "Known
   limitation": `--branch main` still lacks `gr-qtgui`, needs Qt6 + Qwt for
-  Qt6); "Releases and changes" (on `main` since `v1.1`; in `v1.1`);
-  "Download the installers" (`v1.1` links; swap in `main` to try the new
-  changes); "Run the installers in order" with "Removing an earlier
+  Qt6); "Releases and changes" (in `v1.2`; in `v1.1`);
+  "Download the installers" (`v1.2` links); "Run the installers in order" with "Removing an earlier
   install" (manifest removal, then delete the leftover empty directories,
   and the old source-built Volk); "Environment variables"; UHD usage
   section; GNU Radio usage section with "GNU Radio's dependencies", options
@@ -146,14 +145,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 - **`wiki-draft-download-section.txt`** — local-only (in `.gitignore`, so
   not on GitHub or other machines): MediaWiki-markup draft of the
   "Building GNU Radio from Source Code" page. Rewritten 2026-10-03 for the
-  upcoming **`v1.2`**: supported systems, two scripts via tag-pinned raw
+  **`v1.2`**: supported systems, two scripts via tag-pinned raw
   links, both run with `sudo`, where the dependency lists come from (no
   manual package lines), `--branch` (default `maint-3.10`; `main` lacks
   `gr-qtgui`), build logs and `make test`, replacing an earlier install
   (manifest removal + leftover directories + old Volk), checking the
-  result. Contains two bold "Draft note" markers to resolve before
-  publishing: the `v1.2` tag doesn't exist yet, and 24.04 is untested with
-  these scripts. (The live page uses `v1.0`.)
+  result. No draft notes remain: `v1.2` is tagged and 24.04 is tested.
+  (The live page still uses `v1.0`.)
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
@@ -324,6 +322,16 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   leftover-directory check to the installer; rewrote README; updated the
   local wiki draft. `~/gnuradio.main` and `~/gnuradio.old` are old build
   trees on the LENOVO and can be deleted.
+- 2026-10-04: **Clean Ubuntu 24.04 test on the GMKtec** (reloaded from
+  scratch; two scripts from `main` at `00db21e`): no errors. UHD 109/109
+  tests; GNU Radio 268/268 (one fewer test than the LENOVO's 269 on 26.04 —
+  not a failure; commit not reported, presumably a test that 24.04 doesn't
+  register); GNU Radio 3.10.12.0; 42 enabled components, identical to the
+  LENOVO's. UHD's `cmake.log` lists "B300" (needs NI's `nib310rio-dev`, only
+  in the Ettus PPA; B200/B210 is separate and enabled) and "RFNoC/FPGA
+  Development Files" (off by default) as disabled on both machines —
+  expected. Still untested: a clean 26.04 install with the current scripts.
+  Then tagged **`v1.2`** and pointed README's download links at it.
 
 ## Key decisions
 
@@ -562,12 +570,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     - `v1.0` and the current wiki links stay unchanged; ship as the next tag
       with a wiki page update. The local `wiki-draft-download-section.txt`
       still describes `v1.0` (three scripts) — update it for the next tag.
-12. **Next (as of 2026-10-03):**
-    - Clean-install test of the current `main` scripts on the GMKtec (the
-      LENOVO run needed manual cleanup), and a 24.04 test (untested since
-      `v1.0`; 24.04's list is 67 packages).
-    - Then tag `v1.2` and update the wiki page: two scripts, `maint-3.10`
-      default, no manual dependency lines needed, supported releases
-      (24.04, 26.04), removal procedure. The local draft is already written
-      for `v1.2` (its links 404 until the tag exists).
+12. **Next (as of 2026-10-04):**
+    - ~~Clean-install test and a 24.04 test~~ — done 2026-10-04 on the
+      GMKtec (fresh 24.04, all tests passed, 42 components). Optional: a
+      clean 26.04 install with the current scripts.
+    - ~~Tag `v1.2`~~ — done 2026-10-04 (user's go-ahead). Remaining, the
+      user's call: update the wiki page from the local draft (written for
+      `v1.2`): two scripts, `maint-3.10` default, no manual dependency
+      lines, supported releases (24.04, 26.04), removal procedure. The live
+      page still links `v1.0`.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.

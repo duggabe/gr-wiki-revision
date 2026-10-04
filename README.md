@@ -6,7 +6,7 @@ Scripts and programs to support GNU Radio Wiki documents.
 
 ## Tested builds
 
-**Current scripts (`main`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
+**Current scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
 two installers built, tested, and installed the following:
 
 | Component | Installer | Version | `make test` |
@@ -30,7 +30,20 @@ removed GNU Radio install. After removing them, all 269 tests passed and the
 install completed. The installer now checks for such leftovers before
 building (see [Removing an earlier install](#removing-an-earlier-install)).
 
-Not yet tested with the current scripts: a clean install, and Ubuntu 24.04.
+**Clean install of Ubuntu 24.04, 2026-10-04.** The same scripts were run on
+a freshly installed Ubuntu 24.04 machine, downloading the two scripts from
+`main` and nothing else. Both builds finished without errors: 109 of 109
+UHD tests and 268 of 268 GNU Radio tests passed, and GNU Radio 3.10.12.0 was
+installed with the same 42 enabled components as the 26.04 build above,
+including `gr-qtgui`, `gr-iio`, `gr-soapy`, JACK, and PortAudio.
+
+UHD's own `cmake.log` lists two disabled UHD components on both machines.
+Both are expected: "B300" needs NI's separate `nib310rio-dev` driver
+package (B200/B210 support is a different component and is enabled), and
+"RFNoC/FPGA Development Files" is off by default in UHD.
+
+Not yet tested with the current scripts: a clean install of Ubuntu 26.04
+(the 26.04 build above was on a machine with earlier builds).
 
 **Earlier releases:**
 
@@ -59,10 +72,11 @@ is a 3.10 release (22.04 and later). Only 24.04 and 26.04 have been tested.
 
 ## Releases and changes
 
-`v1.0` is the release the "Building GNU Radio from Source Code" wiki page
-uses. `v1.0` and `v1.1` stay available at their links.
+`v1.2` is the current release. `v1.0` is the release the "Building GNU
+Radio from Source Code" wiki page uses until the page is updated. `v1.0`
+and `v1.1` stay available at their links.
 
-**On `main` since `v1.1`** (will be in the next release):
+**In `v1.2`** (2026-10-04), since `v1.1`:
 
 - **GNU Radio's own dependencies are installed.** The GNU Radio installer
   fetches the build dependencies of Ubuntu's own `gnuradio` package for your
@@ -100,17 +114,16 @@ be in the same directory:
 mkdir -p ~/gr-installers
 cd ~/gr-installers
 for s in uhd gnuradio; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.1/${s}_bare_metal_installer.py
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.2/${s}_bare_metal_installer.py
 done
 ```
 
-These links are for `v1.1`, the latest release. It doesn't yet have the
-changes listed under "On `main` since `v1.1`" above; to try those, replace
-`v1.1` with `main` in the link. The wiki page currently uses `v1.0`, which
-has three scripts (UHD, Volk, and GNU Radio); for it, follow the wiki page
-or the
+These links are for `v1.2`, the current release, tested on Ubuntu 24.04 and
+26.04 (see [Tested builds](#tested-builds)). The wiki page currently uses
+`v1.0`, which has three scripts (UHD, Volk, and GNU Radio); for it, follow
+the wiki page or the
 [`v1.0` README](https://github.com/duggabe/gr-wiki-revision/blob/v1.0/README.md).
-The rest of this README describes the scripts on `main`.
+The rest of this README describes `v1.2`.
 
 Look the scripts over before running them, and don't pipe a download
 straight into `python3`, especially with `sudo`. Use `--dry-run` to see

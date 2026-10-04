@@ -342,8 +342,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   `gr-soapy`, JACK, PortAudio, Thrift, codec2/freedv/gsm. `from gnuradio
   import qtgui, iio, soapy, uhd, audio` works with no env vars. Added the
   leftover-directory check to the installer; rewrote README; updated the
-  local wiki draft. `~/gnuradio.main` and `~/gnuradio.old` are old build
-  trees on the LENOVO and can be deleted.
+  local wiki draft. `~/gnuradio.main` and `~/gnuradio.old` were old build
+  trees on the LENOVO (deleted by the user 2026-10-04).
 - 2026-10-04: **Clean Ubuntu 24.04 test on the GMKtec** (reloaded from
   scratch; two scripts from `main` at `00db21e`): no errors. UHD 109/109
   tests; GNU Radio 268/268 (one fewer test than the LENOVO's 269 on 26.04 —
@@ -648,5 +648,6 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       beyond that. Start from the PPA evaluation in git history.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
-      24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`;
-      `~/gnuradio.main` and `~/gnuradio.old` on the LENOVO can be deleted.
+      24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`.
+      (`~/gnuradio.main` and `~/gnuradio.old` on the LENOVO were deleted
+      2026-10-04.)

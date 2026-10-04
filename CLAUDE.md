@@ -170,9 +170,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   (lines 1–11: when a source build is needed — unsupported distribution, or
   a developer testing code outside a container; notes on OOT modules, the
   README link, and "bare-metal" = non-container) followed by the `v1.2`
-  text above, unchanged. Treat the wiki as the master copy — except the
-  Notes block, which I reformatted locally on 2026-10-04 and the live page
-  may not have yet.
+  text above, unchanged. Treat the wiki as the master copy. (The Notes
+  block was reformatted as wiki-markup bullets on 2026-10-04, both here and
+  on the live page.)
 
 - `AI_notes.txt` (running log incl. the machine-migration checklist) was
   removed from the repo on 2026-09-25; its content survives in git history
@@ -366,7 +366,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   Release; the user is waiting for the reviewers' comments first. Reviewed
   the introduction and gave four comments (see Next step 12). At the user's
   request, applied the first (the Notes list's MediaWiki formatting) to the
-  local file; the live page needs the same paste.
+  local file; the user made the same edit on the live page and confirmed
+  it looks good.
 
 ## Key decisions
 
@@ -625,9 +626,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     - My review comments on the user's introduction (given 2026-10-04):
       (1) ~~the Notes lines start with spaces then `*`, which MediaWiki
       renders as preformatted text with literal asterisks rather than
-      bullets~~ — fixed in the local file 2026-10-04 (wiki-markup bullets,
-      `'''` bold, README as a named link); the user still has to paste it
-      into the live page. Comments 2–4 are not yet acted on: (2) scenario (a), "your
+      bullets~~ — fixed 2026-10-04 in the local file and, by the user, on
+      the live page (wiki-markup bullets, `'''` bold, README as a named
+      link). Comments 2–4 are not yet acted on: (2) scenario (a), "your
       distribution does not support GNU Radio", doesn't fit a page that
       only works on Ubuntu 24.04/26.04, which both package GNU Radio;
       (3) scenario (b), developers: the script always clones fresh from

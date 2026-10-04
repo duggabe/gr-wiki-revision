@@ -138,7 +138,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   Commons advises against its licenses for software; kept as-is by choice.
 
 - **`README.md`** — user-facing docs (describes `v1.2`, the current
-  release): "Tested builds" (clean 24.04 and 26.04 results; current
+  release): an overview and quick start at the top (what the two installers
+  do, `v1.2` tested on 24.04/26.04, the `wget` loop and two `sudo`
+  commands; work-in-progress note limited to `--branch main`); "Tested
+  builds" (clean 24.04 and 26.04 results; current
   scripts on 26.04: UHD 4.11.0.0 109/109, GNU Radio 3.10.12.0 269/269, no
   disabled components, incl. the `grc_tests` leftover-directory story;
   earlier `v1.1` and `v1.0` results; supported Ubuntu releases; "Known
@@ -344,6 +347,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   links at it. Verified: `v1.0`, `v1.1`, and `v1.2` raw links all respond;
   the two `v1.2` scripts downloaded into an empty directory run
   (`--list-only`, GNU Radio `--dry-run`: 66 packages, `maint-3.10`).
+  Afterwards added an overview and quick start to the top of `README.md`
+  (commit `65d333c`, after the tag, so `v1.2`'s own README lacks it; the
+  scripts are unchanged).
 
 ## Key decisions
 

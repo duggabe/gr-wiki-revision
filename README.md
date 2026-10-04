@@ -2,7 +2,34 @@
 
 Scripts and programs to support GNU Radio Wiki documents.
 
-> **Note:** This is a work in progress.
+The main content is two Python installers that build
+[UHD](https://github.com/EttusResearch/uhd) and
+[GNU Radio](https://github.com/gnuradio/gnuradio) from source on Ubuntu,
+without Docker. They back the "Building GNU Radio from Source Code" page on
+the GNU Radio Wiki. Each installer works out the packages its project needs
+from an upstream list rather than a hardcoded one, installs them, then
+builds, tests, and installs the project into `/usr/local`.
+
+The current release, `v1.2`, has been tested on Ubuntu 24.04 and 26.04. It
+installs UHD 4.11.0.0 and GNU Radio 3.10.12.0 with every component enabled,
+including the QT GUI blocks. In short:
+
+```bash
+mkdir -p ~/gr-installers && cd ~/gr-installers
+for s in uhd gnuradio; do
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.2/${s}_bare_metal_installer.py
+done
+sudo python3 uhd_bare_metal_installer.py --build
+sudo python3 gnuradio_bare_metal_installer.py
+```
+
+Look the scripts over before running them; see
+[Download the installers](#download-the-installers) and
+[Run the installers in order](#run-the-installers-in-order) for details.
+
+> **Note:** This is a work in progress. Building GNU Radio's `main` branch
+> (the 3.11 development version) is not fully supported yet; see the known
+> limitation below.
 
 ## Tested builds
 

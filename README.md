@@ -49,9 +49,15 @@ Look the scripts over before running them; see
 The two Phase 2 scripts were downloaded onto a freshly installed machine and
 run as described in
 [Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork): UHD
-from the Ettus PPA, then GNU Radio's `main` branch built from a fork. The
-build finished without errors and 271 of 271 GNU Radio tests passed. Phase 2
-has not yet been tested on Ubuntu 24.04.
+from the Ettus PPA, then GNU Radio's `main` branch built from a fork:
+
+| Component | Script | Version | `make test` |
+| --- | --- | --- | --- |
+| UHD | `sudo python3 gnuradio_dependencies_installer.py` (Ettus PPA) | 4.11.0.0-0ubuntu1~resolute3 | — (not built) |
+| GNU Radio | `sudo python3 gnuradio_clone_builder.py` (`main`) | v3.11.0.0git-1193-g0403558f | 271 of 271 passed |
+
+The build finished without errors. Phase 2 has not yet been tested on
+Ubuntu 24.04.
 
 **Phase 1 scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
 two installers built, tested, and installed the following:

@@ -725,8 +725,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       - **2026-10-10: first real runs.** The user reported "everything
         worked! 100% tests passed, 0 tests failed out of 271 (main)" with
         the scripts from `main` at `1f8711c`, on the **GMKtec, clean
-        install of Ubuntu 26.04** (GNU Radio/UHD versions and enabled
-        components not reported). Phase 2 is untested on 24.04. On the LENOVO the same day:
+        install of Ubuntu 26.04**: UHD 4.11.0.0-0ubuntu1~resolute3 (PPA),
+        GNU Radio v3.11.0.0git-1193-g0403558f (enabled components not
+        reported). Phase 2 is untested on 24.04. On the LENOVO the same day:
         `apt-get remove gnuradio gnuradio-dev` done and Step 1 run for
         real (extras incl. `python3-qtpy` installed; deb-src was already
         on, so no `.bak`; no images in `/usr/share/uhd/images`), but

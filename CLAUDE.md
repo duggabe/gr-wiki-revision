@@ -745,8 +745,19 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         (download, before you start, Step 1 and Step 2 with options
         tables, memory note). Keep those tables in sync with the two
         Phase 2 scripts' argparse help.
-      - Open: the user to put the Phase 2 section on the live wiki page;
-        a 24.04 test of Phase 2; Step 2 on the LENOVO.
+      - 2026-10-10 (user): **Phase 2 goes before Phase 1 on the wiki
+        page**, since it is the page's ultimate goal. Reordered in the
+        local draft (intro unchanged, then `== Phase 2 ==`, then
+        `== Phase 1 ==`).
+      - 2026-10-10: **the user replaced the entire live wiki page** with
+        the draft (Phase 2 first; intro now lists the Phase 2 goals first
+        and "Phase 1 goals (completed)"), so the local file is again the
+        user's copy of the live page. I then found my own error in it: the
+        "equivalent" commands had `make -j7  # comment 2>&1 | tee
+        make.log` (the comment swallowed the `tee`). Fixed locally to
+        `make -j7 2>&1 | tee make.log   # ...`; the user needs to make the
+        same one-line fix on the live page (not yet confirmed).
+      - Open: a 24.04 test of Phase 2; Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`.

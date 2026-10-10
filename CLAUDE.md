@@ -783,7 +783,12 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         https://github.com/gnuradio/gnuradio`, then `git checkout
         maint-3.10`. The local wiki draft has a paragraph saying so after
         the `main`/`gr-qtgui` note. The user updated the live wiki page the
-        same day (user's report; exact live wording not seen). README "Tested builds" and the local wiki draft's
+        same day (user's report; exact live wording not seen). The `v2.0`
+        GitHub Release notes were edited the same day (user's request):
+        the "Tested" section has a second table for this 24.04 run in
+        place of "not yet tested on Ubuntu 24.04", and the `gr-qtgui`
+        limitation adds that a `maint-3.10` build includes it. Tag, title,
+        and attached scripts unchanged. README "Tested builds" and the local wiki draft's
         status line updated.
       - Open: Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.

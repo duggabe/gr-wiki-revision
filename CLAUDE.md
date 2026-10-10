@@ -779,7 +779,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         same number as Phase 1 `v1.2`, incl. `gr-qtgui`, `gr-iio` +
         `libad9361`, `gr-soapy`, `gr-uhd` + RFNoC, JACK, PortAudio, Thrift,
         codec2/freedv/gsm — so Phase 2 with `maint-3.10` gives the full
-        Qt5 build. README "Tested builds" and the local wiki draft's
+        Qt5 build. The user did not fork for this test: a plain `git clone
+        https://github.com/gnuradio/gnuradio`, then `git checkout
+        maint-3.10`. The local wiki draft has a paragraph saying so after
+        the `main`/`gr-qtgui` note (not yet on the live page). README "Tested builds" and the local wiki draft's
         status line updated (the live page's status line is the user's to
         change).
       - Open: Step 2 on the LENOVO.

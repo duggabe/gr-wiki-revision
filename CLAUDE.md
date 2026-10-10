@@ -677,25 +677,53 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         making a pull request (user, 2026-10-09), from the commands the
         user used to fix issue 8218: fork → clone the fork to `~/gnuradio`
         → branch → cmake / make / make test (tee'd) → `sudo make install`
-        → `sudo ldconfig`, on `main`. Drafted 2026-10-09 as **wiki text,
-        not a script** (my recommendation; the user has not confirmed) in
-        `wiki-draft-download-section.txt`, whose intro the user had already
-        rewritten for two phases (Phase 1 text now under `== Phase 1 ==`).
-        My additions to the user's steps: an `upstream` remote, `git
-        checkout -b <branch> upstream/main`, `make -j$(($(nproc)-1))`, and
-        the edit → rebuild → `git commit -s` → push → PR tail. Dropped the
-        user's copy of `60-uhd-host.rules` into `/etc/udev/rules.d/`
-        (already active from `/usr/lib/udev/rules.d/`; a copy still sits in
-        `/etc/udev/rules.d/` on the LENOVO). The draft's download link uses
-        tag `v2.0`, **which does not exist yet**. A `main` build has no
+        → `sudo ldconfig`, on `main`. The user clones the fork into `$HOME`
+        by hand, "then we work on that" (user, 2026-10-09 — I took this as
+        confirming a build script for the existing clone).
+      - **Step 2 script = `gnuradio_clone_builder.py`** (written
+        2026-10-09, self-contained: carries a trimmed copy of the Phase 1
+        `BuildStep` / `run_build_steps()` / `run_logged()` /
+        `get_build_user()` helpers and of `INSTALL_DIR_PATTERNS` — keep that
+        list in sync with the Phase 1 installer). Builds whatever is
+        checked out in `~/gnuradio` (`--source-dir`); never clones or
+        changes branches; reuses an existing `build/`, so it serves the
+        edit → rebuild loop. Steps: `mkdir build` (first time) or `sudo
+        chown -R` the build dir back to the user if `sudo make install`
+        left root-owned files (149 on the LENOVO) → cmake / make / make
+        test, tee'd to logs → `sudo make install` → `sudo ldconfig`.
+        Aborts if the directory isn't GNU Radio source, `libuhd-dev` isn't
+        installed, Ubuntu's `gnuradio` packages are installed, or stale
+        install dirs exist. Options: `--source-dir`, `--no-install`,
+        `--dry-run`, `-y`. Tested by dry-run on `~/gnuradio` and a real
+        `--no-install` run on a tiny fake CMake project (passing and
+        failing test); **no real GNU Radio build with it yet**.
+      - **Make jobs are limited by memory** (2026-10-09). The user's
+        manual `main` build on the LENOVO (16 cores, 15 GiB RAM, 4 GB swap)
+        was OOM-killed at `make -j15` (kernel log 2026-10-08 10:44:
+        `cc1plus invoked oom-killer`); they worked around it with `-j7`,
+        no `tee` on make, and `ENABLE_GR_FEC` / `ENABLE_GR_VOCODER` /
+        `ENABLE_GR_CTRLPORT` (+ `ENABLE_CTRLPORT_THRIFT`) `=OFF` — still OFF
+        in `~/gnuradio/build/CMakeCache.txt`, so cmake keeps them off there
+        until set `=ON` or `build/` is removed. The job count is the cause;
+        `tee` is not. `gnuradio_clone_builder.py` uses `min(nproc - 1,
+        MemTotal // 2 GB)` (7 on the LENOVO; the 2 GB per job is my
+        estimate, not measured) and has `--jobs` and `--cmake-args="..."`.
+        **The Phase 1 `v1.2` scripts still use plain `nproc - 1`** and
+        could hit the same on a many-core, low-memory machine — a possible
+        `v1.3` fix, not made.
+      - **Wiki draft** (`wiki-draft-download-section.txt`): the user
+        rewrote the intro for two phases (Phase 1 text now under
+        `== Phase 1 ==`); I drafted `== Phase 2 ==` on 2026-10-09:
+        downloading both scripts, before you start, Step 1, Step 2 (fork,
+        clone, `upstream` remote, `git checkout -b <branch> upstream/main`,
+        the builder script, then `git commit -s` → push → PR), checking the
+        result. Dropped the user's copy of `60-uhd-host.rules` into
+        `/etc/udev/rules.d/` (already active from `/usr/lib/udev/rules.d/`;
+        a copy still sits there on the LENOVO). The download links use tag
+        `v2.0`, **which does not exist yet**. A `main` build has no
         `gr-qtgui` (Qt6/Qwt), as in Phase 1.
-      - Unconfirmed: `sudo make install` leaves root-owned CMake files in
-        `~/gnuradio/build` (149 on the LENOVO); a later `make` as the user
-        may fail on them. If so, add `sudo chown -R $USER: ~/gnuradio/build`
-        to the page.
-      - Open: whether the existing `gnuradio_bare_metal_installer.py`
-        gets a Phase 2 role (the user's goal line says "use the ~/gnuradio
-        folder already cloned"); README not yet updated for Phase 2.
+      - Open: a real run of both scripts (ideally a clean install on the
+        GMKtec), then tag `v2.0`; README not yet updated for Phase 2.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`.

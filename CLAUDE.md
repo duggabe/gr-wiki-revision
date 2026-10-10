@@ -771,7 +771,18 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         https://github.com/duggabe/gr-wiki-revision/releases/tag/v1.2 —
         with the two Phase 1 scripts from the tag attached. Its notes list
         the plain `nproc - 1` make job count as a known limitation.
-      - Open: a 24.04 test of Phase 2; Step 2 on the LENOVO.
+      - **2026-10-10: Phase 2 tested on Ubuntu 24.04** (user, on the
+        laptop — not a clean install): built `maint-3.10` and got GNU Radio
+        3.10.12.0, `make test` 268 of 268 passed (same count as Phase 1
+        on 24.04); UHD 4.11.0.0-0ubuntu1~noble3 from the PPA; the `v2.0`-tag
+        scripts were used. `--enabled-components` lists 42 components, the
+        same number as Phase 1 `v1.2`, incl. `gr-qtgui`, `gr-iio` +
+        `libad9361`, `gr-soapy`, `gr-uhd` + RFNoC, JACK, PortAudio, Thrift,
+        codec2/freedv/gsm — so Phase 2 with `maint-3.10` gives the full
+        Qt5 build. README "Tested builds" and the local wiki draft's
+        status line updated (the live page's status line is the user's to
+        change).
+      - Open: Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`.

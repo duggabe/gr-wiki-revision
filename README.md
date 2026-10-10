@@ -56,8 +56,15 @@ from the Ettus PPA, then GNU Radio's `main` branch built from a fork:
 | UHD | `sudo python3 gnuradio_dependencies_installer.py` (Ettus PPA) | 4.11.0.0-0ubuntu1~resolute3 | — (not built) |
 | GNU Radio | `sudo python3 gnuradio_clone_builder.py` (`main`) | v3.11.0.0git-1193-g0403558f | 271 of 271 passed |
 
-The build finished without errors. Phase 2 has not yet been tested on
-Ubuntu 24.04.
+The build finished without errors.
+
+**Phase 2 scripts (`v2.0`), 2026-10-10, Ubuntu 24.04.** Phase 2 was also run on an
+Ubuntu 24.04 laptop (not a clean install), this time with the
+`maint-3.10` branch checked out in the clone. UHD from the Ettus PPA was
+4.11.0.0-0ubuntu1~noble3. It built and installed
+GNU Radio 3.10.12.0; `make test` passed 268 of 268 tests, the same count
+as the Phase 1 build on 24.04. All 42 components are enabled, as in
+Phase 1, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and `gr-soapy`.
 
 **Phase 1 scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
 two installers built, tested, and installed the following:
@@ -475,7 +482,7 @@ script:
 2. `gnuradio_clone_builder.py` builds, tests, and installs GNU Radio from
    your own fork, which you clone into your home directory.
 
-Phase 2 (`v2.0`) has been tested on a clean install of Ubuntu 26.04; see
+Phase 2 (`v2.0`) has been tested on a clean install of Ubuntu 26.04 and on Ubuntu 24.04; see
 [Tested builds](#tested-builds).
 
 ### Download the Phase 2 scripts

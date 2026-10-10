@@ -755,8 +755,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         user's copy of the live page. I then found my own error in it: the
         "equivalent" commands had `make -j7  # comment 2>&1 | tee
         make.log` (the comment swallowed the `tee`). Fixed locally to
-        `make -j7 2>&1 | tee make.log   # ...`; the user needs to make the
-        same one-line fix on the live page (not yet confirmed).
+        `make -j7 2>&1 | tee make.log   # ...`; the user made the same
+        one-line fix on the live page (confirmed 2026-10-10).
       - Open: a 24.04 test of Phase 2; Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on

@@ -757,6 +757,20 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         make.log` (the comment swallowed the `tee`). Fixed locally to
         `make -j7 2>&1 | tee make.log   # ...`; the user made the same
         one-line fix on the live page (confirmed 2026-10-10).
+      - **GitHub Release for `v2.0` created 2026-10-10** (the repo's
+        first Release; `v1.0`–`v1.2` are still tags only):
+        https://github.com/duggabe/gr-wiki-revision/releases/tag/v2.0 —
+        notes cover what's new, the clean 26.04 test, a quick start, and
+        known limitations; the two Phase 2 scripts as they are at the tag
+        are attached.
+      - **`v1.2` review outcome (user, 2026-10-10): no negative comments**
+        from the GNU Radio developers and documentation people. So no
+        `v1.3` is needed for the review, and the wait on a `v1.2` GitHub
+        Release is over. **`v1.2` Release created 2026-10-10** (user's
+        go-ahead), not marked latest so `v2.0` stays "Latest":
+        https://github.com/duggabe/gr-wiki-revision/releases/tag/v1.2 —
+        with the two Phase 1 scripts from the tag attached. Its notes list
+        the plain `nproc - 1` make job count as a known limitation.
       - Open: a 24.04 test of Phase 2; Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on

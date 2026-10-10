@@ -643,9 +643,59 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       first-time setup (later rebuilds are manual in `~/gnuradio/build`),
       and developers mostly use `main`, which this path builds without
       `gr-qtgui`; (4) the README link points at `main`, not `v1.2`.
-    - **Phase 2 (later): `v2.0`, UHD from the Ettus PPA** (user,
-      2026-10-04; see Key decisions). Not started; no scope or timing given
-      beyond that. Start from the PPA evaluation in git history.
+    - **Phase 2: `v2.0`, UHD from the Ettus PPA — started 2026-10-09**
+      (see Key decisions). The user's plan is **two steps**: Step 1 is
+      completely different from Phase 1, Step 2 is similar to it.
+      - **Step 1 = `gnuradio_dependencies_installer.py`** (written
+        2026-10-09, self-contained, uncommitted; only dry-run and unit
+        tested — **no real `sudo` run yet**). From the user's manual steps
+        (tried on the LENOVO, reloaded with a fresh 26.04 on 2026-10-08):
+        enable "Source code" (`Types: deb` → `Types: deb deb-src` in
+        `/etc/apt/sources.list.d/ubuntu.sources`, backup `.bak`; replaces
+        the "Software & Updates" GUI steps) → `apt-get update` →
+        `apt-get install -y software-properties-common git` →
+        `add-apt-repository -y ppa:ettusresearch/uhd` → `apt-get install -y
+        --no-install-recommends uhd-host libuhd-dev` → `apt-get build-dep -y
+        gnuradio` → the four run-time extras (`python3-qtpy`,
+        `python3-pyqtgraph`, `python3-matplotlib`, `soapysdr-tools`) →
+        `uhd_images_downloader`. Aborts first if Ubuntu's `gnuradio` /
+        `gnuradio-dev` packages are installed or a source-built UHD is in
+        `/usr/local`. Options: `--dry-run`, `-y`, `--no-images`,
+        `--sources-path`, `--os-release-path`.
+      - **Why `--no-install-recommends`:** `libuhd-dev` recommends
+        `gnuradio-dev` and `python3-uhd` recommends `gnuradio`. The user's
+        manual `apt-get install -y uhd-host libuhd-dev` put Ubuntu's GNU
+        Radio 3.10.12 in `/usr` next to the source build (unintended). It
+        is **still installed on the LENOVO**; Step 1 refuses to run until
+        `sudo apt-get remove gnuradio gnuradio-dev`. Don't `autoremove`
+        before Step 1 has run: it would take 82 packages, including
+        `python3-matplotlib`, `python3-pyqtgraph`, `soapysdr-tools`.
+      - `uhd-host` installs the udev rules itself
+        (`/usr/lib/udev/rules.d/60-uhd-host.rules`); `python3-uhd` makes
+        `import uhd` work without `PYTHONPATH`.
+      - **Step 2 is for a GNU Radio code developer** testing an issue and
+        making a pull request (user, 2026-10-09), from the commands the
+        user used to fix issue 8218: fork → clone the fork to `~/gnuradio`
+        → branch → cmake / make / make test (tee'd) → `sudo make install`
+        → `sudo ldconfig`, on `main`. Drafted 2026-10-09 as **wiki text,
+        not a script** (my recommendation; the user has not confirmed) in
+        `wiki-draft-download-section.txt`, whose intro the user had already
+        rewritten for two phases (Phase 1 text now under `== Phase 1 ==`).
+        My additions to the user's steps: an `upstream` remote, `git
+        checkout -b <branch> upstream/main`, `make -j$(($(nproc)-1))`, and
+        the edit → rebuild → `git commit -s` → push → PR tail. Dropped the
+        user's copy of `60-uhd-host.rules` into `/etc/udev/rules.d/`
+        (already active from `/usr/lib/udev/rules.d/`; a copy still sits in
+        `/etc/udev/rules.d/` on the LENOVO). The draft's download link uses
+        tag `v2.0`, **which does not exist yet**. A `main` build has no
+        `gr-qtgui` (Qt6/Qwt), as in Phase 1.
+      - Unconfirmed: `sudo make install` leaves root-owned CMake files in
+        `~/gnuradio/build` (149 on the LENOVO); a later `make` as the user
+        may fail on them. If so, add `sudo chown -R $USER: ~/gnuradio/build`
+        to the page.
+      - Open: whether the existing `gnuradio_bare_metal_installer.py`
+        gets a Phase 2 role (the user's goal line says "use the ~/gnuradio
+        folder already cloned"); README not yet updated for Phase 2.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`.

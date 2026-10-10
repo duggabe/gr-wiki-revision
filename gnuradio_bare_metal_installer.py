@@ -33,7 +33,7 @@ series installs. It:
          git checkout <branch>
          mkdir build && cd build
          cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
-         make -j$(nproc)-1 2>&1 | tee make.log
+         make -j<jobs> 2>&1 | tee make.log
          make test 2>&1 | tee make_test.log
          sudo make install
          sudo ldconfig
@@ -282,7 +282,7 @@ def get_build_steps(home: str, branch: str, packages: list[str]) -> list[BuildSt
         git checkout <branch>
         mkdir build && cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
-        make -j$(nproc)-1 2>&1 | tee make.log
+        make -j<jobs> 2>&1 | tee make.log    # see get_make_jobs()
         make test 2>&1 | tee make_test.log
         sudo make install
         sudo ldconfig

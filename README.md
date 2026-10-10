@@ -136,6 +136,14 @@ is a 3.10 release (22.04 and later). Only 24.04 and 26.04 have been tested.
 `v2.0` is the Phase 2 release and `v1.2` is the current Phase 1 release.
 `v1.0` and `v1.1` stay available at their links.
 
+**On `main`, not yet in a release** (2026-10-10): the two Phase 1
+installers limit the number of `make` jobs by the machine's memory, as the
+Phase 2 builder does: one less than the number of processor cores, but no
+more than one per 2 GB of memory. `v1.2` uses one less than the number of
+cores regardless of memory, which can run a machine with many cores and
+little memory out of memory during the build. Not yet tested with a real
+build.
+
 **In `v2.0`** (2026-10-10), two new scripts for Phase 2. The Phase 1
 installers are unchanged since `v1.2`.
 
@@ -317,7 +325,9 @@ python3 uhd_bare_metal_installer.py [options]
 #### What `--build` does
 
 1. `git clone` UHD into `<home>/uhd`
-2. `cmake`, then `make -j$(nproc-1)`, then `make test` (UHD's unit tests)
+2. `cmake`, then `make -j<jobs>`, then `make test` (UHD's unit tests).
+   `v1.2` uses one job less than the number of processor cores; the
+   scripts on `main` also limit it to one job per 2 GB of memory.
 3. `sudo make install` and `sudo ldconfig`
 4. `uhd_find_devices` (a failure here just means no USRP is attached)
 5. `sudo uhd_images_downloader`
@@ -389,9 +399,11 @@ installer has run. It:
    dependency list.
 5. Clones GNU Radio into `$HOME/gnuradio` and checks out the chosen branch
    (`maint-3.10`, the 3.10 release series, by default).
-6. Runs `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j$(nproc-1)`,
+6. Runs `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j<jobs>`,
    and `make test` (GNU Radio's tests), then `sudo make install` and
-   `sudo ldconfig`.
+   `sudo ldconfig`. `v1.2` uses one job less than the number of processor
+   cores; the scripts on `main` also limit it to one job per 2 GB of
+   memory.
 
 The output of `cmake`, `make`, and `make test` is shown as it runs and also
 saved to `cmake.log`, `make.log`, and `make_test.log` in

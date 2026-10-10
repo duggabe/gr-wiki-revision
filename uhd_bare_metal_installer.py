@@ -260,14 +260,36 @@ def get_home_dir(explicit_home: str | None = None) -> tuple[str, str]:
     return os.environ.get("HOME", os.path.expanduser("~")), "$HOME"
 
 
-def get_make_jobs() -> int:
+# Compiling UHD or GNU Radio needs a lot of memory per make job. With more
+# jobs than the memory allows, the kernel kills the compiler part-way through
+# the build.
+MEMORY_PER_JOB_KB = 2 * 1024 * 1024
+
+
+def get_total_memory_kb(meminfo_path: str = "/proc/meminfo") -> int | None:
+    """The machine's memory (MemTotal) in kB, or None if it can't be read."""
+    try:
+        with open(meminfo_path, encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("MemTotal:"):
+                    return int(line.split()[1])
+    except (OSError, ValueError, IndexError):
+        pass
+    return None
+
+
+def get_make_jobs(cpu_count: int | None = None, memory_kb: int | None = None) -> int:
     """
-    Number of parallel make jobs: nproc - 1 (i.e. leave one core free), like
-    `-j$(nproc)-1`. Falls back to 1 if the core count can't be determined or
-    the host only has a single core.
+    Number of parallel make jobs: nproc - 1 (i.e. leave one core free), but
+    no more than one per MEMORY_PER_JOB_KB of memory. Falls back to 1 if the
+    core count can't be determined or the host only has a single core.
     """
-    nproc = os.cpu_count() or 2
-    return max(1, nproc - 1)
+    cpu_count = cpu_count or os.cpu_count() or 2
+    memory_kb = memory_kb or get_total_memory_kb()
+    jobs = cpu_count - 1
+    if memory_kb:
+        jobs = min(jobs, memory_kb // MEMORY_PER_JOB_KB)
+    return max(1, jobs)
 
 
 class BuildStep(typing.NamedTuple):
@@ -294,7 +316,7 @@ def get_build_steps(home: str) -> list[BuildStep]:
         git clone https://github.com/EttusResearch/uhd.git
         cd $HOME/uhd/host && mkdir build && cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
-        make -j$(nproc)-1 2>&1 | tee make.log
+        make -j<jobs> 2>&1 | tee make.log    # see get_make_jobs()
         make test 2>&1 | tee make_test.log
         sudo make install
         sudo ldconfig
@@ -564,7 +586,7 @@ def main() -> int:
         "--build", action="store_true",
         help=(
             "After dependencies install successfully, also clone and build UHD itself "
-            "into <home>/uhd (git clone, cmake, make -j(nproc-1), make test -- each saving its "
+            "into <home>/uhd (git clone, cmake, make -j<jobs>, make test -- each saving its "
             "output to cmake.log, make.log, or make_test.log in the build directory -- then "
             "sudo make install, sudo ldconfig, "
             "uhd_find_devices, sudo uhd_images_downloader, then installs the udev rules and "

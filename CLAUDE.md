@@ -28,8 +28,9 @@ tests, no `gr-qtgui`) and on the Ubuntu 24.04 laptop (`maint-3.10`,
 3.10.12.0, 268/268 tests, 42 components incl. `gr-qtgui`). The live wiki
 page "Building GNU Radio from Source Code" has Phase 2 first, then
 Phase 1. Tags `v1.0` and `v1.1` stay available. Nothing is waiting on
-anyone. Open: running Step 2 on the LENOVO; a possible `v1.3` giving the
-Phase 1 scripts the memory-aware `make` job count; the `main`/Qt6 path
+anyone. Open: running Step 2 on the LENOVO; the Phase 1 scripts on `main` have
+the memory-aware `make` job count (written 2026-10-10, no real build yet,
+not tagged — would be `v1.3`); the `main`/Qt6 path
 (Qwt for Qt6). Details are in Next steps 12 and 13.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
@@ -517,7 +518,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 - **`make` jobs are limited by memory in Phase 2**: `min(nproc - 1,
   MemTotal // 2 GB)`, after an OOM kill at `-j15` on 15 GiB. The 2 GB per
   job is my estimate, not measured. Phase 1 `v1.2` still uses plain
-  `nproc - 1`.
+  `nproc - 1`; the Phase 1 scripts on `main` have the same limit since
+  2026-10-10 (untagged).
 - **GitHub Releases** exist for `v2.0` (Latest) and `v1.2` (created with
   `--latest=false`), each with its scripts attached as they are at the
   tag; `v1.0` and `v1.1` are tags only.
@@ -894,8 +896,20 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       / CTRLPORT off (remove `build/` for a full build). Optional cleanups
       there: `sudo rm /etc/udev/rules.d/60-uhd-host.rules` (an unneeded
       copy) and `sudo apt autoremove` after reviewing its list.
-    - **Possible `v1.3`:** give the Phase 1 scripts the memory-aware
-      `make` job count.
+    - **Memory-aware `make` jobs in the Phase 1 scripts — written
+      2026-10-10 (user's request), on `main`, not tagged.** The shared
+      `get_make_jobs()` in `uhd_bare_metal_installer.py` (imported by the
+      GNU Radio installer) now matches the Phase 2 builder: `min(nproc -
+      1, MemTotal // 2 GB)`, at least 1, with `MEMORY_PER_JOB_KB` and
+      `get_total_memory_kb()`. No `--jobs` option was added. It applies to
+      the UHD build too, which had built fine at `-j15` on the LENOVO's
+      15 GiB, so UHD now builds there at `-j7` (slower, not needed for
+      UHD). Checked against the Phase 2 function for six core/memory
+      combinations and by dry-run of both installers (`make -j7` on the
+      LENOVO); **no real build with it yet**. README notes it under
+      "Releases and changes" as on `main`, not in a release. To publish:
+      tag `v1.3`, point README's and the wiki's Phase 1 links at it, and
+      consider a Release.
     - **The `main`/Qt6 path:** `gr-qtgui` on `main` needs Qwt built from
       source for Qt6 (see step 8); applies to both phases.
     - Untested: a clean 24.04 install with Phase 2 (the laptop was not a

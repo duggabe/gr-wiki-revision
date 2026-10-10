@@ -720,10 +720,32 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         result. Dropped the user's copy of `60-uhd-host.rules` into
         `/etc/udev/rules.d/` (already active from `/usr/lib/udev/rules.d/`;
         a copy still sits there on the LENOVO). The download links use tag
-        `v2.0`, **which does not exist yet**. A `main` build has no
+        `v2.0`. A `main` build has no
         `gr-qtgui` (Qt6/Qwt), as in Phase 1.
-      - Open: a real run of both scripts (ideally a clean install on the
-        GMKtec), then tag `v2.0`; README not yet updated for Phase 2.
+      - **2026-10-10: first real runs.** The user reported "everything
+        worked! 100% tests passed, 0 tests failed out of 271 (main)" with
+        the scripts from `main` at `1f8711c`, on the **GMKtec, clean
+        install of Ubuntu 26.04** (GNU Radio/UHD versions and enabled
+        components not reported). Phase 2 is untested on 24.04. On the LENOVO the same day:
+        `apt-get remove gnuradio gnuradio-dev` done and Step 1 run for
+        real (extras incl. `python3-qtpy` installed; deb-src was already
+        on, so no `.bak`; no images in `/usr/share/uhd/images`), but
+        Step 2 has not been run there (`/usr/local` still has
+        3.11.0git-1193, no logs in `~/gnuradio/build`). `gh` installed and
+        logged in on the LENOVO; `main` pushed.
+      - **Tagged `v2.0`** at `1f8711c` and pushed, 2026-10-10 (user's
+        go-ahead); both `v2.0` raw links verified. The local wiki draft's
+        Phase 2 status line now says tested on a clean 26.04, untested on
+        24.04. For fixes tag `v2.1` etc.
+      - **README updated for Phase 2** 2026-10-10 (after the tag, so
+        `v2.0`'s own README lacks it): two-phase intro, a `v2.0` entry in
+        "Tested builds" and "Releases and changes", and a new last section
+        "Phase 2: UHD from the Ettus PPA, GNU Radio from your fork"
+        (download, before you start, Step 1 and Step 2 with options
+        tables, memory note). Keep those tables in sync with the two
+        Phase 2 scripts' argparse help.
+      - Open: the user to put the Phase 2 section on the live wiki page;
+        a 24.04 test of Phase 2; Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on
       24.04 vs 269 on 26.04; a clean 26.04 install with `v1.2`.

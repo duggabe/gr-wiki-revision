@@ -2,17 +2,29 @@
 
 Scripts and programs to support GNU Radio Wiki documents.
 
-The main content is two Python installers that build
-[UHD](https://github.com/EttusResearch/uhd) and
+The main content is Python scripts that build
 [GNU Radio](https://github.com/gnuradio/gnuradio) from source on Ubuntu,
 without Docker. They back the "Building GNU Radio from Source Code" page on
-the GNU Radio Wiki. Each installer works out the packages its project needs
-from an upstream list rather than a hardcoded one, installs them, then
-builds, tests, and installs the project into `/usr/local`.
+the GNU Radio Wiki. The work is in two phases, and each has its own pair of
+scripts:
 
-The current release, `v1.2`, has been tested on Ubuntu 24.04 and 26.04. It
-installs UHD 4.11.0.0 and GNU Radio 3.10.12.0 with every component enabled,
-including the QT GUI blocks. In short:
+- **Phase 1** (releases `v1.x`) builds both
+  [UHD](https://github.com/EttusResearch/uhd) and the GNU Radio 3.10 release
+  series from source. Each installer works out the packages its project
+  needs from an upstream list rather than a hardcoded one, installs them,
+  then builds, tests, and installs the project into `/usr/local`.
+- **Phase 2** (release `v2.0`) is for developers of GNU Radio itself. It
+  installs UHD from the Ettus Research PPA instead of building it, then
+  builds GNU Radio from your own fork, so that you can work on an issue and
+  submit a pull request. See
+  [Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork).
+
+Most of this README describes Phase 1; Phase 2 has its own section at the
+end.
+
+The current Phase 1 release, `v1.2`, has been tested on Ubuntu 24.04 and
+26.04. It installs UHD 4.11.0.0 and GNU Radio 3.10.12.0 with every component
+enabled, including the QT GUI blocks. In short:
 
 ```bash
 mkdir -p ~/gr-installers && cd ~/gr-installers
@@ -33,7 +45,15 @@ Look the scripts over before running them; see
 
 ## Tested builds
 
-**Current scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
+**Phase 2 scripts (`v2.0`), 2026-10-10, clean install of Ubuntu 26.04.**
+The two Phase 2 scripts were downloaded onto a freshly installed machine and
+run as described in
+[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork): UHD
+from the Ettus PPA, then GNU Radio's `main` branch built from a fork. The
+build finished without errors and 271 of 271 GNU Radio tests passed. Phase 2
+has not yet been tested on Ubuntu 24.04.
+
+**Phase 1 scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
 two installers built, tested, and installed the following:
 
 | Component | Installer | Version | `make test` |
@@ -69,7 +89,7 @@ Both are expected: "B300" needs NI's separate `nib310rio-dev` driver
 package (B200/B210 support is a different component and is enabled), and
 "RFNoC/FPGA Development Files" is off by default in UHD.
 
-Not yet tested with the current scripts: a clean install of Ubuntu 26.04
+Not yet tested with the `v1.2` scripts: a clean install of Ubuntu 26.04
 (the 26.04 build above was on a machine with earlier builds).
 
 **Earlier releases:**
@@ -95,13 +115,25 @@ is a 3.10 release (22.04 and later). Only 24.04 and 26.04 have been tested.
 > `gr-qtgui`. Ubuntu 24.04 and 26.04 have no packaged Qwt for Qt6, and the
 > dependency list the installer uses is for the Qt5-based 3.10 series. So a
 > `main` build still lacks `gr-qtgui`. The default branch, `maint-3.10`, is
-> not affected.
+> not affected. The same applies to a `main` build made with the Phase 2
+> scripts.
 
 ## Releases and changes
 
-`v1.2` is the current release. `v1.0` is the release the "Building GNU
-Radio from Source Code" wiki page uses until the page is updated. `v1.0`
-and `v1.1` stay available at their links.
+`v2.0` is the Phase 2 release and `v1.2` is the current Phase 1 release.
+`v1.0` and `v1.1` stay available at their links.
+
+**In `v2.0`** (2026-10-10), two new scripts for Phase 2. The Phase 1
+installers are unchanged since `v1.2`.
+
+- **`gnuradio_dependencies_installer.py`** installs UHD from the
+  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd) and
+  GNU Radio's dependencies with `apt-get`; nothing is compiled.
+- **`gnuradio_clone_builder.py`** builds, tests, and installs GNU Radio from
+  a clone that is already on the machine, normally your own fork. It can be
+  run again after every change.
+- **The number of `make` jobs is limited by the machine's memory,** so that
+  the build is not killed for running out of it.
 
 **In `v1.2`** (2026-10-04), since `v1.1`:
 
@@ -129,10 +161,8 @@ and `v1.1` stay available at their links.
   `make.log`, and `make_test.log` in their `build` directories. Any failure,
   including a failing test, stops the build before `sudo make install`.
 
-The `v1.x` releases build UHD from source. A later release, `v2.0`, is
-planned to install UHD from the
-[Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd)
-instead.
+The `v1.x` releases build UHD from source; `v2.0` installs it from the
+Ettus PPA.
 
 ## Download the installers
 
@@ -148,12 +178,13 @@ for s in uhd gnuradio; do
 done
 ```
 
-These links are for `v1.2`, the current release, tested on Ubuntu 24.04 and
-26.04 (see [Tested builds](#tested-builds)). The wiki page currently uses
-`v1.0`, which has three scripts (UHD, Volk, and GNU Radio); for it, follow
-the wiki page or the
+These links are for `v1.2`, the current Phase 1 release, tested on Ubuntu
+24.04 and 26.04 (see [Tested builds](#tested-builds)). `v1.0` has three
+scripts (UHD, Volk, and GNU Radio); for it, see the
 [`v1.0` README](https://github.com/duggabe/gr-wiki-revision/blob/v1.0/README.md).
-The rest of this README describes `v1.2`.
+The sections from here up to
+[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork) describe
+`v1.2`.
 
 Look the scripts over before running them, and don't pipe a download
 straight into `python3`, especially with `sudo`. Use `--dry-run` to see
@@ -426,3 +457,157 @@ Build the `main` branch (3.11 development) instead:
 ```bash
 sudo python3 gnuradio_bare_metal_installer.py --branch main
 ```
+
+## Phase 2: UHD from the Ettus PPA, GNU Radio from your fork
+
+Phase 2 is for a developer of GNU Radio code who needs to test additions or
+changes outside a Docker container. It has two steps, each with its own
+script:
+
+1. `gnuradio_dependencies_installer.py` installs UHD from the Ettus Research
+   PPA and everything GNU Radio needs, using `apt-get`. Nothing is compiled.
+2. `gnuradio_clone_builder.py` builds, tests, and installs GNU Radio from
+   your own fork, which you clone into your home directory.
+
+Phase 2 (`v2.0`) has been tested on a clean install of Ubuntu 26.04; see
+[Tested builds](#tested-builds).
+
+### Download the Phase 2 scripts
+
+```bash
+mkdir -p ~/gr-installers
+cd ~/gr-installers
+for s in gnuradio_dependencies_installer gnuradio_clone_builder; do
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.0/${s}.py
+done
+```
+
+Each script works on its own; neither needs the Phase 1 installers. Look
+them over before running them. Both have `--help` and `--dry-run`.
+
+### Before you start
+
+Phase 2 needs a system without another GNU Radio or a source-built UHD on
+it. The scripts check for both and stop with the commands to run if they
+find either.
+
+- If Ubuntu's own GNU Radio packages are installed, remove them:
+
+  ```bash
+  sudo apt-get remove gnuradio gnuradio-dev
+  ```
+
+- If you built UHD from source (for example with Phase 1), remove it. GNU
+  Radio's `cmake` looks in `/usr/local` before `/usr`, so it would otherwise
+  keep using that copy instead of the PPA's:
+
+  ```bash
+  cd ~/uhd/host/build && sudo xargs rm -f < install_manifest.txt
+  sudo rm -rf /usr/local/include/uhd /usr/local/lib/uhd /usr/local/lib/cmake/uhd /usr/local/share/uhd
+  sudo ldconfig
+  ```
+
+- If you installed GNU Radio with Phase 1, remove it as described in
+  [Removing an earlier install](#removing-an-earlier-install).
+
+### Step 1: install UHD and the dependencies
+
+```bash
+sudo python3 gnuradio_dependencies_installer.py
+```
+
+The script runs the equivalent of:
+
+```bash
+# enable "Source code" (deb-src) in /etc/apt/sources.list.d/ubuntu.sources
+sudo apt-get update
+sudo apt-get install -y software-properties-common git
+sudo add-apt-repository -y ppa:ettusresearch/uhd
+sudo apt-get install -y --no-install-recommends uhd-host libuhd-dev
+sudo apt-get build-dep -y gnuradio
+sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools
+sudo uhd_images_downloader
+```
+
+- **"Source code"** is the same change the "Source code" box in the
+  "Software & Updates" app makes; `apt-get build-dep` needs it. The original
+  file is saved as `ubuntu.sources.bak`.
+- **`--no-install-recommends`** matters: UHD's packages recommend Ubuntu's
+  own `gnuradio` packages, which would otherwise be installed into `/usr`,
+  next to the GNU Radio you are about to build.
+- **`apt-get build-dep gnuradio`** installs the build dependencies of
+  Ubuntu's own `gnuradio` package for your release, so no package list is
+  hardcoded. The last `apt-get` line adds run-time packages that list
+  doesn't cover.
+- **udev rules** for USRP devices are installed by the `uhd-host` package.
+  UHD's own Python API (`import uhd`) works without `PYTHONPATH`.
+
+| Option | Description |
+| --- | --- |
+| `--dry-run` | Run the checks and print what would be done, without changing anything or requiring root. |
+| `-y`, `--yes` | Do not prompt for confirmation before installing. |
+| `--no-images` | Do not run `uhd_images_downloader` (the USRP FPGA images, a large download). |
+| `--sources-path PATH` | Ubuntu's apt sources file, in which to enable source code (default: `/etc/apt/sources.list.d/ubuntu.sources`). |
+| `--os-release-path PATH` | Path to read the OS name and version from (default: `/etc/os-release`). |
+
+### Step 2: build GNU Radio from your fork
+
+Fork <https://github.com/gnuradio/gnuradio> on GitHub, clone your fork into
+your home directory, and check out the branch you want to work on:
+
+```bash
+cd ~
+git clone https://github.com/<your-username>/gnuradio.git
+cd gnuradio
+git remote add upstream https://github.com/gnuradio/gnuradio.git
+git fetch upstream
+git checkout -b issue8218 upstream/main      # example branch name
+```
+
+Then build, test, and install whatever is checked out:
+
+```bash
+cd ~/gr-installers
+sudo python3 gnuradio_clone_builder.py
+```
+
+The script does not clone anything and does not change branches. It runs
+`cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make`, and `make test` in
+`~/gnuradio/build`, saving their output to `cmake.log`, `make.log`, and
+`make_test.log` there, then `sudo make install` and `sudo ldconfig`. If any
+step fails, including a failing test, it stops before installing.
+
+Run it again after every change to the code: it reuses the `build`
+directory, so only what changed is rebuilt. It works with or without `sudo`;
+the build runs as you either way, and files that `sudo make install` leaves
+root-owned in the `build` directory are given back to you before the next
+build.
+
+Before building, the script checks that the directory holds GNU Radio's
+source code, that `libuhd-dev` is installed (Step 1 was run), that Ubuntu's
+own `gnuradio` packages are not installed, and that no empty directories
+from a removed GNU Radio install are left in `/usr/local`.
+
+**Memory and `make` jobs.** Compiling GNU Radio needs a lot of memory. With
+too many `make` jobs for the memory in the machine, the kernel kills the
+compiler part-way through the build. The script uses one job less than the
+number of processor cores, but no more than one for each 2 GB of memory
+(7 jobs on a 16-core machine with 16 GB). Use `--jobs` to choose the number
+yourself.
+
+| Option | Description |
+| --- | --- |
+| `--source-dir DIR` | The GNU Radio clone to build. Default: `gnuradio` in the home directory of the invoking user (`$SUDO_USER` when run via `sudo`). |
+| `--jobs N` | Number of parallel `make` jobs. Default: one less than the number of processor cores, but no more than one per 2 GB of memory. |
+| `--cmake-args "ARGS"` | Extra options for `cmake`, in one quoted string written with `=`, e.g. `--cmake-args="-DENABLE_GR_FEC=OFF -DENABLE_GR_VOCODER=OFF"`. `cmake` remembers them in the build directory until they are changed or the directory is removed. |
+| `--no-install` | Stop after the tests: do not run `sudo make install` and `sudo ldconfig`. |
+| `--dry-run` | Run the checks and print the build steps, without running them. |
+| `-y`, `--yes` | Do not prompt for confirmation before building. |
+
+When the change works, commit it with a sign-off (`git commit -s`, which GNU
+Radio requires), push the branch to your fork, and open a pull request. See
+GNU Radio's
+[CONTRIBUTING.md](https://github.com/gnuradio/gnuradio/blob/main/CONTRIBUTING.md).
+
+A `main` build made this way does not include `gr-qtgui`; see the known
+limitation under [Tested builds](#tested-builds).

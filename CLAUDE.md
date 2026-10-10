@@ -782,9 +782,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         Qt5 build. The user did not fork for this test: a plain `git clone
         https://github.com/gnuradio/gnuradio`, then `git checkout
         maint-3.10`. The local wiki draft has a paragraph saying so after
-        the `main`/`gr-qtgui` note (not yet on the live page). README "Tested builds" and the local wiki draft's
-        status line updated (the live page's status line is the user's to
-        change).
+        the `main`/`gr-qtgui` note. The user updated the live wiki page the
+        same day (user's report; exact live wording not seen). README "Tested builds" and the local wiki draft's
+        status line updated.
       - Open: Step 2 on the LENOVO.
     - Later: the `main`/Qt6 path (Qwt from source) if wanted.
     - Minor, unresolved: which GNU Radio test accounts for 268 tests on

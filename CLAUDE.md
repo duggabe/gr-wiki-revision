@@ -906,7 +906,7 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       removing the installed GNU Radio" (end of Step 2; last step is
       `sudo rm -rf ~/gnuradio/build`, the source is kept), in the draft
       and README. Removing `build/` when changing branches is my
-      recommendation, untested. **The live page still needs both.**
+      recommendation, untested.
     - 2026-10-11 (user's request): made Phase 2 stand-alone in the README
       (see Files) and in the local wiki draft, so Phase 1 is easy to
       remove from both. In the draft, Phase 2's "Before you start" no
@@ -914,8 +914,12 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       instead of Phase 1's; the Phase 2 section now has no references to
       Phase 1. To retire Phase 1 on the wiki: delete from `== Phase 1 ==`
       to the end, and edit the user's intro (the "two phases" sentence,
-      "rather than the Phase 1 methods", the "Phase 1 goals" list). **The
-      live page needs the two "Before you start" bullets changed.**
+      "rather than the Phase 1 methods", the "Phase 1 goals" list).
+    - 2026-10-11: the user updated the live wiki page from the local
+      draft "with no changes" — which I take to mean the draft's text was
+      used as it is, so the local file again matches the live page
+      (Phase 1 "Rebuilding" fix, the new Phase 2 removal section, and the
+      two "Before you start" bullets).
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

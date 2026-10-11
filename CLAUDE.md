@@ -504,7 +504,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   material for Phase 2. Nothing has been removed: the Phase 1 scripts,
   tags, `v1.2` Release, README sections, and the wiki's Phase 1 section
   all still exist. The Phase 2 scripts import nothing from Phase 1, so
-  retiring Phase 1 breaks nothing in them.
+  retiring Phase 1 breaks nothing in them. **Wait on removing Phase 1
+  (user, 2026-10-11): do not remove it from the README, the wiki draft,
+  or the repo until the user says so.**
 - **Phase 2 is two steps, for GNU Radio developers** (user, 2026-10-09):
   Step 1 installs everything with `apt-get`; Step 2 builds a clone the
   user made by hand in `$HOME` (normally their fork, to test an issue and

@@ -5,483 +5,16 @@ Scripts and programs to support GNU Radio Wiki documents.
 The main content is Python scripts that build
 [GNU Radio](https://github.com/gnuradio/gnuradio) from source on Ubuntu,
 without Docker. They back the "Building GNU Radio from Source Code" page on
-the GNU Radio Wiki. The work is in two phases, and each has its own pair of
-scripts:
-
-- **Phase 1** (releases `v1.x`) builds both
-  [UHD](https://github.com/EttusResearch/uhd) and the GNU Radio 3.10 release
-  series from source. Each installer works out the packages its project
-  needs from an upstream list rather than a hardcoded one, installs them,
-  then builds, tests, and installs the project into `/usr/local`.
-- **Phase 2** (release `v2.0`) is for developers of GNU Radio itself. It
-  installs UHD from the Ettus Research PPA instead of building it, then
-  builds GNU Radio from your own fork, so that you can work on an issue and
-  submit a pull request. See
-  [Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork).
-
-Most of this README describes Phase 1; Phase 2 has its own section at the
-end.
-
-The current Phase 1 release, `v1.2`, has been tested on Ubuntu 24.04 and
-26.04. It installs UHD 4.11.0.0 and GNU Radio 3.10.12.0 with every component
-enabled, including the QT GUI blocks. In short:
-
-```bash
-mkdir -p ~/gr-installers && cd ~/gr-installers
-for s in uhd gnuradio; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.2/${s}_bare_metal_installer.py
-done
-sudo python3 uhd_bare_metal_installer.py --build
-sudo python3 gnuradio_bare_metal_installer.py
-```
-
-Look the scripts over before running them; see
-[Download the installers](#download-the-installers) and
-[Run the installers in order](#run-the-installers-in-order) for details.
-
-> **Note:** This is a work in progress. Building GNU Radio's `main` branch
-> (the 3.11 development version) is not fully supported yet; see the known
-> limitation below.
-
-## Tested builds
-
-**Phase 2 scripts (`v2.0`), 2026-10-10, clean install of Ubuntu 26.04.**
-The two Phase 2 scripts were downloaded onto a freshly installed machine and
-run as described in
-[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork): UHD
-from the Ettus PPA, then GNU Radio's `main` branch built from a fork:
-
-| Component | Script | Version | `make test` |
-| --- | --- | --- | --- |
-| UHD | `sudo python3 gnuradio_dependencies_installer.py` (Ettus PPA) | 4.11.0.0-0ubuntu1~resolute3 | — (not built) |
-| GNU Radio | `sudo python3 gnuradio_clone_builder.py` (`main`) | v3.11.0.0git-1193-g0403558f | 271 of 271 passed |
-
-The build finished without errors.
-
-**Phase 2 scripts (`v2.0`), 2026-10-10, Ubuntu 24.04.** Phase 2 was also run on an
-Ubuntu 24.04 laptop (not a clean install), this time with the
-`maint-3.10` branch checked out in the clone. UHD from the Ettus PPA was
-4.11.0.0-0ubuntu1~noble3. It built and installed
-GNU Radio 3.10.12.0; `make test` passed 268 of 268 tests, the same count
-as the Phase 1 build on 24.04. All 42 components are enabled, as in
-Phase 1, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and `gr-soapy`.
-
-**Phase 1 scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
-two installers built, tested, and installed the following:
-
-| Component | Installer | Version | `make test` |
-| --- | --- | --- | --- |
-| UHD | `sudo python3 uhd_bare_metal_installer.py --build` | 4.11.0.0-0-g0d7ed3b1 | 109 of 109 passed |
-| Volk | installed by the GNU Radio installer (`libvolk-dev`) | 3.3.0 (Ubuntu package) | — |
-| GNU Radio | `sudo python3 gnuradio_bare_metal_installer.py` (`maint-3.10`) | 3.10.12.0 (v3.10.12.0-92-gc1a73dc34) | 269 of 269 passed |
-
-This GNU Radio build has no disabled components: `gr-qtgui`, `gr-iio`
-(with `libad9361`), `gr-soapy`, `gr-uhd`, ControlPort with Thrift, and the
-ALSA, OSS, JACK, and PortAudio audio back-ends are all enabled. To see which
-components your build includes:
-
-```bash
-gnuradio-config-info --enabled-components
-```
-
-On this machine the first GNU Radio run stopped at `make test`: one test,
-`grc_tests`, failed because of empty directories left by a previously
-removed GNU Radio install. After removing them, all 269 tests passed and the
-install completed. The installer now checks for such leftovers before
-building (see [Removing an earlier install](#removing-an-earlier-install)).
-
-**Clean install of Ubuntu 24.04, 2026-10-04.** The same scripts were run on
-a freshly installed Ubuntu 24.04 machine, downloading the two scripts from
-`main` and nothing else. Both builds finished without errors: 109 of 109
-UHD tests and 268 of 268 GNU Radio tests passed, and GNU Radio 3.10.12.0 was
-installed with the same 42 enabled components as the 26.04 build above,
-including `gr-qtgui`, `gr-iio`, `gr-soapy`, JACK, and PortAudio.
-
-UHD's own `cmake.log` lists two disabled UHD components on both machines.
-Both are expected: "B300" needs NI's separate `nib310rio-dev` driver
-package (B200/B210 support is a different component and is enabled), and
-"RFNoC/FPGA Development Files" is off by default in UHD.
-
-Not yet tested with the `v1.2` scripts: a clean install of Ubuntu 26.04
-(the 26.04 build above was on a machine with earlier builds).
-
-**Earlier releases:**
-
-- **`v1.1`** (2026-10-02 and 2026-10-03, Ubuntu 26.04, including a fresh
-  install of 26.04.1): UHD 4.11.0.0 (109 of 109 tests) and GNU Radio `main`,
-  v3.11.0.0git-1174-gaee9fd3f (266 of 266 tests). That build lacked
-  `gr-qtgui`, `gr-iio`, `gr-soapy`, JACK, and PortAudio, because only UHD's
-  dependencies were installed.
-- **`v1.0`** (2026-09-25 on Ubuntu 26.04; 2026-09-26 on a clean Ubuntu
-  24.04 install, following only the "Building GNU Radio from Source Code"
-  wiki page): UHD 4.11.0.0, Volk 3.3.0 built from source, and GNU Radio
-  v3.11.0.0git-1174-gaee9fd3f, with the same missing components.
-
-The UHD installer works on any Ubuntu release for which Ettus provides a UHD
-build Dockerfile (in
-[`.ci/docker`](https://github.com/EttusResearch/uhd/tree/master/.ci/docker)).
-The GNU Radio installer needs an Ubuntu release whose own `gnuradio` package
-is a 3.10 release (22.04 and later). Only 24.04 and 26.04 have been tested.
-
-> **Known limitation:** GNU Radio's `main` branch (the 3.11 development
-> version, `--branch main`) needs Qt6, PyQt6, and Qwt built for Qt6 for its
-> `gr-qtgui`. Ubuntu 24.04 and 26.04 have no packaged Qwt for Qt6, and the
-> dependency list the installer uses is for the Qt5-based 3.10 series. So a
-> `main` build still lacks `gr-qtgui`. The default branch, `maint-3.10`, is
-> not affected. The same applies to a `main` build made with the Phase 2
-> scripts.
-
-## Releases and changes
-
-`v2.0` is the Phase 2 release and `v1.2` is the current Phase 1 release.
-`v1.0` and `v1.1` stay available at their links.
-
-**In `v1.3`** (2026-10-10), since `v1.2`: the two Phase 1
-installers limit the number of `make` jobs by the machine's memory, as the
-Phase 2 builder does: one less than the number of processor cores, but no
-more than one per 2 GB of memory. `v1.2` uses one less than the number of
-cores regardless of memory, which can run a machine with many cores and
-little memory out of memory during the build. `v1.3` has not yet been
-tested with a real build, so the download links below still point at
-`v1.2`.
-
-**In `v2.0`** (2026-10-10), two new scripts for Phase 2. The Phase 1
-installers are unchanged since `v1.2`.
-
-- **`gnuradio_dependencies_installer.py`** installs UHD from the
-  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd) and
-  GNU Radio's dependencies with `apt-get`; nothing is compiled.
-- **`gnuradio_clone_builder.py`** builds, tests, and installs GNU Radio from
-  a clone that is already on the machine, normally your own fork. It can be
-  run again after every change.
-- **The number of `make` jobs is limited by the machine's memory,** so that
-  the build is not killed for running out of it.
-
-**In `v1.2`** (2026-10-04), since `v1.1`:
-
-- **GNU Radio's own dependencies are installed.** The GNU Radio installer
-  fetches the build dependencies of Ubuntu's own `gnuradio` package for your
-  Ubuntu release, leaves out the ones that don't apply, adds a few run-time
-  packages, and installs them. See
-  [GNU Radio's dependencies](#gnu-radios-dependencies).
-- **The default GNU Radio branch is `maint-3.10`,** the 3.10 release
-  series, instead of `main`.
-- **A check for leftovers of an earlier install,** which would make GNU
-  Radio's tests fail. See
-  [Removing an earlier install](#removing-an-earlier-install).
-
-**In `v1.1`** (2026-10-03), since `v1.0`:
-
-- **Volk is no longer built from source.** `volk_bare_metal_installer.py`
-  has been removed; Volk comes from Ubuntu's `libvolk-dev`.
-- **Simpler GNU Radio installer.** It no longer compares dependency lists;
-  it only checks that `uhd-dependencies.txt` exists, i.e. that the UHD
-  installer has been run.
-- **`--branch` option for GNU Radio.**
-- **Build logs and tests.** The UHD and GNU Radio builds run `make test`
-  and save the `cmake`, `make`, and `make test` output to `cmake.log`,
-  `make.log`, and `make_test.log` in their `build` directories. Any failure,
-  including a failing test, stops the build before `sudo make install`.
-
-The `v1.x` releases build UHD from source; `v2.0` installs it from the
-Ettus PPA.
-
-## Download the installers
-
-You don't need to clone this repository. Download the two scripts into one
-directory. The GNU Radio script uses code from the UHD script, so both must
-be in the same directory:
-
-```bash
-mkdir -p ~/gr-installers
-cd ~/gr-installers
-for s in uhd gnuradio; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.2/${s}_bare_metal_installer.py
-done
-```
-
-These links are for `v1.2`, the current Phase 1 release, tested on Ubuntu
-24.04 and 26.04 (see [Tested builds](#tested-builds)). `v1.0` has three
-scripts (UHD, Volk, and GNU Radio); for it, see the
-[`v1.0` README](https://github.com/duggabe/gr-wiki-revision/blob/v1.0/README.md).
-The sections from here up to
-[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork) describe
-`v1.2`.
-
-Look the scripts over before running them, and don't pipe a download
-straight into `python3`, especially with `sudo`. Use `--dry-run` to see
-what a script will do without changing anything, and `--help` for its
-options.
-
-## Run the installers in order
-
-Run the two installers in this order, from the same directory:
-
-```bash
-sudo python3 uhd_bare_metal_installer.py --build
-sudo python3 gnuradio_bare_metal_installer.py
-```
-
-The UHD installer installs UHD's build dependencies, then builds, tests, and
-installs UHD. The GNU Radio installer installs GNU Radio's dependencies,
-then builds, tests, and installs GNU Radio (the 3.10 release series by
-default).
-
-Both install packages, so both need root for those steps. The UHD installer
-must be started with `sudo`. The GNU Radio installer also works without
-`sudo`, prompting for your password at its `sudo` steps. Either way, the
-clone and build steps run as you, so `~/uhd` and `~/gnuradio` belong to you.
-
-The UHD installer writes `uhd-dependencies.txt` into the directory it runs
-from. The GNU Radio installer stops with an error unless that file exists,
-so run both from the same directory (or point the GNU Radio installer at
-the file with `--uhd-deps`).
-
-**Rebuilding.** Each installer clones into a new directory and stops if it
-already exists. To rebuild, remove or rename `~/uhd` or `~/gnuradio` first,
-and see [Removing an earlier install](#removing-an-earlier-install).
-
-### Removing an earlier install
-
-Before building a different GNU Radio version or branch, remove the
-installed one. Each build directory has an `install_manifest.txt` listing
-the files `make install` put in `/usr/local`:
-
-```bash
-cd ~/gnuradio/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
-```
-
-That removes files but leaves their directories behind, empty. Remove those
-too:
-
-```bash
-sudo rm -rf /usr/local/lib/python3*/dist-packages/gnuradio \
-            /usr/local/lib/python3*/dist-packages/pmt \
-            /usr/local/include/gnuradio /usr/local/include/pmt \
-            /usr/local/share/gnuradio /usr/local/etc/gnuradio \
-            /usr/local/lib/cmake/gnuradio /usr/local/share/doc/gnuradio-*
-```
-
-The empty directories matter: Python treats an empty directory as a valid,
-empty package, so GNU Radio's `grc_tests` find the leftover instead of the
-code being built, and fail. The GNU Radio installer checks for such
-leftovers before building and stops with the exact `rm` command to run.
-
-If you built Volk from source earlier (with `v1.0`), remove that copy as
-well. GNU Radio's `cmake` looks in `/usr/local` before `/usr`, so it would
-otherwise keep using it instead of Ubuntu's package:
-
-```bash
-cd ~/volk/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
-```
-
-## Environment variables
-
-Everything is installed under `/usr/local`. On Ubuntu 24.04 and 26.04 you
-don't need to set `LD_LIBRARY_PATH`: Ubuntu already lists `/usr/local/lib`
-in `/etc/ld.so.conf.d`, and the installers run `sudo ldconfig`. GNU Radio's
-Python modules (including `from gnuradio import uhd`) are found without
-`PYTHONPATH` too.
-
-The one exception is UHD's own Python API (`import uhd`). The UHD source
-build installs it in `/usr/local/lib/python3.X/site-packages`, which Ubuntu's
-Python doesn't search. If you need it, add that directory to `PYTHONPATH`
-in your shell startup file (for example `~/.bashrc` or `~/.bash_aliases`),
-replacing `3.X` with your Python version:
-
-```bash
-export PYTHONPATH=/usr/local/lib/python3.X/site-packages:$PYTHONPATH
-```
-
-## Install UHD in a bare-metal environment
-
-`uhd_bare_metal_installer.py` adapts the build environment from
-[EttusResearch/uhd](https://github.com/EttusResearch/uhd)'s `.ci/docker`
-Dockerfiles for a bare-metal installation of UHD (no Docker required).
-
-### Usage
-
-```bash
-python3 uhd_bare_metal_installer.py [options]
-```
-
-### Options
-
-| Option | Description |
-| --- | --- |
-| `-h`, `--help` | Show the help message and exit. |
-| `--dockerfile-url URL` | URL of the Dockerfile to fetch. Default: auto-detect from `/etc/os-release` and look up the matching file in EttusResearch/uhd's `.ci/docker` directory. |
-| `--dockerfile-path PATH` | Read the Dockerfile from a local path instead of fetching it. |
-| `--list-only` | Only parse and print/save the dependency list; do not install anything. |
-| `-o`, `--output OUTPUT` | Path to save the extracted package list (default: `uhd-dependencies.txt`). |
-| `--dry-run` | Print the apt/pip commands that would run, without executing them or requiring root. |
-| `-y`, `--yes` | Do not prompt for confirmation before installing. |
-| `--skip-upgrade` | Skip `apt-get upgrade` (recommended on a machine you don't want fully upgraded). |
-| `--pip-index-url URL` | pip index URL to use (default: `$PIP_INDEX_URL`). |
-| `--pip-index-host HOST` | pip trusted host to use (default: `$PIP_INDEX_HOST`). |
-| `--os-release-path PATH` | Path to read `NAME`/`VERSION_ID` from for OS auto-detection (default: `/etc/os-release`). |
-| `--build` | After dependencies install successfully, also clone, build, and install UHD itself into `<home>/uhd` (see below). Aborts with exit code 1 if any build step fails. |
-| `--home HOME` | Directory to clone/build UHD into (used with `--build`), overriding auto-detection. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
-
-#### What `--build` does
-
-1. `git clone` UHD into `<home>/uhd`
-2. `cmake`, then `make -j<jobs>`, then `make test` (UHD's unit tests).
-   `v1.2` uses one job less than the number of processor cores; `v1.3`
-   also limits it to one job per 2 GB of memory.
-3. `sudo make install` and `sudo ldconfig`
-4. `uhd_find_devices` (a failure here just means no USRP is attached)
-5. `sudo uhd_images_downloader`
-6. Install the udev rules and trigger `udevadm`, so USRPs are usable without root
-
-The output of `cmake`, `make`, and `make test` is shown as it runs and also
-saved to `cmake.log`, `make.log`, and `make_test.log` in `<home>/uhd/host/build`,
-as with `2>&1 | tee <file>`. If any of them fails, the installer stops, so a
-failing unit test prevents installing that build.
-
-Although the installer runs with `sudo`, the steps without `sudo` (clone,
-`cmake`, `make`, `make test`, `uhd_find_devices`) run as the user who invoked `sudo`, so
-`<home>/uhd` belongs to you, not root. Only the `sudo` steps run as root.
-
-### Examples
-
-Auto-detect the host OS and just print/save the dependency list (no install):
-
-```bash
-python3 uhd_bare_metal_installer.py --list-only
-```
-
-Show exactly what would be run, without touching the system:
-
-```bash
-python3 uhd_bare_metal_installer.py --dry-run
-```
-
-Install on a bare-metal host matching one of UHD's Dockerfiles (needs root):
-
-```bash
-sudo python3 uhd_bare_metal_installer.py
-```
-
-Skip the `apt-get upgrade` step (safer on a machine you don't want fully upgraded):
-
-```bash
-sudo python3 uhd_bare_metal_installer.py --skip-upgrade
-```
-
-Force a specific Dockerfile instead of auto-detecting from `/etc/os-release`:
-
-```bash
-python3 uhd_bare_metal_installer.py \
-  --dockerfile-url https://raw.githubusercontent.com/EttusResearch/uhd/master/.ci/docker/uhd-builder-ubuntu2604.Dockerfile
-```
-
-Install dependencies, then clone, build, and install UHD itself into `$HOME/uhd`:
-
-```bash
-sudo python3 uhd_bare_metal_installer.py --build
-```
-
-## Install GNU Radio in a bare-metal environment
-
-`gnuradio_bare_metal_installer.py` builds and installs
-[GNU Radio](https://github.com/gnuradio/gnuradio) from source, after the UHD
-installer has run. It:
-
-1. Derives GNU Radio's dependency list and saves it to
-   `gnuradio-dependencies.txt` (see
-   [GNU Radio's dependencies](#gnu-radios-dependencies)).
-2. Aborts with an error unless `uhd-dependencies.txt` exists (the UHD
-   installer writes it).
-3. Aborts with an error if empty directories from an earlier, removed GNU
-   Radio install are left in `/usr/local` (see
-   [Removing an earlier install](#removing-an-earlier-install)).
-4. Runs `sudo apt-get update` and `sudo apt-get install -y` for the
-   dependency list.
-5. Clones GNU Radio into `$HOME/gnuradio` and checks out the chosen branch
-   (`maint-3.10`, the 3.10 release series, by default).
-6. Runs `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j<jobs>`,
-   and `make test` (GNU Radio's tests), then `sudo make install` and
-   `sudo ldconfig`. `v1.2` uses one job less than the number of processor
-   cores; `v1.3` also limits it to one job per 2 GB of memory.
-
-The output of `cmake`, `make`, and `make test` is shown as it runs and also
-saved to `cmake.log`, `make.log`, and `make_test.log` in
-`$HOME/gnuradio/build`. If any of them fails, the installer stops, so a
-failing test prevents installing that build.
-
-Run it either as your normal user or with `sudo`; the clone and build steps
-run as you either way. The GNU Radio build usually takes longer than
-`sudo`'s 15-minute password cache, so without `sudo` expect a password
-prompt at the `sudo` steps (the package install at the start, and
-`sudo make install` at the end, where the build waits even with `-y`).
-Starting with `sudo` avoids that.
-
-### GNU Radio's dependencies
-
-UHD's Dockerfile only lists what UHD needs, so the GNU Radio installer
-installs GNU Radio's own dependencies. Rather than hardcoding a list, it
-fetches the `debian/control` file of Ubuntu's own `gnuradio` package for
-your Ubuntu release from Launchpad and takes its `Build-Depends`: the same
-list `apt-get build-dep gnuradio` uses. Then it:
-
-- **Leaves out** `libuhd-dev` (UHD is built from source; Ubuntu's older copy
-  would conflict) and the packages only needed to build the Debian package
-  or the documentation (`debhelper-compat`, `dh-python`, `dpkg-dev`,
-  `graphviz`, `xmlto`, `libjs-mathjax`).
-- **Skips** entries meant for other operating systems or architectures.
-- **Adds** run-time packages a build-dependency list doesn't cover:
-  `python3-qtpy`, `python3-pyqtgraph`, `python3-matplotlib`, and
-  `soapysdr-tools` (and makes sure `libvolk-dev` and `python3-packaging`
-  are included).
-
-On Ubuntu 26.04 that gives 66 packages. Ubuntu's `gnuradio` package is a
-3.10 release, which uses Qt5, so the list fits `maint-3.10`. GNU Radio needs
-Volk 2.4.1 or later; `libvolk-dev` on the list provides it (3.1.2 on Ubuntu
-24.04, 3.3.0 on 26.04).
-
-### Options
-
-| Option | Description |
-| --- | --- |
-| `--branch BRANCH` | GNU Radio branch (or tag) to check out and build, e.g. `maint-3.10` or `main` (default: `maint-3.10`). |
-| `--control-url URL` | URL of the `debian/control` file to take GNU Radio's `Build-Depends` from. Default: Ubuntu's `gnuradio` package for the host's release (from `/etc/os-release`), on Launchpad. |
-| `--control-path PATH` | Read the `debian/control` file from a local path instead of fetching it. |
-| `--os-release-path PATH` | Path to read the Ubuntu codename from (default: `/etc/os-release`). |
-| `--list-only` | Only derive and print/save the dependency list; do not install or build anything. |
-| `-o`, `--output OUTPUT` | Path to save the dependency list (default: `gnuradio-dependencies.txt`). |
-| `--uhd-deps PATH` | Package list written by `uhd_bare_metal_installer.py`, which must exist (default: `uhd-dependencies.txt`). |
-| `--dry-run` | Derive the dependency list and print the build steps, without running them. |
-| `-y`, `--yes` | Do not prompt for confirmation before installing and building. |
-| `--build` | Accepted for consistency with `uhd_bare_metal_installer.py` and ignored: building GNU Radio is already the default. |
-| `--home HOME` | Directory to clone/build GNU Radio into. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
-
-### Examples
-
-Just print and save the dependency list:
-
-```bash
-python3 gnuradio_bare_metal_installer.py --list-only
-```
-
-Show the packages and build steps without running anything:
-
-```bash
-python3 gnuradio_bare_metal_installer.py --dry-run
-```
-
-Install the dependencies, then clone, build, and install the 3.10 release
-series into `$HOME/gnuradio`:
-
-```bash
-sudo python3 gnuradio_bare_metal_installer.py
-```
-
-Build the `main` branch (3.11 development) instead:
-
-```bash
-sudo python3 gnuradio_bare_metal_installer.py --branch main
-```
+the GNU Radio Wiki.
+
+- **[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork)**
+  (release `v2.0`) is the current method. It is for developers of GNU Radio
+  itself: it installs [UHD](https://github.com/EttusResearch/uhd) from the
+  Ettus Research PPA instead of building it, then builds GNU Radio from your
+  own fork, so that you can work on an issue and submit a pull request.
+- **[Phase 1](#phase-1-uhd-and-gnu-radio-310-from-source)** (releases
+  `v1.x`) is the earlier method, which builds both UHD and the GNU Radio
+  3.10 release series from source. It is the last part of this file.
 
 ## Phase 2: UHD from the Ettus PPA, GNU Radio from your fork
 
@@ -494,8 +27,8 @@ script:
 2. `gnuradio_clone_builder.py` builds, tests, and installs GNU Radio from
    your own fork, which you clone into your home directory.
 
-Phase 2 (`v2.0`) has been tested on a clean install of Ubuntu 26.04 and on Ubuntu 24.04; see
-[Tested builds](#tested-builds).
+Phase 2 (`v2.0`) has been tested on a clean install of Ubuntu 26.04 and on
+Ubuntu 24.04; see [Phase 2 tested builds](#phase-2-tested-builds).
 
 ### Download the Phase 2 scripts
 
@@ -507,7 +40,7 @@ for s in gnuradio_dependencies_installer gnuradio_clone_builder; do
 done
 ```
 
-Each script works on its own; neither needs the Phase 1 installers. Look
+Each script works on its own and needs nothing else from this repository. Look
 them over before running them. Both have `--help` and `--dry-run`.
 
 ### Before you start
@@ -522,7 +55,7 @@ find either.
   sudo apt-get remove gnuradio gnuradio-dev
   ```
 
-- If you built UHD from source (for example with Phase 1), remove it. GNU
+- If you built UHD from source earlier, remove it. GNU
   Radio's `cmake` looks in `/usr/local` before `/usr`, so it would otherwise
   keep using that copy instead of the PPA's:
 
@@ -532,8 +65,9 @@ find either.
   sudo ldconfig
   ```
 
-- If you installed GNU Radio with Phase 1, remove it as described in
-  [Removing an earlier install](#removing-an-earlier-install).
+- If you built and installed GNU Radio from source earlier, remove it with
+  steps 1 and 2 of
+  [Changing branches, or removing the installed GNU Radio](#changing-branches-or-removing-the-installed-gnu-radio).
 
 ### Step 1: install UHD and the dependencies
 
@@ -634,5 +168,536 @@ Radio requires), push the branch to your fork, and open a pull request. See
 GNU Radio's
 [CONTRIBUTING.md](https://github.com/gnuradio/gnuradio/blob/main/CONTRIBUTING.md).
 
-A `main` build made this way does not include `gr-qtgui`; see the known
-limitation under [Tested builds](#tested-builds).
+A `main` build made this way does not include `gr-qtgui`; see
+[Phase 2 known limitation](#phase-2-known-limitation).
+
+### Changing branches, or removing the installed GNU Radio
+
+Rebuilding the same branch after a change needs none of this: the new
+install replaces the old one. Before building a different branch or version
+(for example changing between `main` and `maint-3.10`), or to remove the
+installed GNU Radio altogether, do these steps in this order. The first one
+needs a file inside `~/gnuradio/build`.
+
+1. Remove the installed files, using the build directory's
+   `install_manifest.txt`:
+
+   ```bash
+   cd ~/gnuradio/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
+   ```
+
+2. Remove the empty directories that leaves behind, which make GNU Radio's
+   tests fail on the next build. `gnuradio_clone_builder.py` checks for
+   them and stops with this command if it finds any:
+
+   ```bash
+   sudo rm -rf /usr/local/lib/python3*/dist-packages/gnuradio \
+               /usr/local/lib/python3*/dist-packages/pmt \
+               /usr/local/include/gnuradio /usr/local/include/pmt \
+               /usr/local/share/gnuradio /usr/local/etc/gnuradio \
+               /usr/local/lib/cmake/gnuradio /usr/local/share/doc/gnuradio-*
+   ```
+
+3. Only now remove the build directory, so that the other branch is
+   configured and built from scratch. Your source code and branches in
+   `~/gnuradio` are not touched:
+
+   ```bash
+   cd && sudo rm -rf ~/gnuradio/build
+   ```
+
+Then check out the other branch in `~/gnuradio` and run the script again.
+
+### Phase 2 tested builds
+
+**`v2.0`, 2026-10-10, clean install of Ubuntu 26.04.**
+The two scripts were downloaded onto a freshly installed machine and
+run as described above: UHD from the Ettus PPA, then GNU Radio's `main`
+branch built from a fork:
+
+| Component | Script | Version | `make test` |
+| --- | --- | --- | --- |
+| UHD | `sudo python3 gnuradio_dependencies_installer.py` (Ettus PPA) | 4.11.0.0-0ubuntu1~resolute3 | — (not built) |
+| GNU Radio | `sudo python3 gnuradio_clone_builder.py` (`main`) | v3.11.0.0git-1193-g0403558f | 271 of 271 passed |
+
+The build finished without errors.
+
+**`v2.0`, 2026-10-10, Ubuntu 24.04.** Phase 2 was also run on an
+Ubuntu 24.04 laptop (not a clean install), this time with the
+`maint-3.10` branch checked out in the clone. UHD from the Ettus PPA was
+4.11.0.0-0ubuntu1~noble3. It built and installed
+GNU Radio 3.10.12.0; `make test` passed 268 of 268 tests. All 42
+components are enabled, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and
+`gr-soapy`.
+
+To see which components your build includes:
+
+```bash
+gnuradio-config-info --enabled-components
+```
+
+### Phase 2 known limitation
+
+GNU Radio's `main` branch (the 3.11 development version) needs Qt6, PyQt6,
+and Qwt built for Qt6 for its `gr-qtgui`. Ubuntu 24.04 and 26.04 have no
+packaged Qwt for Qt6, and the packages Step 1 installs are those of the
+Qt5-based 3.10 series. So a `main` build has no `gr-qtgui`. A `maint-3.10`
+build is not affected.
+
+### Phase 2 releases
+
+**`v2.0`** (2026-10-10) is the first Phase 2 release, with two scripts:
+
+- **`gnuradio_dependencies_installer.py`** installs UHD from the
+  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd) and
+  GNU Radio's dependencies with `apt-get`; nothing is compiled.
+- **`gnuradio_clone_builder.py`** builds, tests, and installs GNU Radio from
+  a clone that is already on the machine, normally your own fork. It can be
+  run again after every change.
+- **The number of `make` jobs is limited by the machine's memory,** so that
+  the build is not killed for running out of it.
+
+Fixes will be tagged `v2.1` and so on; a tag is never moved, so a link to a
+tag always gives the same scripts.
+
+## Phase 1: UHD and GNU Radio 3.10 from source
+
+Everything from this heading to the end of the file describes Phase 1
+(releases `v1.x`): two installers that build both
+[UHD](https://github.com/EttusResearch/uhd) and the GNU Radio 3.10 release
+series from source. Each works out the packages its project needs from an
+upstream list rather than a hardcoded one, installs them, then builds,
+tests, and installs the project into `/usr/local`. Phase 2 above does not
+depend on anything in this part.
+
+The current Phase 1 release, `v1.2`, has been tested on Ubuntu 24.04 and
+26.04. It installs UHD 4.11.0.0 and GNU Radio 3.10.12.0 with every component
+enabled, including the QT GUI blocks. In short:
+
+```bash
+mkdir -p ~/gr-installers && cd ~/gr-installers
+for s in uhd gnuradio; do
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.2/${s}_bare_metal_installer.py
+done
+sudo python3 uhd_bare_metal_installer.py --build
+sudo python3 gnuradio_bare_metal_installer.py
+```
+
+Look the scripts over before running them; see
+[Download the installers](#download-the-installers) and
+[Run the installers in order](#run-the-installers-in-order) for details.
+
+> **Note:** This is a work in progress. Building GNU Radio's `main` branch
+> (the 3.11 development version) is not fully supported yet; see the known
+> limitation below.
+
+### Tested builds
+
+**Phase 1 scripts (`v1.2`), 2026-10-02 and 2026-10-03, Ubuntu 26.04.** The
+two installers built, tested, and installed the following:
+
+| Component | Installer | Version | `make test` |
+| --- | --- | --- | --- |
+| UHD | `sudo python3 uhd_bare_metal_installer.py --build` | 4.11.0.0-0-g0d7ed3b1 | 109 of 109 passed |
+| Volk | installed by the GNU Radio installer (`libvolk-dev`) | 3.3.0 (Ubuntu package) | — |
+| GNU Radio | `sudo python3 gnuradio_bare_metal_installer.py` (`maint-3.10`) | 3.10.12.0 (v3.10.12.0-92-gc1a73dc34) | 269 of 269 passed |
+
+This GNU Radio build has no disabled components: `gr-qtgui`, `gr-iio`
+(with `libad9361`), `gr-soapy`, `gr-uhd`, ControlPort with Thrift, and the
+ALSA, OSS, JACK, and PortAudio audio back-ends are all enabled. To see which
+components your build includes:
+
+```bash
+gnuradio-config-info --enabled-components
+```
+
+On this machine the first GNU Radio run stopped at `make test`: one test,
+`grc_tests`, failed because of empty directories left by a previously
+removed GNU Radio install. After removing them, all 269 tests passed and the
+install completed. The installer now checks for such leftovers before
+building (see [Removing an earlier install](#removing-an-earlier-install)).
+
+**Clean install of Ubuntu 24.04, 2026-10-04.** The same scripts were run on
+a freshly installed Ubuntu 24.04 machine, downloading the two scripts from
+`main` and nothing else. Both builds finished without errors: 109 of 109
+UHD tests and 268 of 268 GNU Radio tests passed, and GNU Radio 3.10.12.0 was
+installed with the same 42 enabled components as the 26.04 build above,
+including `gr-qtgui`, `gr-iio`, `gr-soapy`, JACK, and PortAudio.
+
+UHD's own `cmake.log` lists two disabled UHD components on both machines.
+Both are expected: "B300" needs NI's separate `nib310rio-dev` driver
+package (B200/B210 support is a different component and is enabled), and
+"RFNoC/FPGA Development Files" is off by default in UHD.
+
+Not yet tested with the `v1.2` scripts: a clean install of Ubuntu 26.04
+(the 26.04 build above was on a machine with earlier builds).
+
+**Earlier releases:**
+
+- **`v1.1`** (2026-10-02 and 2026-10-03, Ubuntu 26.04, including a fresh
+  install of 26.04.1): UHD 4.11.0.0 (109 of 109 tests) and GNU Radio `main`,
+  v3.11.0.0git-1174-gaee9fd3f (266 of 266 tests). That build lacked
+  `gr-qtgui`, `gr-iio`, `gr-soapy`, JACK, and PortAudio, because only UHD's
+  dependencies were installed.
+- **`v1.0`** (2026-09-25 on Ubuntu 26.04; 2026-09-26 on a clean Ubuntu
+  24.04 install, following only the "Building GNU Radio from Source Code"
+  wiki page): UHD 4.11.0.0, Volk 3.3.0 built from source, and GNU Radio
+  v3.11.0.0git-1174-gaee9fd3f, with the same missing components.
+
+The UHD installer works on any Ubuntu release for which Ettus provides a UHD
+build Dockerfile (in
+[`.ci/docker`](https://github.com/EttusResearch/uhd/tree/master/.ci/docker)).
+The GNU Radio installer needs an Ubuntu release whose own `gnuradio` package
+is a 3.10 release (22.04 and later). Only 24.04 and 26.04 have been tested.
+
+> **Known limitation:** GNU Radio's `main` branch (the 3.11 development
+> version, `--branch main`) needs Qt6, PyQt6, and Qwt built for Qt6 for its
+> `gr-qtgui`. Ubuntu 24.04 and 26.04 have no packaged Qwt for Qt6, and the
+> dependency list the installer uses is for the Qt5-based 3.10 series. So a
+> `main` build still lacks `gr-qtgui`. The default branch, `maint-3.10`, is
+> not affected.
+
+### Releases and changes
+
+`v1.2` is the current Phase 1 release. `v1.0` and `v1.1` stay available at
+their links.
+
+**In `v1.3`** (2026-10-10), since `v1.2`: the two Phase 1
+installers limit the number of `make` jobs by the machine's memory: one less than the number of processor cores, but no
+more than one per 2 GB of memory. `v1.2` uses one less than the number of
+cores regardless of memory, which can run a machine with many cores and
+little memory out of memory during the build. `v1.3` has not yet been
+tested with a real build, so the download links below still point at
+`v1.2`.
+
+**In `v1.2`** (2026-10-04), since `v1.1`:
+
+- **GNU Radio's own dependencies are installed.** The GNU Radio installer
+  fetches the build dependencies of Ubuntu's own `gnuradio` package for your
+  Ubuntu release, leaves out the ones that don't apply, adds a few run-time
+  packages, and installs them. See
+  [GNU Radio's dependencies](#gnu-radios-dependencies).
+- **The default GNU Radio branch is `maint-3.10`,** the 3.10 release
+  series, instead of `main`.
+- **A check for leftovers of an earlier install,** which would make GNU
+  Radio's tests fail. See
+  [Removing an earlier install](#removing-an-earlier-install).
+
+**In `v1.1`** (2026-10-03), since `v1.0`:
+
+- **Volk is no longer built from source.** `volk_bare_metal_installer.py`
+  has been removed; Volk comes from Ubuntu's `libvolk-dev`.
+- **Simpler GNU Radio installer.** It no longer compares dependency lists;
+  it only checks that `uhd-dependencies.txt` exists, i.e. that the UHD
+  installer has been run.
+- **`--branch` option for GNU Radio.**
+- **Build logs and tests.** The UHD and GNU Radio builds run `make test`
+  and save the `cmake`, `make`, and `make test` output to `cmake.log`,
+  `make.log`, and `make_test.log` in their `build` directories. Any failure,
+  including a failing test, stops the build before `sudo make install`.
+
+### Download the installers
+
+You don't need to clone this repository. Download the two scripts into one
+directory. The GNU Radio script uses code from the UHD script, so both must
+be in the same directory:
+
+```bash
+mkdir -p ~/gr-installers
+cd ~/gr-installers
+for s in uhd gnuradio; do
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v1.2/${s}_bare_metal_installer.py
+done
+```
+
+These links are for `v1.2`, the current Phase 1 release, tested on Ubuntu
+24.04 and 26.04 (see [Tested builds](#tested-builds)). `v1.0` has three
+scripts (UHD, Volk, and GNU Radio); for it, see the
+[`v1.0` README](https://github.com/duggabe/gr-wiki-revision/blob/v1.0/README.md).
+The sections from here up to
+[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork) describe
+`v1.2`.
+
+Look the scripts over before running them, and don't pipe a download
+straight into `python3`, especially with `sudo`. Use `--dry-run` to see
+what a script will do without changing anything, and `--help` for its
+options.
+
+### Run the installers in order
+
+Run the two installers in this order, from the same directory:
+
+```bash
+sudo python3 uhd_bare_metal_installer.py --build
+sudo python3 gnuradio_bare_metal_installer.py
+```
+
+The UHD installer installs UHD's build dependencies, then builds, tests, and
+installs UHD. The GNU Radio installer installs GNU Radio's dependencies,
+then builds, tests, and installs GNU Radio (the 3.10 release series by
+default).
+
+Both install packages, so both need root for those steps. The UHD installer
+must be started with `sudo`. The GNU Radio installer also works without
+`sudo`, prompting for your password at its `sudo` steps. Either way, the
+clone and build steps run as you, so `~/uhd` and `~/gnuradio` belong to you.
+
+The UHD installer writes `uhd-dependencies.txt` into the directory it runs
+from. The GNU Radio installer stops with an error unless that file exists,
+so run both from the same directory (or point the GNU Radio installer at
+the file with `--uhd-deps`).
+
+**Rebuilding.** Each installer clones into a new directory and stops if it
+already exists. To rebuild, first remove the installed files as described
+in [Removing an earlier install](#removing-an-earlier-install), and only
+then remove or rename `~/uhd` or `~/gnuradio`. The order matters: the
+removal uses `install_manifest.txt`, which is inside that directory.
+
+#### Removing an earlier install
+
+Before building a different GNU Radio version or branch, remove the
+installed one. Each build directory has an `install_manifest.txt` listing
+the files `make install` put in `/usr/local`:
+
+```bash
+cd ~/gnuradio/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
+```
+
+That removes files but leaves their directories behind, empty. Remove those
+too:
+
+```bash
+sudo rm -rf /usr/local/lib/python3*/dist-packages/gnuradio \
+            /usr/local/lib/python3*/dist-packages/pmt \
+            /usr/local/include/gnuradio /usr/local/include/pmt \
+            /usr/local/share/gnuradio /usr/local/etc/gnuradio \
+            /usr/local/lib/cmake/gnuradio /usr/local/share/doc/gnuradio-*
+```
+
+Only after both commands, remove or rename `~/gnuradio` so that the
+installer can clone again (for example `mv ~/gnuradio ~/gnuradio.old`). If
+`~/gnuradio` is already gone, so is the manifest: run the second command
+and then the installer. The new install overwrites the files that have the
+same names; files that only the earlier version installed stay in
+`/usr/local`.
+
+The empty directories matter: Python treats an empty directory as a valid,
+empty package, so GNU Radio's `grc_tests` find the leftover instead of the
+code being built, and fail. The GNU Radio installer checks for such
+leftovers before building and stops with the exact `rm` command to run.
+
+If you built Volk from source earlier (with `v1.0`), remove that copy as
+well. GNU Radio's `cmake` looks in `/usr/local` before `/usr`, so it would
+otherwise keep using it instead of Ubuntu's package:
+
+```bash
+cd ~/volk/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
+```
+
+### Environment variables
+
+Everything is installed under `/usr/local`. On Ubuntu 24.04 and 26.04 you
+don't need to set `LD_LIBRARY_PATH`: Ubuntu already lists `/usr/local/lib`
+in `/etc/ld.so.conf.d`, and the installers run `sudo ldconfig`. GNU Radio's
+Python modules (including `from gnuradio import uhd`) are found without
+`PYTHONPATH` too.
+
+The one exception is UHD's own Python API (`import uhd`). The UHD source
+build installs it in `/usr/local/lib/python3.X/site-packages`, which Ubuntu's
+Python doesn't search. If you need it, add that directory to `PYTHONPATH`
+in your shell startup file (for example `~/.bashrc` or `~/.bash_aliases`),
+replacing `3.X` with your Python version:
+
+```bash
+export PYTHONPATH=/usr/local/lib/python3.X/site-packages:$PYTHONPATH
+```
+
+### Install UHD in a bare-metal environment
+
+`uhd_bare_metal_installer.py` adapts the build environment from
+[EttusResearch/uhd](https://github.com/EttusResearch/uhd)'s `.ci/docker`
+Dockerfiles for a bare-metal installation of UHD (no Docker required).
+
+#### Usage
+
+```bash
+python3 uhd_bare_metal_installer.py [options]
+```
+
+#### Options
+
+| Option | Description |
+| --- | --- |
+| `-h`, `--help` | Show the help message and exit. |
+| `--dockerfile-url URL` | URL of the Dockerfile to fetch. Default: auto-detect from `/etc/os-release` and look up the matching file in EttusResearch/uhd's `.ci/docker` directory. |
+| `--dockerfile-path PATH` | Read the Dockerfile from a local path instead of fetching it. |
+| `--list-only` | Only parse and print/save the dependency list; do not install anything. |
+| `-o`, `--output OUTPUT` | Path to save the extracted package list (default: `uhd-dependencies.txt`). |
+| `--dry-run` | Print the apt/pip commands that would run, without executing them or requiring root. |
+| `-y`, `--yes` | Do not prompt for confirmation before installing. |
+| `--skip-upgrade` | Skip `apt-get upgrade` (recommended on a machine you don't want fully upgraded). |
+| `--pip-index-url URL` | pip index URL to use (default: `$PIP_INDEX_URL`). |
+| `--pip-index-host HOST` | pip trusted host to use (default: `$PIP_INDEX_HOST`). |
+| `--os-release-path PATH` | Path to read `NAME`/`VERSION_ID` from for OS auto-detection (default: `/etc/os-release`). |
+| `--build` | After dependencies install successfully, also clone, build, and install UHD itself into `<home>/uhd` (see below). Aborts with exit code 1 if any build step fails. |
+| `--home HOME` | Directory to clone/build UHD into (used with `--build`), overriding auto-detection. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
+
+##### What `--build` does
+
+1. `git clone` UHD into `<home>/uhd`
+2. `cmake`, then `make -j<jobs>`, then `make test` (UHD's unit tests).
+   `v1.2` uses one job less than the number of processor cores; `v1.3`
+   also limits it to one job per 2 GB of memory.
+3. `sudo make install` and `sudo ldconfig`
+4. `uhd_find_devices` (a failure here just means no USRP is attached)
+5. `sudo uhd_images_downloader`
+6. Install the udev rules and trigger `udevadm`, so USRPs are usable without root
+
+The output of `cmake`, `make`, and `make test` is shown as it runs and also
+saved to `cmake.log`, `make.log`, and `make_test.log` in `<home>/uhd/host/build`,
+as with `2>&1 | tee <file>`. If any of them fails, the installer stops, so a
+failing unit test prevents installing that build.
+
+Although the installer runs with `sudo`, the steps without `sudo` (clone,
+`cmake`, `make`, `make test`, `uhd_find_devices`) run as the user who invoked `sudo`, so
+`<home>/uhd` belongs to you, not root. Only the `sudo` steps run as root.
+
+#### Examples
+
+Auto-detect the host OS and just print/save the dependency list (no install):
+
+```bash
+python3 uhd_bare_metal_installer.py --list-only
+```
+
+Show exactly what would be run, without touching the system:
+
+```bash
+python3 uhd_bare_metal_installer.py --dry-run
+```
+
+Install on a bare-metal host matching one of UHD's Dockerfiles (needs root):
+
+```bash
+sudo python3 uhd_bare_metal_installer.py
+```
+
+Skip the `apt-get upgrade` step (safer on a machine you don't want fully upgraded):
+
+```bash
+sudo python3 uhd_bare_metal_installer.py --skip-upgrade
+```
+
+Force a specific Dockerfile instead of auto-detecting from `/etc/os-release`:
+
+```bash
+python3 uhd_bare_metal_installer.py \
+  --dockerfile-url https://raw.githubusercontent.com/EttusResearch/uhd/master/.ci/docker/uhd-builder-ubuntu2604.Dockerfile
+```
+
+Install dependencies, then clone, build, and install UHD itself into `$HOME/uhd`:
+
+```bash
+sudo python3 uhd_bare_metal_installer.py --build
+```
+
+### Install GNU Radio in a bare-metal environment
+
+`gnuradio_bare_metal_installer.py` builds and installs
+[GNU Radio](https://github.com/gnuradio/gnuradio) from source, after the UHD
+installer has run. It:
+
+1. Derives GNU Radio's dependency list and saves it to
+   `gnuradio-dependencies.txt` (see
+   [GNU Radio's dependencies](#gnu-radios-dependencies)).
+2. Aborts with an error unless `uhd-dependencies.txt` exists (the UHD
+   installer writes it).
+3. Aborts with an error if empty directories from an earlier, removed GNU
+   Radio install are left in `/usr/local` (see
+   [Removing an earlier install](#removing-an-earlier-install)).
+4. Runs `sudo apt-get update` and `sudo apt-get install -y` for the
+   dependency list.
+5. Clones GNU Radio into `$HOME/gnuradio` and checks out the chosen branch
+   (`maint-3.10`, the 3.10 release series, by default).
+6. Runs `cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../`, `make -j<jobs>`,
+   and `make test` (GNU Radio's tests), then `sudo make install` and
+   `sudo ldconfig`. `v1.2` uses one job less than the number of processor
+   cores; `v1.3` also limits it to one job per 2 GB of memory.
+
+The output of `cmake`, `make`, and `make test` is shown as it runs and also
+saved to `cmake.log`, `make.log`, and `make_test.log` in
+`$HOME/gnuradio/build`. If any of them fails, the installer stops, so a
+failing test prevents installing that build.
+
+Run it either as your normal user or with `sudo`; the clone and build steps
+run as you either way. The GNU Radio build usually takes longer than
+`sudo`'s 15-minute password cache, so without `sudo` expect a password
+prompt at the `sudo` steps (the package install at the start, and
+`sudo make install` at the end, where the build waits even with `-y`).
+Starting with `sudo` avoids that.
+
+#### GNU Radio's dependencies
+
+UHD's Dockerfile only lists what UHD needs, so the GNU Radio installer
+installs GNU Radio's own dependencies. Rather than hardcoding a list, it
+fetches the `debian/control` file of Ubuntu's own `gnuradio` package for
+your Ubuntu release from Launchpad and takes its `Build-Depends`: the same
+list `apt-get build-dep gnuradio` uses. Then it:
+
+- **Leaves out** `libuhd-dev` (UHD is built from source; Ubuntu's older copy
+  would conflict) and the packages only needed to build the Debian package
+  or the documentation (`debhelper-compat`, `dh-python`, `dpkg-dev`,
+  `graphviz`, `xmlto`, `libjs-mathjax`).
+- **Skips** entries meant for other operating systems or architectures.
+- **Adds** run-time packages a build-dependency list doesn't cover:
+  `python3-qtpy`, `python3-pyqtgraph`, `python3-matplotlib`, and
+  `soapysdr-tools` (and makes sure `libvolk-dev` and `python3-packaging`
+  are included).
+
+On Ubuntu 26.04 that gives 66 packages. Ubuntu's `gnuradio` package is a
+3.10 release, which uses Qt5, so the list fits `maint-3.10`. GNU Radio needs
+Volk 2.4.1 or later; `libvolk-dev` on the list provides it (3.1.2 on Ubuntu
+24.04, 3.3.0 on 26.04).
+
+#### Options
+
+| Option | Description |
+| --- | --- |
+| `--branch BRANCH` | GNU Radio branch (or tag) to check out and build, e.g. `maint-3.10` or `main` (default: `maint-3.10`). |
+| `--control-url URL` | URL of the `debian/control` file to take GNU Radio's `Build-Depends` from. Default: Ubuntu's `gnuradio` package for the host's release (from `/etc/os-release`), on Launchpad. |
+| `--control-path PATH` | Read the `debian/control` file from a local path instead of fetching it. |
+| `--os-release-path PATH` | Path to read the Ubuntu codename from (default: `/etc/os-release`). |
+| `--list-only` | Only derive and print/save the dependency list; do not install or build anything. |
+| `-o`, `--output OUTPUT` | Path to save the dependency list (default: `gnuradio-dependencies.txt`). |
+| `--uhd-deps PATH` | Package list written by `uhd_bare_metal_installer.py`, which must exist (default: `uhd-dependencies.txt`). |
+| `--dry-run` | Derive the dependency list and print the build steps, without running them. |
+| `-y`, `--yes` | Do not prompt for confirmation before installing and building. |
+| `--build` | Accepted for consistency with `uhd_bare_metal_installer.py` and ignored: building GNU Radio is already the default. |
+| `--home HOME` | Directory to clone/build GNU Radio into. Default: the invoking user's home when run via `sudo` (`$SUDO_USER`), else `$HOME`. |
+
+#### Examples
+
+Just print and save the dependency list:
+
+```bash
+python3 gnuradio_bare_metal_installer.py --list-only
+```
+
+Show the packages and build steps without running anything:
+
+```bash
+python3 gnuradio_bare_metal_installer.py --dry-run
+```
+
+Install the dependencies, then clone, build, and install the 3.10 release
+series into `$HOME/gnuradio`:
+
+```bash
+sudo python3 gnuradio_bare_metal_installer.py
+```
+
+Build the `main` branch (3.11 development) instead:
+
+```bash
+sudo python3 gnuradio_bare_metal_installer.py --branch main
+```

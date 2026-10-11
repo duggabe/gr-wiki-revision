@@ -185,26 +185,23 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
-- **`README.md`** — user-facing docs for both phases; most of it
-  describes Phase 1 (`v1.2`), with Phase 2 in its own last section. A
-  two-phase intro and Phase 1 quick start at the top (the `wget` loop and
-  two `sudo` commands; work-in-progress note limited to `--branch main`);
-  "Tested builds" (Phase 2 `v2.0` first: clean 26.04 with `main`, then
-  24.04 with `maint-3.10`; then Phase 1: 26.04 with UHD 4.11.0.0 109/109
-  and GNU Radio 3.10.12.0 269/269, no disabled components, incl. the
-  `grc_tests` leftover-directory story; the clean 24.04 result; earlier
-  `v1.1` and `v1.0` results; supported Ubuntu releases; "Known
-  limitation": a `main` build lacks `gr-qtgui`, needs Qt6 + Qwt for Qt6);
-  "Releases and changes" (`v2.0`, `v1.2`, `v1.1`); "Download the
-  installers" (`v1.2` links); "Run the installers in order" with "Removing
-  an earlier install" (manifest removal, then delete the leftover empty
-  directories, and the old source-built Volk); "Environment variables";
-  UHD usage section; GNU Radio usage section with "GNU Radio's
-  dependencies", options table, examples; and last "Phase 2: UHD from the
-  Ettus PPA, GNU Radio from your fork" (download with `v2.0` links, before
-  you start, Step 1 and Step 2 with options tables, memory note). Keep all
-  options tables in sync with the four scripts' argparse help. The Phase 2
-  section landed after the `v2.0` tag, so the README at that tag lacks it.
+- **`README.md`** — user-facing docs, restructured 2026-10-11 so that
+  **Phase 2 stands alone and Phase 1 can be removed in one cut**: a short
+  intro with one bullet per phase; then `## Phase 2: UHD from the Ettus
+  PPA, GNU Radio from your fork` (download with `v2.0` links, before you
+  start, Step 1 and Step 2 with options tables and the memory note,
+  "Changing branches, or removing the installed GNU Radio", "Phase 2
+  tested builds", "Phase 2 known limitation", "Phase 2 releases") — it has
+  no links into and no mentions of Phase 1; then `## Phase 1: UHD and GNU
+  Radio 3.10 from source`, which runs to the end of the file and holds
+  everything else, one heading level deeper than before (quick start,
+  "Tested builds", "Releases and changes" `v1.3`/`v1.2`/`v1.1`, "Download
+  the installers" with `v1.2` links, "Run the installers in order" with
+  "Removing an earlier install", "Environment variables", the UHD and GNU
+  Radio usage sections). **To retire Phase 1:** delete from the `## Phase
+  1` heading to the end and the Phase 1 bullet in the intro. Keep the
+  options tables in sync with the scripts' argparse help. The README at
+  the `v2.0` tag predates all of this.
 
 - **`wiki-draft-download-section.txt`** — local-only (in `.gitignore`, so
   not on GitHub or other machines): the user's copy, in MediaWiki markup,
@@ -501,6 +498,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   applies to Phase 1 only: don't add PPA support to `v1.x`. Fixes are
   tagged `v1.3` / `v2.1` etc.; tags are never moved. The earlier PPA
   evaluation is in git history, `CLAUDE.md` before commit `1036aeb`.
+- **Direction: Phase 2 only; Phase 1 will be history** (user,
+  2026-10-11, as an FYI — no timing or steps given yet). So don't invest
+  further in the Phase 1 scripts or their docs unless asked, and write new
+  material for Phase 2. Nothing has been removed: the Phase 1 scripts,
+  tags, `v1.2` Release, README sections, and the wiki's Phase 1 section
+  all still exist. The Phase 2 scripts import nothing from Phase 1, so
+  retiring Phase 1 breaks nothing in them.
 - **Phase 2 is two steps, for GNU Radio developers** (user, 2026-10-09):
   Step 1 installs everything with `apt-get`; Step 2 builds a clone the
   user made by hand in `$HOME` (normally their fork, to test an issue and
@@ -522,7 +526,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   2026-10-10 (tag `v1.3`).
 - **GitHub Releases** exist for `v2.0` (Latest) and `v1.2` (created with
   `--latest=false`), each with its scripts attached as they are at the
-  tag; `v1.0` and `v1.1` are tags only.
+  tag; `v1.0`, `v1.1`, and `v1.3` are tags only (`v1.3` by the user's
+  decision, 2026-10-11).
 - **Any build-step failure stops the automated build** (user,
   2026-10-02), including `cmake`, `make`, and a failing `make test` unit
   test (so a failing build is never installed). The user's manual wiki
@@ -888,8 +893,34 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
         status line updated.
     - (`~/gnuradio.main` and `~/gnuradio.old` on the LENOVO were deleted
       2026-10-04.)
-13. **Next (as of 2026-10-10).** Nothing is in progress or waiting on
-    anyone. Open, none requested yet:
+13. **Next (as of 2026-10-11).** Direction (user, 2026-10-11): moving
+    toward Phase 2 only, Phase 1 becoming history (see Key decisions) —
+    which makes the `v1.3` items below low priority. Open:
+    - 2026-10-11: the user pointed out that the wiki's Phase 1 section
+      "Rebuilding, or replacing an earlier install" told readers to remove
+      `~/gnuradio` and then use `~/gnuradio/build/install_manifest.txt`
+      (my wording). Rewritten in the local draft and README as three
+      ordered steps (manifest removal → leftover directories → only then
+      remove/rename the source directory). At the user's request, added a
+      Phase 2 counterpart without Volk or UHD, "Changing branches, or
+      removing the installed GNU Radio" (end of Step 2; last step is
+      `sudo rm -rf ~/gnuradio/build`, the source is kept), in the draft
+      and README. Removing `build/` when changing branches is my
+      recommendation, untested. **The live page still needs both.**
+    - 2026-10-11 (user's request): made Phase 2 stand-alone in the README
+      (see Files) and in the local wiki draft, so Phase 1 is easy to
+      remove from both. In the draft, Phase 2's "Before you start" no
+      longer names Phase 1 and links to Phase 2's own removal section
+      instead of Phase 1's; the Phase 2 section now has no references to
+      Phase 1. To retire Phase 1 on the wiki: delete from `== Phase 1 ==`
+      to the end, and edit the user's intro (the "two phases" sentence,
+      "rather than the Phase 1 methods", the "Phase 1 goals" list). **The
+      live page needs the two "Before you start" bullets changed.**
+    - `v1.3`: the user will reload the GMKtec with 26.04 and test it
+      there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
+      test only); another tester is using a different computer (what
+      they test is not known). **Decided (user, 2026-10-11): keep the
+      `v1.3` tag, but no GitHub Release for it.**
     - **Step 2 on the LENOVO.** `/usr/local` there still has the
       hand-built 3.11.0git-1193; `~/gnuradio` is the fork on branch
       `issue8218`, and its `build/CMakeCache.txt` still has FEC / VOCODER

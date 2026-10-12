@@ -936,6 +936,22 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       "Tested" section the same day (user's request). The user updated
       the live page's status line the same day (user's report; exact
       wording not seen).
+    - 2026-10-11: **the other tester had problems with real SDR
+      hardware** (user; no details yet — which device, which step, what
+      error). The user plans for 2026-10-12: a clean 26.04 + `main` build
+      on the GMKtec (the same combination as the 2026-10-10 test), and a
+      hardware test on the LENOVO. LENOVO checked beforehand: the FPGA
+      images **are** installed (242 files, 939 MB in
+      `/usr/share/uhd/4.11.0/images`, the directory `uhd_config_info
+      --images-dir` reports — my earlier "no images in
+      `/usr/share/uhd/images`" looked at the wrong path); udev rules
+      active (`MODE 0666`); barry is in `plugdev`. One thing to watch:
+      Ubuntu's `libuhd4.9.0` is installed next to the PPA's
+      `libuhd4.11.0`, pulled in by `soapysdr0.8-module-uhd` (part of
+      `soapysdr0.8-module-all`), so a USRP opened through gr-soapy would
+      use UHD 4.9 while gr-uhd uses 4.11. On the LENOVO these came with
+      the accidental Ubuntu `gnuradio` install; whether a clean Step 1
+      machine gets them is not checked.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

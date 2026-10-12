@@ -1098,8 +1098,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       nothing). README and the local wiki draft now say so: the
       paragraph opens "On the `main` branch..." with an example file
       name, and a closing paragraph says a `maint-3.10` build does not
-      need the cleanup. **Draft ahead of the live page** in those two
-      places.
+      need the cleanup. The user then updated the live page from the
+      draft — **live page = local draft again, 2026-10-12**.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

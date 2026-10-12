@@ -1217,6 +1217,30 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       first the GNU Radio-independent checks: `SoapySDRUtil --info`,
       `SoapySDRUtil --find`, `SoapySDRUtil --probe="driver=<name>"`,
       and `dpkg -l 'soapysdr*' 'libuhd*'`.
+    - 2026-10-12: **LENOVO switched to `maint-3.10`, RTL-SDR plugged
+      in, "everything looks good"** (user). Checked on the machine:
+      GNU Radio 3.10.12.0 (v3.10.12.0-92-gc1a73dc34), **269 of 269
+      tests**, 42 components; `from gnuradio import gr, soapy, qtgui,
+      uhd, iio` works; `SoapySDRUtil --find` sees the RTL-SDR (driver
+      `rtlsdr`, RTL2838, R820T tuner). What the user tested with the
+      RTL-SDR beyond that (flowgraph, gr-soapy) was not reported. This
+      was a **full from-scratch build** (`build/` created 16:35, 1374
+      compile lines in `make.log`, tests done 16:48) on the 16-core,
+      15 GiB machine with no OOM kill in the kernel log — so the
+      **memory-aware job count (`-j7`) is now exercised by a full
+      build**, and FEC / VOCODER / CTRLPORT are back on (the old CMake
+      cache is gone). **Leftover:** the 18 `main` libraries of
+      2026-10-11 are still in `/usr/local/lib` (36 names:
+      `libgnuradio-*.so.3.11.0git` links and
+      `.so.v3.11.0.0git-1194-gb0937160` files), although the GNU Radio
+      directories under `/usr/local` hold only today's files — so the
+      manifest removal (step 1 of "Changing branches...") seems not to
+      have run on the old build, while the directories were removed
+      (my reading; not confirmed). Harmless (everything links
+      `.so.3.10.12`). Cleanup: `sudo rm
+      /usr/local/lib/libgnuradio-*.so.*3.11*` then `sudo ldconfig`.
+      Note the wiki's listing command would remove the 18 `.so.v...`
+      files here but leave the 18 `.so.3.11.0git` links dangling.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

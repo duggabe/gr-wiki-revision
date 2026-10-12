@@ -1255,8 +1255,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       `upstream` remote. The local wiki draft's one-line hint ("start
       your branch from `upstream/maint-3.10`") is now a paragraph with
       the commands (`git fetch upstream`, `git checkout -b <name>
-      upstream/maint-3.10`) — **draft ahead of the live page**; README
-      has no matching passage. Also drafted for the user, on request,
+      upstream/maint-3.10`); README has no matching passage. The user
+      then updated the live page from the draft and made one change of
+      their own, already in the local file: the example commit line in
+      "Making and submitting a change" is now `git commit -s -m
+      "gr-filter: describe what the change does"   # use the name of
+      the module: 'gr-filter' is an example` (was `"filter: ..."`).
+      **Live page = local draft again, 2026-10-12.** Also drafted for the user, on request,
       the text of an upstream issue report about `grc_tests` (not
       filed by me).
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it

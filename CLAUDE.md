@@ -958,6 +958,27 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       there, so upstream `main` has not moved and the result repeats.
       A clean 26.04 install with the `v2.0` scripts, as planned (user
       confirmed). UHD version and enabled components were not reported.
+    - 2026-10-12: **hardware test, first step: `uhd_find_devices` finds
+      a USRP B200mini** (serial 315C7B7, type b200) with the PPA's UHD
+      4.11.0.0-0ubuntu1~resolute3 (pasted output). UHD loaded the
+      firmware from `/usr/share/uhd/4.11.0/images/usrp_b200_fw.hex`, so
+      the images from Step 1 and the udev rules work for a normal user
+      (no sudo). On the LENOVO; a first run printed "No UHD Devices
+      Found" because the device was not yet plugged in (both confirmed
+      by the user). Then **`uhd_usrp_probe` worked** (pasted output, up
+      to the clock-rate lines): loaded the FPGA image
+      `usrp_b200mini_fpga.bin` from the same directory, "Operating over
+      USB 3", register loopback test passed, master clock 16 MHz. Then
+      **receiving through GNU Radio's gr-uhd worked**: `uhd_rx_cfile -f
+      100e6 -r 1e6 -N 1000000 /tmp/test.cfile` wrote exactly 8,000,000
+      bytes (1,000,000 complex samples), with no overflows or errors
+      (user's report). GNU Radio here is the fork build
+      v3.11.0.0git-1194-gb0937160 (`main` + one commit), without
+      `gr-qtgui`. So Phase 2 works with real hardware on 26.04 for a
+      B200mini; the other tester's problem is not reproduced (their
+      device, step, and error are still unknown). Not tested: transmit,
+      a GRC flowgraph, a USRP through gr-soapy (would use Ubuntu's UHD
+      4.9 here), other devices.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

@@ -1084,6 +1084,22 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       `sudo apt-get install soapysdr0.8-module-lms7` — not needed: the
       user's other SDRs are a PlutoSDR and an RTL-SDR, whose modules
       are still installed.
+    - 2026-10-12: **no `main` libraries left on the GMKtec after the
+      branch change** (user: `ls /usr/local/lib | grep libgnuradio |
+      grep 3.11` printed nothing). So the manifest removal in the
+      "Changing branches..." steps takes the versioned libraries with
+      it. **Library names on `maint-3.10`** (user's `ls
+      /usr/local/lib/libgnuradio-runtime*` on the GMKtec):
+      `libgnuradio-runtime.so`, `.so.3.10.12`, `.so.3.10.12.0` — no
+      `.so.v<version>-<commit>` file. So on `maint-3.10` a rebuild
+      overwrites the same files and no libraries pile up; the leftover
+      problem is a `main` matter. The wiki's listing command matches
+      nothing there (`ls` reports no such files; the removal line does
+      nothing). README and the local wiki draft now say so: the
+      paragraph opens "On the `main` branch..." with an example file
+      name, and a closing paragraph says a `maint-3.10` build does not
+      need the cleanup. **Draft ahead of the live page** in those two
+      places.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

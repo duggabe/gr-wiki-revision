@@ -211,10 +211,11 @@ place of the old one.
 
 Then check out the other branch in `~/gnuradio` and run the script again.
 
-**Libraries left by earlier builds.** The names of GNU Radio's library
-files include the version of the code they were built from, and that
-version changes with every commit. So when you rebuild after committing a
-change, the new libraries are installed next to the previous ones, which
+**Libraries left by earlier builds.** On the `main` branch, the names of
+GNU Radio's library files include the version of the code they were built
+from (for example `libgnuradio-runtime.so.v3.11.0.0git-1193-g0403558f`), and
+that version changes with every commit. So when you rebuild after committing
+a change, the new libraries are installed next to the previous ones, which
 stay in `/usr/local/lib`. They do no harm, because programs use the newest
 ones, but they add up. To list the ones that do not belong to the installed
 version, and then remove them:
@@ -224,6 +225,11 @@ ls /usr/local/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --ver
 ls /usr/local/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)" | sudo xargs -r rm
 sudo ldconfig
 ```
+
+A `maint-3.10` build does not need this. Its library files are named after
+the release only (for example `libgnuradio-runtime.so.3.10.12.0`), so each
+rebuild replaces them, and the first command above just reports that it
+found no such files.
 
 ### Phase 2 tested builds
 

@@ -28,7 +28,7 @@ script:
    your own fork, which you clone into your home directory.
 
 Phase 2 (`v2.0`) has been tested on clean installs of Ubuntu 26.04 and
-24.04; see [Phase 2 tested builds](#phase-2-tested-builds).
+24.04, and with a USRP B200mini on Ubuntu 26.04; see [Phase 2 tested builds](#phase-2-tested-builds).
 
 ### Download the Phase 2 scripts
 
@@ -251,6 +251,19 @@ the two scripts on a freshly installed Ubuntu 24.04 machine and built GNU
 Radio's `main` branch: `make test` passed 267 of 267 tests. (The UHD and GNU
 Radio versions were not reported. The number of tests differs between
 Ubuntu releases and branches.)
+
+**`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
+tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD
+4.11.0.0-0ubuntu1~resolute3 from the Ettus PPA, GNU Radio built from
+`main`), as a normal user without `sudo`:
+
+| Test | Result |
+| --- | --- |
+| `uhd_find_devices` | found the B200mini; firmware loaded from `/usr/share/uhd/4.11.0/images` |
+| `uhd_usrp_probe` | FPGA image loaded, operating over USB 3, register loopback test passed |
+| `uhd_rx_cfile -f 100e6 -r 1e6 -N 1000000 /tmp/test.cfile` | 1,000,000 samples received through GNU Radio's `gr-uhd`, no overflows or errors |
+
+Transmitting and other devices were not tested.
 
 To see which components your build includes:
 

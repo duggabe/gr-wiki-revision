@@ -979,6 +979,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       device, step, and error are still unknown). Not tested: transmit,
       a GRC flowgraph, a USRP through gr-soapy (would use Ubuntu's UHD
       4.9 here), other devices.
+    - 2026-10-12 (user's request): hardware test added to the README
+      (a sentence in the Phase 2 intro and a table in "Phase 2 tested
+      builds") and to the local wiki draft (a sentence on the Phase 2
+      status line, and in Phase 2's "Checking the result" an "If you
+      have a USRP" paragraph with the three commands and what to
+      expect — the commands for readers are my addition). **The local
+      draft is now ahead of the live page** until the user copies these
+      two places over.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

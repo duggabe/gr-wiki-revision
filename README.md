@@ -314,6 +314,10 @@ packaged Qwt for Qt6, and the packages Step 1 installs are those of the
 Qt5-based 3.10 series. So a `main` build has no `gr-qtgui`. A `maint-3.10`
 build is not affected.
 
+A `main` build also lacks the Thrift back-end of `gr-ctrlport` (ControlPort
+over Thrift), which a `maint-3.10` build has. `gr-ctrlport` itself is
+built. This was seen on Ubuntu 26.04; the cause has not been looked into.
+
 ### Phase 2 releases
 
 **`v2.0`** (2026-10-10) is the first Phase 2 release, with two scripts:

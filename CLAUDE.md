@@ -1186,7 +1186,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       40 components.** Against the 42 of `maint-3.10` on the same
       machine: no `gr-qtgui` (expected) and no `* thrift` (`gr-ctrlport`
       itself is enabled, without its Thrift back-end — not known
-      before; cause not looked into); `doxygen` is named
+      before; cause not looked into; noted the same day, at the user's
+      request, in README "Phase 2 known limitation" and in the local
+      wiki draft's `main`/`gr-qtgui` paragraph — **draft ahead of the
+      live page** in that one sentence); `doxygen` is named
       `doxygen-documentation` on `main`. Everything else is there,
       incl. `gr-fec`, `gr-dtv`, `gr-vocoder` + codec2/freedv/gsm,
       `gr-iio` + `libad9361`, `gr-soapy`, `gr-uhd` + RFNoC, JACK,

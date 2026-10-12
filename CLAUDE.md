@@ -999,6 +999,78 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       three-row table as the README). Tag, title, and attached scripts
       unchanged. Then, also on request, a sentence for the second clean
       26.04 run (271 of 271) under the first table.
+    - 2026-10-12: **the extra udev rules copy is gone from the
+      LENOVO** (user removed `/etc/udev/rules.d/60-uhd-host.rules`;
+      I checked: only the package's
+      `/usr/lib/udev/rules.d/60-uhd-host.rules` remains). After
+      unplugging and replugging the B200mini, `uhd_find_devices` still
+      finds it — so the rules file `uhd-host` installs is enough on its
+      own, as the wiki's Phase 2 section assumes (no manual udev step).
+      Earlier notes in this file saying the copy is still there are
+      superseded.
+    - 2026-10-12: **`sudo apt autoremove` run on the LENOVO** (user;
+      24 packages, per `/var/log/apt/history.log`): the 22
+      `libgnuradio-*3.10.12` libraries left from the accidental Ubuntu
+      `gnuradio` install, plus `python3-networkx` and
+      `python3-pyqt5.qwt`. Checked afterwards: nothing more is
+      auto-removable; `python3-matplotlib`, `python3-pyqtgraph`,
+      `python3-qtpy`, `soapysdr-tools`, and the PPA's UHD packages are
+      still installed; `from gnuradio import gr, blocks, uhd, soapy`
+      works (v3.11.0.0git-1194). **Ubuntu's `libuhd4.9.0` is still
+      there** — it is not a leftover of the accidental install:
+      `libsoapysdr0.8` *recommends* `soapysdr0.8-module-all`, which
+      depends on `soapysdr0.8-module-uhd`, which needs `libuhd4.9.0`.
+      Step 1 installs `soapysdr-tools` (and `libsoapysdr-dev` via
+      `build-dep`) with Recommends on, so a clean Step 1 machine very
+      likely has UHD 4.9 next to the PPA's 4.11 too (my inference; check
+      on the GMKtec with `dpkg -l 'libuhd*'`). Effect: a USRP opened
+      through gr-soapy would use UHD 4.9; gr-uhd and the UHD tools use
+      4.11. Not changed in the scripts.
+      **That inference was wrong** — see the GMKtec's `dpkg -l` result
+      below.
+    - 2026-10-12: **GMKtec: switched from `main` to `maint-3.10`,
+      rebuild in progress** (user). On the clean 26.04 install from
+      that morning. The user followed the wiki's three "Changing
+      branches..." steps (manifest removal, leftover directories,
+      `sudo rm -rf ~/gnuradio/build`) before switching — their first
+      real use. **Result: 269 of 269 tests passed** (user) — the same
+      count as Phase 1's `maint-3.10` on 26.04. So this is the first
+      Phase 2 `maint-3.10` build on 26.04, and the "Changing
+      branches..." steps, incl. `rm -rf build`, are tested for `main` →
+      `maint-3.10` (no longer just my recommendation).
+      `gnuradio-config-info --version`: **3.10.12.0** (user).
+      `--enabled-components` (pasted): **42 components**, the same
+      number as on 24.04 and as Phase 1 `v1.2`, incl. `gr-qtgui`,
+      `gr-iio` + `libad9361`, `gr-soapy`, `gr-uhd` + RFNoC, `gr-fec`,
+      `gr-dtv`, `gr-vocoder` (codec2/freedv/gsm), `gr-ctrlport` +
+      thrift, JACK, PortAudio. **`dpkg -l 'libuhd*'` on the GMKtec (pasted): only
+      `libuhd-dev` and `libuhd4.11.0`, both 4.11.0.0-0ubuntu1~resolute3
+      — no `libuhd4.9.0`.** So a clean Step 1 machine has one UHD, the
+      PPA's, and the scripts need no change. The LENOVO's `libuhd4.9.0`
+      (with `soapysdr0.8-module-all` / `-module-uhd`) is particular to
+      that machine after all — presumably from the accidental Ubuntu
+      `gnuradio` install, and kept from autoremove by `libsoapysdr0.8`'s
+      Recommends (my reading; which SoapySDR modules the GMKtec has was
+      not checked). Not reported: the
+      leftover-library listing, `dpkg -l 'libuhd*'`. Added to README
+      "Phase 2 tested builds" and the local wiki draft's status line
+      (**draft ahead of the live page again**, in that one sentence).
+    - 2026-10-12: **`libuhd4.9.0` removed from the LENOVO** (user ran
+      `sudo apt-get remove soapysdr0.8-module-all soapysdr0.8-module-uhd`
+      then `sudo apt autoremove`; checked in `/var/log/apt/history.log`).
+      The LENOVO now has one UHD, the PPA's 4.11, like the GMKtec.
+      The autoremove took more than `libuhd4.9.0`: also the SoapySDR
+      modules `lms7` (LimeSDR, with `liblimesuite23.11-1` and
+      `limesuite-udev`), `osmosdr`, `mirisdr`, `hydrasdr` and their
+      libraries (11 packages). Still installed: SoapySDR modules
+      airspy, airspyhf, audio, bladerf, hackrf, plutosdr, redpitaya,
+      remote, rtlsdr; `soapysdr-tools`; `libsoapysdr-dev`. Checked
+      afterwards: `from gnuradio import gr, blocks, uhd, soapy` works,
+      `uhd_find_devices` still finds the B200mini, nothing more is
+      auto-removable. A removed module can be put back singly, e.g.
+      `sudo apt-get install soapysdr0.8-module-lms7` — not needed: the
+      user's other SDRs are a PlutoSDR and an RTL-SDR, whose modules
+      are still installed.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

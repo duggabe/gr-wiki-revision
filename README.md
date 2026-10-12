@@ -241,6 +241,14 @@ The build finished without errors. A second run on 2026-10-12, on the same
 machine after another clean install of Ubuntu 26.04, gave the same result: v3.11.0.0git-1193-g0403558f, 271 of 271
 tests passed.
 
+**`v2.0`, 2026-10-12, changing branches on Ubuntu 26.04.** On that same
+clean install, the installed `main` build was removed with the steps in
+[Changing branches, or removing the installed GNU Radio](#changing-branches-or-removing-the-installed-gnu-radio),
+`maint-3.10` was checked out, and `gnuradio_clone_builder.py` was run
+again. It built and installed GNU Radio 3.10.12.0; `make test` passed 269
+of 269 tests. All 42 components are enabled, including `gr-qtgui`, `gr-uhd`,
+`gr-iio`, and `gr-soapy`.
+
 **`v2.0`, 2026-10-10, Ubuntu 24.04.** Phase 2 was also run on an
 Ubuntu 24.04 laptop (not a clean install), this time with the
 `maint-3.10` branch checked out in the clone. UHD from the Ettus PPA was

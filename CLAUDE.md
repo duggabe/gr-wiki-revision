@@ -1241,6 +1241,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       /usr/local/lib/libgnuradio-*.so.*3.11*` then `sudo ldconfig`.
       Note the wiki's listing command would remove the 18 `.so.v...`
       files here but leave the 18 `.so.3.11.0git` links dangling.
+      **Done by the user the same day**; checked: no `3.11` library
+      names left, no dangling links, imports still work.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

@@ -14,11 +14,12 @@ developers: one installs UHD from the Ettus PPA and GNU Radio's
 dependencies with `apt-get` only, the other builds GNU Radio from a clone
 already on the machine.
 
-**Current state (2026-10-12):** two releases, both with GitHub Releases.
-**Phase 2 = `v2.1`** (tag only, 2026-10-12: the builder removes GNU
+**Current state (2026-10-12):** GitHub Releases for `v2.1`, `v2.0`,
+and `v1.2`.
+**Phase 2 = `v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
 Radio's generated GRC test files before `make test`, since with `v2.0`
 every `make test` after the first failed on `main`; README and wiki
-link `v2.1`) on top of **`v2.0`** (the GitHub "Latest" release; UHD from the Ettus
+link `v2.1`) on top of **`v2.0`** (the first Phase 2 release; UHD from the Ettus
 PPA, then GNU Radio built from a clone already on the machine, for GNU
 Radio developers), two self-contained scripts,
 `gnuradio_dependencies_installer.py` and `gnuradio_clone_builder.py`.
@@ -546,8 +547,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   because without it every `make test` after the first fails on a
   `main` build (no `gr-qtgui`). It works around an upstream test
   weakness; drop it if upstream fixes that.
-- **GitHub Releases** exist for `v2.0` (Latest) and `v1.2` (created with
-  `--latest=false`), each with its scripts attached as they are at the
+- **GitHub Releases** exist for `v2.1` (Latest, since 2026-10-12),
+  `v2.0`, and `v1.2` (created with `--latest=false`), each with its scripts attached as they are at the
   tag; `v1.0`, `v1.1`, and `v1.3` are tags only (`v1.3` by the user's
   decision, 2026-10-11).
 - **Any build-step failure stops the automated build** (user,
@@ -1193,9 +1194,16 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       in Step 2, a `v2.1` entry in "Phase 2 releases", and the 270/271
       run in "Phase 2 tested builds". Local wiki draft: links on
       `v2.1`, the `git clean` line in the equivalent commands, and a
-      bullet explaining it — **draft ahead of the live page** until the
-      user copies it. No GitHub Release for `v2.1` yet (`v2.0` is still
-      "Latest"); not asked for.
+      bullet explaining it; the user updated the live page from the
+      draft after the `v2.1` test — **live page = local draft again,
+      2026-10-12**, linking `v2.1`. **GitHub Release for `v2.1` created 2026-10-12 and marked
+      "Latest"** (user's request):
+      https://github.com/duggabe/gr-wiki-revision/releases/tag/v2.1 —
+      notes cover the fix, the workaround for `v2.0` users, the
+      270/271 → 271/271 test, the 40 components, a quick start, and
+      known limitations; the two Phase 2 scripts as they are at the tag
+      are attached. The `v2.0` Release is unchanged apart from losing
+      the "Latest" mark.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

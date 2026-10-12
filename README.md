@@ -173,11 +173,14 @@ A `main` build made this way does not include `gr-qtgui`; see
 
 ### Changing branches, or removing the installed GNU Radio
 
-Rebuilding the same branch after a change needs none of this: the new
-install is used in place of the old one. Before building a different branch or version
-(for example changing between `main` and `maint-3.10`), or to remove the
-installed GNU Radio altogether, do these steps in this order. The first one
-needs a file inside `~/gnuradio/build`.
+Do the three steps below before building a different branch or version of
+GNU Radio (for example changing between `main` and `maint-3.10`), or to
+remove the installed GNU Radio altogether. Keep them in this order: the
+first one needs a file inside `~/gnuradio/build`.
+
+You do not need these steps to rebuild the same branch after changing the
+code. Run `gnuradio_clone_builder.py` again, and the new install is used in
+place of the old one.
 
 1. Remove the installed files, using the build directory's
    `install_manifest.txt`:

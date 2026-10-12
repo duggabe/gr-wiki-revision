@@ -986,7 +986,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       have a USRP" paragraph with the three commands and what to
       expect — the commands for readers are my addition). **The local
       draft is now ahead of the live page** until the user copies these
-      two places over.
+      two places over. Also 2026-10-12 (user: "this" in "needs none of
+      this" was ambiguous): the opening of Phase 2's "Changing
+      branches..." section reworded in both files, as two paragraphs —
+      when to do the three steps, then that a rebuild of the same branch
+      does not need them. A third place to copy to the live page.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

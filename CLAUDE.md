@@ -998,7 +998,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       section got the B200mini hardware test (a paragraph and the same
       three-row table as the README). Tag, title, and attached scripts
       unchanged. Then, also on request, a sentence for the second clean
-      26.04 run (271 of 271) under the first table.
+      26.04 run (271 of 271) under the first table. Later the same
+      day, on request, the branch change test (`maint-3.10` on 26.04:
+      3.10.12.0, 269 of 269, 42 components) after that sentence.
     - 2026-10-12: **the extra udev rules copy is gone from the
       LENOVO** (user removed `/etc/udev/rules.d/60-uhd-host.rules`;
       I checked: only the package's

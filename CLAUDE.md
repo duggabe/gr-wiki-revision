@@ -941,12 +941,32 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       test only); another tester is using a different computer (what
       they test is not known). **Decided (user, 2026-10-11): keep the
       `v1.3` tag, but no GitHub Release for it.**
-    - **Step 2 on the LENOVO.** `/usr/local` there still has the
-      hand-built 3.11.0git-1193; `~/gnuradio` is the fork on branch
-      `issue8218`, and its `build/CMakeCache.txt` still has FEC / VOCODER
-      / CTRLPORT off (remove `build/` for a full build). Optional cleanups
-      there: `sudo rm /etc/udev/rules.d/60-uhd-host.rules` (an unneeded
-      copy) and `sudo apt autoremove` after reviewing its list.
+    - ~~Step 2 on the LENOVO~~ — **done 2026-10-11 (user), as a rebuild
+      in the existing build directory** (the user's choice: the machine
+      took a lot of work to set up, so nothing was removed first).
+      `sudo python3 gnuradio_clone_builder.py` on the fork, branch
+      `issue8218` (one commit ahead of `main`): the `sudo chown -R` of the
+      root-owned build files worked (first real use), `make -j7`,
+      **247 of 247 tests passed**, installed
+      v3.11.0.0git-1194-gb0937160; the three logs are owned by barry.
+      FEC / VOCODER / CTRLPORT are still off from the old CMake cache
+      (so is `gr-dtv`, which needs FEC, and `gr-qtgui` as on any `main`
+      build) — hence 247 tests, not 271. This was an incremental build,
+      so it did not exercise the memory limit under a full compile.
+      **Finding:** installing over the earlier build left its 18
+      versioned libraries (`libgnuradio-*.so.v3.11.0.0git-1193-g0403558f`,
+      14 MB) in `/usr/local/lib`: the version string is in the file name
+      and changes with every commit, and the new `install_manifest.txt`
+      does not list the old files. Harmless (the `.so.3.11.0git` links
+      point at the new ones), but it means the docs' "the new install
+      replaces the old one" is not quite true, and such files pile up
+      over an edit → commit → rebuild loop. Not yet reflected in the
+      README or wiki. As always, `sudo make install` left root-owned
+      files in `build/` again (147). Still on the LENOVO: the unneeded
+      `/etc/udev/rules.d/60-uhd-host.rules` copy; `sudo apt autoremove`
+      not run. A full from-scratch build there (the wiki's "Changing
+      branches..." steps, incl. my untested `rm -rf build`) has not been
+      done.
     - **Memory-aware `make` jobs in the Phase 1 scripts — written
       2026-10-10 (user's request), on `main`, not tagged.** The shared
       `get_make_jobs()` in `uhd_bare_metal_installer.py` (imported by the

@@ -27,8 +27,8 @@ script:
 2. `gnuradio_clone_builder.py` builds, tests, and installs GNU Radio from
    your own fork, which you clone into your home directory.
 
-Phase 2 (`v2.0`) has been tested on a clean install of Ubuntu 26.04 and on
-Ubuntu 24.04; see [Phase 2 tested builds](#phase-2-tested-builds).
+Phase 2 (`v2.0`) has been tested on clean installs of Ubuntu 26.04 and
+24.04; see [Phase 2 tested builds](#phase-2-tested-builds).
 
 ### Download the Phase 2 scripts
 
@@ -229,6 +229,12 @@ Ubuntu 24.04 laptop (not a clean install), this time with the
 GNU Radio 3.10.12.0; `make test` passed 268 of 268 tests. All 42
 components are enabled, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and
 `gr-soapy`.
+
+**`v2.0`, 2026-10-11, clean install of Ubuntu 24.04.** A second tester ran
+the two scripts on a freshly installed Ubuntu 24.04 machine and built GNU
+Radio's `main` branch: `make test` passed 267 of 267 tests. (The UHD and GNU
+Radio versions were not reported. The number of tests differs between
+Ubuntu releases and branches.)
 
 To see which components your build includes:
 

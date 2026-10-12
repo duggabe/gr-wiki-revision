@@ -922,6 +922,17 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       used as it is, so the local file again matches the live page
       (Phase 1 "Rebuilding" fix, the new Phase 2 removal section, and the
       two "Before you start" bullets).
+    - 2026-10-11: **result from the other tester** (via the user): "100%
+      tests passed, 0 tests failed out of 267", on a clean install of
+      Ubuntu "24.04.5.1" (as the user reported it), with the **`v2.0`
+      scripts, `main` branch**. This fills two gaps: a clean 24.04
+      install with Phase 2, and `main` on 24.04. Not reported: machine,
+      UHD and GNU Radio versions, enabled components. 267 on 24.04 vs 271
+      for `main` on 26.04 (-1193) is unexplained (commit and components
+      unknown; `maint-3.10` also has one test fewer on 24.04). Added to
+      README "Phase 2 tested builds" and the local wiki draft's status
+      line; the live page's status line and the `v2.0` Release notes are
+      not updated.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what
@@ -950,10 +961,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       after a real build with `v1.3`; no GitHub Release for it yet.
     - **The `main`/Qt6 path:** `gr-qtgui` on `main` needs Qwt built from
       source for Qt6 (see step 8); applies to both phases.
-    - Untested: a clean 24.04 install with Phase 2 (the laptop was not a
-      clean install — my assumption, not confirmed by the user); Phase 2
-      with a fork on 24.04; `main` on 24.04 with Phase 2; a clean 26.04
-      install with `v1.2`.
+    - Untested: Phase 2 with a fork on 24.04 (the tests there used plain
+      clones, as far as reported); a clean 26.04 install with `v1.2`.
+      (The laptop's 24.04 was not a clean install — my assumption, not
+      confirmed by the user.)
     - Wiki page: my comments 2–4 on the introduction (step 12) were
       written for the Phase 1-only page and were never acted on; the two
       "Checking the result" headings share a name.

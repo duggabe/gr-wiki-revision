@@ -14,24 +14,33 @@ developers: one installs UHD from the Ettus PPA and GNU Radio's
 dependencies with `apt-get` only, the other builds GNU Radio from a clone
 already on the machine.
 
-**Current state (2026-10-10):** two releases, both with GitHub Releases.
+**Current state (2026-10-12):** two releases, both with GitHub Releases.
+**Phase 2 = `v2.0`** (the GitHub "Latest" release; UHD from the Ettus
+PPA, then GNU Radio built from a clone already on the machine, for GNU
+Radio developers), two self-contained scripts,
+`gnuradio_dependencies_installer.py` and `gnuradio_clone_builder.py`.
+Tested: clean Ubuntu 26.04 with `main` (v3.11.0.0git-1193, 271/271
+tests, twice; no `gr-qtgui`) and, after the "Changing branches..."
+steps, with `maint-3.10` (3.10.12.0, 269/269, 42 components); Ubuntu
+24.04 with `maint-3.10` (3.10.12.0, 268/268, 42 components incl.
+`gr-qtgui`) and, by a second tester on a clean install, with `main`
+(267/267); a rebuild in place on the LENOVO (fork, 247/247 with FEC /
+VOCODER / CTRLPORT off); and real hardware on the LENOVO, a USRP
+B200mini found, probed, and received from through gr-uhd.
 **Phase 1 = `v1.2`** (UHD and GNU Radio built from source): tested on
 Ubuntu 24.04 (clean install) and 26.04 — UHD 4.11.0.0 and GNU Radio
-3.10.12.0 (`maint-3.10`) with all 42 components, all tests passing; the
-GNU Radio developers and documentation people reviewed the wiki page with
-no negative comments. **Phase 2 = `v2.0`** (the GitHub "Latest" release;
-UHD from the Ettus PPA, then GNU Radio built from a clone already on the
-machine, for GNU Radio developers), two self-contained scripts,
-`gnuradio_dependencies_installer.py` and `gnuradio_clone_builder.py`:
-tested on a clean Ubuntu 26.04 install (`main`, v3.11.0.0git-1193, 271/271
-tests, no `gr-qtgui`) and on the Ubuntu 24.04 laptop (`maint-3.10`,
-3.10.12.0, 268/268 tests, 42 components incl. `gr-qtgui`). The live wiki
-page "Building GNU Radio from Source Code" has Phase 2 first, then
-Phase 1. Tags `v1.0` and `v1.1` stay available. Nothing is waiting on
-anyone. Open: running Step 2 on the LENOVO; the Phase 1 scripts on `main` have
-the memory-aware `make` job count (written 2026-10-10, tagged `v1.3`, no
-real build yet, links still on `v1.2`); the `main`/Qt6 path
-(Qwt for Qt6). Details are in Next steps 12 and 13.
+3.10.12.0 (`maint-3.10`) with all 42 components, all tests passing;
+reviewed by the GNU Radio developers and documentation people with no
+negative comments. **Direction (user, 2026-10-11): Phase 2 only; Phase 1
+will become history, but removing it is on hold until the user says
+so.** The README and the wiki page have Phase 2 first and stand-alone,
+then Phase 1; the live wiki page "Building GNU Radio from Source Code"
+equals the local draft as of 2026-10-12. Tags `v1.0`, `v1.1`, and `v1.3`
+(memory-aware `make` jobs for Phase 1, never built for real, links still
+on `v1.2`) have no Release. Nothing is waiting on anyone. Open: details
+of the other tester's hardware problem; a full from-scratch build on a
+many-core machine (the memory limit); the `main`/Qt6 path (Qwt for Qt6).
+Details are in Next steps 12 and 13.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
 and programs supporting GNU Radio Wiki documents, which the user writes.

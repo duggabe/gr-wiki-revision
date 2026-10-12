@@ -922,7 +922,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       used as it is, so the local file again matches the live page
       (Phase 1 "Rebuilding" fix, the new Phase 2 removal section, and the
       two "Before you start" bullets).
-    - 2026-10-11: **result from the other tester** (via the user): "100%
+    - 2026-10-11: **result from the other tester** (via the user; run
+      that day, user confirmed): "100%
       tests passed, 0 tests failed out of 267", on a clean install of
       Ubuntu "24.04.5.1" (as the user reported it), with the **`v2.0`
       scripts, `main` branch**. This fills two gaps: a clean 24.04
@@ -931,8 +932,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       for `main` on 26.04 (-1193) is unexplained (commit and components
       unknown; `maint-3.10` also has one test fewer on 24.04). Added to
       README "Phase 2 tested builds" and the local wiki draft's status
-      line; the live page's status line and the `v2.0` Release notes are
-      not updated.
+      line. The `v2.0` Release notes got a line for this run in their
+      "Tested" section the same day (user's request). Whether the live
+      page's status line was updated is not known.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

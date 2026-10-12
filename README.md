@@ -234,7 +234,9 @@ branch built from a fork:
 | UHD | `sudo python3 gnuradio_dependencies_installer.py` (Ettus PPA) | 4.11.0.0-0ubuntu1~resolute3 | — (not built) |
 | GNU Radio | `sudo python3 gnuradio_clone_builder.py` (`main`) | v3.11.0.0git-1193-g0403558f | 271 of 271 passed |
 
-The build finished without errors.
+The build finished without errors. A second run on 2026-10-12, on the same
+machine after another clean install of Ubuntu 26.04, gave the same result: v3.11.0.0git-1193-g0403558f, 271 of 271
+tests passed.
 
 **`v2.0`, 2026-10-10, Ubuntu 24.04.** Phase 2 was also run on an
 Ubuntu 24.04 laptop (not a clean install), this time with the

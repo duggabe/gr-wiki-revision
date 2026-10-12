@@ -960,8 +960,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       does not list the old files. Harmless (the `.so.3.11.0git` links
       point at the new ones), but it means the docs' "the new install
       replaces the old one" is not quite true, and such files pile up
-      over an edit → commit → rebuild loop. Not yet reflected in the
-      README or wiki. As always, `sudo make install` left root-owned
+      over an edit → commit → rebuild loop. Added 2026-10-11 (user's
+      request) to the README and the local wiki draft, at the end of the
+      Phase 2 "Changing branches..." section: a "Libraries left by
+      earlier builds" paragraph with commands to list and remove them
+      (the listing was checked on the LENOVO: 18 old files; the `rm` was
+      not run), and "replaces the old one" reworded. Seen on `main` only;
+      not checked on `maint-3.10`. **The live page still needs it.** As always, `sudo make install` left root-owned
       files in `build/` again (147). Still on the LENOVO: the unneeded
       `/etc/udev/rules.d/60-uhd-host.rules` copy; `sudo apt autoremove`
       not run. A full from-scratch build there (the wiki's "Changing

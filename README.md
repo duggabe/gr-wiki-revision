@@ -174,7 +174,7 @@ A `main` build made this way does not include `gr-qtgui`; see
 ### Changing branches, or removing the installed GNU Radio
 
 Rebuilding the same branch after a change needs none of this: the new
-install replaces the old one. Before building a different branch or version
+install is used in place of the old one. Before building a different branch or version
 (for example changing between `main` and `maint-3.10`), or to remove the
 installed GNU Radio altogether, do these steps in this order. The first one
 needs a file inside `~/gnuradio/build`.
@@ -207,6 +207,20 @@ needs a file inside `~/gnuradio/build`.
    ```
 
 Then check out the other branch in `~/gnuradio` and run the script again.
+
+**Libraries left by earlier builds.** The names of GNU Radio's library
+files include the version of the code they were built from, and that
+version changes with every commit. So when you rebuild after committing a
+change, the new libraries are installed next to the previous ones, which
+stay in `/usr/local/lib`. They do no harm, because programs use the newest
+ones, but they add up. To list the ones that do not belong to the installed
+version, and then remove them:
+
+```bash
+ls /usr/local/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)"
+ls /usr/local/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)" | sudo xargs -r rm
+sudo ldconfig
+```
 
 ### Phase 2 tested builds
 

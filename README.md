@@ -8,7 +8,7 @@ without Docker. They back the "Building GNU Radio from Source Code" page on
 the GNU Radio Wiki.
 
 - **[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork)**
-  (release `v2.0`) is the current method. It is for developers of GNU Radio
+  (release `v2.1`) is the current method. It is for developers of GNU Radio
   itself: it installs [UHD](https://github.com/EttusResearch/uhd) from the
   Ettus Research PPA instead of building it, then builds GNU Radio from your
   own fork, so that you can work on an issue and submit a pull request.
@@ -27,7 +27,7 @@ script:
 2. `gnuradio_clone_builder.py` builds, tests, and installs GNU Radio from
    your own fork, which you clone into your home directory.
 
-Phase 2 (`v2.0`) has been tested on clean installs of Ubuntu 26.04 and
+Phase 2 has been tested on clean installs of Ubuntu 26.04 and
 24.04, and with a USRP B200mini on Ubuntu 26.04; see [Phase 2 tested builds](#phase-2-tested-builds).
 
 ### Download the Phase 2 scripts
@@ -36,7 +36,7 @@ Phase 2 (`v2.0`) has been tested on clean installs of Ubuntu 26.04 and
 mkdir -p ~/gr-installers
 cd ~/gr-installers
 for s in gnuradio_dependencies_installer gnuradio_clone_builder; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.0/${s}.py
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.1/${s}.py
 done
 ```
 
@@ -141,6 +141,12 @@ directory, so only what changed is rebuilt. It works with or without `sudo`;
 the build runs as you either way, and files that `sudo make install` leaves
 root-owned in the `build` directory are given back to you before the next
 build.
+
+Before `make test`, the script runs `git clean -fdX grc/tests/resources` in
+the source directory. GNU Radio's GRC tests write generated files there, and
+on a build without `gr-qtgui` two of them make the next test run fail
+(`grc_tests`). Only those generated files, which git ignores, are removed;
+your source code is not touched.
 
 Before building, the script checks that the directory holds GNU Radio's
 source code, that `libuhd-dev` is installed (Step 1 was run), that Ubuntu's
@@ -269,6 +275,11 @@ Radio's `main` branch: `make test` passed 267 of 267 tests. (The UHD and GNU
 Radio versions were not reported. The number of tests differs between
 Ubuntu releases and branches.)
 
+**`v2.0`, 2026-10-12, a second build of `main` in the same clone.** After
+the `maint-3.10` build above, `main` was checked out again and rebuilt:
+`make test` passed 270 of 271 tests, with `grc_tests` failing. This is the
+problem fixed in `v2.1`; see [Phase 2 releases](#phase-2-releases).
+
 **`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
 tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD
 4.11.0.0-0ubuntu1~resolute3 from the Ettus PPA, GNU Radio built from
@@ -309,8 +320,18 @@ build is not affected.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
-Fixes will be tagged `v2.1` and so on; a tag is never moved, so a link to a
-tag always gives the same scripts.
+**`v2.1`** (2026-10-12) fixes `gnuradio_clone_builder.py` for repeated
+builds of `main`. With `v2.0`, the first `make test` in a clone passed, and
+every later one failed in `grc_tests` (270 of 271 tests passed): GNU Radio's
+GRC tests generate Python files in `grc/tests/resources` in the source tree,
+the next test run picks two of them up as tests, and they need `gr-qtgui`,
+which a `main` build does not have. The script now removes those generated
+files before each `make test`. If you are using `v2.0`, run
+`git -C ~/gnuradio clean -fdX grc/tests/resources` before the script, or
+download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
+
+Further fixes will be tagged `v2.2` and so on; a tag is never moved, so a
+link to a tag always gives the same scripts.
 
 ## Phase 1: UHD and GNU Radio 3.10 from source
 

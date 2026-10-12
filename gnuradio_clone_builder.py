@@ -17,9 +17,16 @@ whatever is checked out in the source directory ($HOME/gnuradio unless
     cd build
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
     make -j<jobs> 2>&1 | tee make.log
+    git -C $HOME/gnuradio clean -fdX grc/tests/resources
     make test 2>&1 | tee make_test.log
     sudo make install
     sudo ldconfig
+
+The `git clean` removes the files that GNU Radio's GRC tests generated in the
+source tree during an earlier `make test`. They are not part of the source
+code (git ignores them), but the next test run would pick two of them up as
+tests, and on a build without gr-qtgui those two fail. Nothing else in the
+source tree is touched.
 
 Any failure, including a failing test, stops before `sudo make install`; the
 logs in the build directory show what went wrong. Use --no-install to stop
@@ -86,6 +93,13 @@ INSTALL_PREFIX = "/usr/local"
 # Memory to allow per parallel make job. GNU Radio's Python bindings need
 # about this much for each file being compiled.
 MEMORY_PER_JOB_KB = 2 * 1024 * 1024
+
+# Where GNU Radio's GRC tests write generated flowgraph code, inside the
+# source tree. The generated test_*_qt_gui_workflow.py files import
+# gnuradio.qtgui; the next `make test` collects them as test modules, and
+# without gr-qtgui (as on a `main` build) that fails grc_tests. So the
+# generated (git-ignored) files there are removed before every test run.
+GENERATED_TEST_DIR = "grc/tests/resources"
 
 INSTALL_DIR_PATTERNS = (
     "lib/python3*/dist-packages/gnuradio",
@@ -247,6 +261,7 @@ def get_build_steps(source_dir: Path, install: bool, jobs: int,
         cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr/local <cmake_args> ../ 2>&1 | tee cmake.log
         make -j<jobs> 2>&1 | tee make.log
+        git clean -fdX grc/tests/resources      (in <source_dir>, if it is a git clone)
         make test 2>&1 | tee make_test.log
         sudo make install
         sudo ldconfig
@@ -271,8 +286,11 @@ def get_build_steps(source_dir: Path, install: bool, jobs: int,
             build_dir, log="cmake.log",
         ),
         BuildStep(["make", f"-j{jobs}"], build_dir, log="make.log"),
-        BuildStep(["make", "test"], build_dir, log="make_test.log"),
     ]
+    if (source_dir / ".git").exists() and (source_dir / GENERATED_TEST_DIR).is_dir():
+        # Only git-ignored files (-X) in that one directory are removed.
+        steps.append(BuildStep(["git", "clean", "-fdX", GENERATED_TEST_DIR], source))
+    steps.append(BuildStep(["make", "test"], build_dir, log="make_test.log"))
     if install:
         steps += [
             BuildStep(["sudo", "make", "install"], build_dir),

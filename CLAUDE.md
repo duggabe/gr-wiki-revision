@@ -15,7 +15,10 @@ dependencies with `apt-get` only, the other builds GNU Radio from a clone
 already on the machine.
 
 **Current state (2026-10-12):** two releases, both with GitHub Releases.
-**Phase 2 = `v2.0`** (the GitHub "Latest" release; UHD from the Ettus
+**Phase 2 = `v2.1`** (tag only, 2026-10-12: the builder removes GNU
+Radio's generated GRC test files before `make test`, since with `v2.0`
+every `make test` after the first failed on `main`; README and wiki
+link `v2.1`) on top of **`v2.0`** (the GitHub "Latest" release; UHD from the Ettus
 PPA, then GNU Radio built from a clone already on the machine, for GNU
 Radio developers), two self-contained scripts,
 `gnuradio_dependencies_installer.py` and `gnuradio_clone_builder.py`.
@@ -178,7 +181,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   changes branches; reuses an existing `build/`, so it serves the edit →
   rebuild loop. Steps: `mkdir build` (first time) or `sudo chown -R` the
   build dir back to the user if `sudo make install` left root-owned files
-  → cmake / make / make test, tee'd to `cmake.log` / `make.log` /
+  → cmake / make → (since `v2.1`) `git clean -fdX grc/tests/resources` in
+  the source dir → make test, tee'd to `cmake.log` / `make.log` /
   `make_test.log` → `sudo make install` → `sudo ldconfig`. `make` jobs =
   `min(nproc - 1, MemTotal // 2 GB)`, at least 1. Aborts if the directory
   isn't GNU Radio source, `libuhd-dev` isn't installed, Ubuntu's `gnuradio`
@@ -535,6 +539,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   job is my estimate, not measured. Phase 1 `v1.2` still uses plain
   `nproc - 1`; the Phase 1 scripts on `main` have the same limit since
   2026-10-10 (tag `v1.3`).
+- **The builder cleans GNU Radio's generated GRC test files before
+  every `make test`** (user, 2026-10-12, `v2.1`): `git clean -fdX
+  grc/tests/resources`, git-ignored files in that one directory only.
+  It is the one place the builder modifies the source tree; accepted
+  because without it every `make test` after the first fails on a
+  `main` build (no `gr-qtgui`). It works around an upstream test
+  weakness; drop it if upstream fixes that.
 - **GitHub Releases** exist for `v2.0` (Latest) and `v1.2` (created with
   `--latest=false`), each with its scripts attached as they are at the
   tag; `v1.0`, `v1.1`, and `v1.3` are tags only (`v1.3` by the user's
@@ -964,7 +975,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     - 2026-10-12: **GMKtec, `main`: GNU Radio
       v3.11.0.0git-1193-g0403558f, 271 of 271 tests passed** (user's
       report). The same commit and test count as the 2026-10-10 test
-      there, so upstream `main` has not moved and the result repeats.
+      there, so the result repeats. (I first wrote that upstream `main`
+      had not moved — wrong: checked later that day, `gnuradio/gnuradio`
+      `main` is 3 commits past `0403558f`, all gr-dtv / CI. The clone
+      on the GMKtec is evidently at an unsynced `main`, presumably the
+      user's fork.)
       A clean 26.04 install with the `v2.0` scripts, as planned (user
       confirmed). UHD version and enabled components were not reported.
     - 2026-10-12: **hardware test, first step: `uhd_find_devices` finds
@@ -1100,6 +1115,72 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       name, and a closing paragraph says a `maint-3.10` build does not
       need the cleanup. The user then updated the live page from the
       draft — **live page = local draft again, 2026-10-12**.
+    - 2026-10-12: **first failure: GMKtec switched back `maint-3.10`
+      → `main`: 270 of 271, test 28 failed** (user; "they are working
+      on the GRC" — the user's explanation, i.e. upstream GRC work).
+      Test 28 is `grc_tests` (confirmed by the user from the GMKtec's
+      output: "28 - grc_tests (Failed)"). **Cause not established.** Against the
+      upstream explanation: the same commit (-1193, if the clone was
+      not pulled — not confirmed) passed 271/271 on this machine that
+      morning, and the 3 newer upstream commits touch only gr-dtv and
+      CI. What differs is that `maint-3.10` was built, tested, and
+      installed in between, so something left by that is my suspicion
+      — the 2026-10-03 `grc_tests` failure was of this kind (empty
+      leftover directories), though the builder's stale-directory check
+      passed this time. Candidates, all unchecked: untracked leftovers
+      in the source tree after `git checkout` (e.g. `__pycache__`
+      directories of files that exist only on `maint-3.10`), GRC's
+      block cache under `~/.cache`, an install directory outside
+      `INSTALL_DIR_PATTERNS`. Asked the user for the test's output.
+      Since a failing test stops the builder before `sudo make
+      install`, the GMKtec currently has no GNU Radio installed. If the
+      cause is a leftover, the wiki's "Changing branches..." steps
+      need another step.
+    - 2026-10-12: **cause of the `grc_tests` failure found** (the
+      "cause not established" entry above is superseded). The user's
+      output: pytest "2 errors during collection" for
+      `grc/tests/resources/test_python_hb_qt_gui_workflow.py` and
+      `test_python_qt_gui_workflow.py`. Those two files are not in git:
+      **GNU Radio's GRC tests generate them into the source tree**
+      (`grc/tests/resources/`, listed in `grc/tests/.gitignore`), and
+      their names match pytest's `test_*.py`, so the *next* `make test`
+      collects them as test modules. They start with `from gnuradio
+      import qtgui`, which a `main` build does not have (no Qt6 Qwt), so
+      collection fails and `grc_tests` is reported failed. Reproduced
+      on the LENOVO with the same pytest command in `--collect-only`
+      mode: same two errors (its files date from the 2026-10-11 run).
+      So this is **not the branch change and not a leftover of the
+      install**: on a `main` build without `gr-qtgui`, the first `make
+      test` in a fresh clone passes and **every later one fails** —
+      which hits the builder's main use, the edit → rebuild loop, and
+      means the LENOVO's next run would fail too. (Why the LENOVO's
+      2026-10-11 run passed: presumably the files did not exist before
+      it — not verified.) A `maint-3.10` build is not affected as far
+      as seen (it has `gr-qtgui`, so the import works; 269/269 on the
+      GMKtec was a first run there, though). It is an upstream test
+      weakness, exposed by building `main` without Qt6. **Workaround
+      (dry-run checked on the LENOVO, removes only the 16 gitignored
+      generated entries): `git -C ~/gnuradio clean -fdX
+      grc/tests/resources`** before running the builder.
+    - 2026-10-12: **fix written and tagged `v2.1`** (user's decision:
+      the builder runs the cleanup itself "so readers never see the
+      failure"). `gnuradio_clone_builder.py` now has a step `git clean
+      -fdX grc/tests/resources` (in the source dir, as the build user)
+      between `make` and `make test`, added only if the source dir has
+      `.git` and that directory exists (`GENERATED_TEST_DIR`).
+      `gnuradio_dependencies_installer.py` is unchanged. Tested on the
+      LENOVO with GNU Radio's own `grc_tests_test.sh`: files present →
+      2 collection errors; the builder's step (run through
+      `run_build_steps()`) removed the 16 generated entries → 41
+      passed; a rerun without the step → 2 errors again. **Not yet
+      tested: a full builder run with the new step** (LENOVO or
+      GMKtec). README: download link and intro on `v2.1`, a paragraph
+      in Step 2, a `v2.1` entry in "Phase 2 releases", and the 270/271
+      run in "Phase 2 tested builds". Local wiki draft: links on
+      `v2.1`, the `git clean` line in the equivalent commands, and a
+      bullet explaining it — **draft ahead of the live page** until the
+      user copies it. No GitHub Release for `v2.1` yet (`v2.0` is still
+      "Latest"); not asked for.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

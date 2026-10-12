@@ -1172,9 +1172,24 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       LENOVO with GNU Radio's own `grc_tests_test.sh`: files present →
       2 collection errors; the builder's step (run through
       `run_build_steps()`) removed the 16 generated entries → 41
-      passed; a rerun without the step → 2 errors again. **Not yet
-      tested: a full builder run with the new step** (LENOVO or
-      GMKtec). README: download link and intro on `v2.1`, a paragraph
+      passed; a rerun without the step → 2 errors again. Pushed
+      (`main` at `22e2ca3`, tag `v2.1`; both raw links checked).
+      **Full builder run with `v2.1` on the GMKtec: 271 of 271 tests
+      passed** (user, 2026-10-12) — the same clone and `main` checkout
+      that had just failed 270/271 with `v2.0`, so the fix is confirmed
+      end to end, and with it the branch change `maint-3.10` → `main`.
+      (Taken to be the `v2.1` builder downloaded from the tag, as I had
+      suggested — my assumption.) `gnuradio-config-info --version`:
+      v3.11.0.0git-1193-g0403558f (pasted). **`--enabled-components`
+      for a clean Phase 2 `main` build, first time captured (pasted):
+      40 components.** Against the 42 of `maint-3.10` on the same
+      machine: no `gr-qtgui` (expected) and no `* thrift` (`gr-ctrlport`
+      itself is enabled, without its Thrift back-end — not known
+      before; cause not looked into); `doxygen` is named
+      `doxygen-documentation` on `main`. Everything else is there,
+      incl. `gr-fec`, `gr-dtv`, `gr-vocoder` + codec2/freedv/gsm,
+      `gr-iio` + `libad9361`, `gr-soapy`, `gr-uhd` + RFNoC, JACK,
+      PortAudio. README: download link and intro on `v2.1`, a paragraph
       in Step 2, a `v2.1` entry in "Phase 2 releases", and the 270/271
       run in "Phase 2 tested builds". Local wiki draft: links on
       `v2.1`, the `git clean` line in the equivalent commands, and a

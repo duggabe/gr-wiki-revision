@@ -251,7 +251,9 @@ branch built from a fork:
 
 The build finished without errors. A second run on 2026-10-12, on the same
 machine after another clean install of Ubuntu 26.04, gave the same result: v3.11.0.0git-1193-g0403558f, 271 of 271
-tests passed.
+tests passed. A `main` build on that machine has 40 components enabled: all
+those of a `maint-3.10` build except `gr-qtgui` and the Thrift back-end of
+`gr-ctrlport`.
 
 **`v2.0`, 2026-10-12, changing branches on Ubuntu 26.04.** On that same
 clean install, the installed `main` build was removed with the steps in
@@ -279,6 +281,11 @@ Ubuntu releases and branches.)
 the `maint-3.10` build above, `main` was checked out again and rebuilt:
 `make test` passed 270 of 271 tests, with `grc_tests` failing. This is the
 problem fixed in `v2.1`; see [Phase 2 releases](#phase-2-releases).
+
+**`v2.1`, 2026-10-12, the same build again.** With the `v2.1` builder, in
+the same clone with the same `main` checkout, `make test` passed 271 of 271
+tests and GNU Radio was installed. That also completes a branch change in
+both directions on Ubuntu 26.04: `main` to `maint-3.10` and back.
 
 **`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
 tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD

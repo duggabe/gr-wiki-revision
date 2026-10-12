@@ -1056,7 +1056,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       not checked). Not reported: the
       leftover-library listing, `dpkg -l 'libuhd*'`. Added to README
       "Phase 2 tested builds" and the local wiki draft's status line
-      (**draft ahead of the live page again**, in that one sentence).
+      (the draft was ahead of the live page in that one sentence until
+      the user updated the live page from the draft later that day —
+      **live page = local draft again, 2026-10-12**).
     - 2026-10-12: **`libuhd4.9.0` removed from the LENOVO** (user ran
       `sudo apt-get remove soapysdr0.8-module-all soapysdr0.8-module-uhd`
       then `sudo apt autoremove`; checked in `/var/log/apt/history.log`).

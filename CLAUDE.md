@@ -1208,6 +1208,15 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       known limitations; the two Phase 2 scripts as they are at the tag
       are attached. The `v2.0` Release is unchanged apart from losing
       the "Latest" mark.
+    - 2026-10-12: **the other tester's hardware problem is with
+      Soapy, on both `main` and `maint-3.10`** (user). Still unknown:
+      the device, the SoapySDR driver, and the error. Failing on both
+      branches points away from the GNU Radio branch and toward
+      SoapySDR itself, its device module, or permissions (my reading).
+      Asked which branch he should run, I recommended `maint-3.10`, and
+      first the GNU Radio-independent checks: `SoapySDRUtil --info`,
+      `SoapySDRUtil --find`, `SoapySDRUtil --probe="driver=<name>"`,
+      and `dpkg -l 'soapysdr*' 'libuhd*'`.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

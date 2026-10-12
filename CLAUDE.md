@@ -994,6 +994,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
     - **2026-10-12: live wiki page = local draft again** (user): the
       whole draft was pasted into the page and the wiki's differences
       view checked. So the three changes above are live.
+    - 2026-10-12 (user's request): the `v2.0` Release notes' "Tested"
+      section got the B200mini hardware test (a paragraph and the same
+      three-row table as the README). Tag, title, and attached scripts
+      unchanged. The notes do not mention the second clean 26.04 run.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

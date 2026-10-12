@@ -933,8 +933,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       unknown; `maint-3.10` also has one test fewer on 24.04). Added to
       README "Phase 2 tested builds" and the local wiki draft's status
       line. The `v2.0` Release notes got a line for this run in their
-      "Tested" section the same day (user's request). Whether the live
-      page's status line was updated is not known.
+      "Tested" section the same day (user's request). The user updated
+      the live page's status line the same day (user's report; exact
+      wording not seen).
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

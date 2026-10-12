@@ -969,7 +969,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       current libraries remain and `from gnuradio import gr, blocks, uhd`
       still works), and "replaces the old one" reworded. Seen on `main` only;
       not checked on `maint-3.10`. The user updated the live page the same
-      day (user's report; exact wording not seen). As always, `sudo make install` left root-owned
+      day.
+    - **2026-10-11: live wiki page = local draft, confirmed.** The user
+      copied the whole of `wiki-draft-download-section.txt` into the wiki
+      page and checked the wiki's differences view: "it all looks good".
+      So earlier "exact wording not seen" notes in this file are
+      superseded: as of this date the live page's text is exactly the
+      local file's. As always, `sudo make install` left root-owned
       files in `build/` again (147). Still on the LENOVO: the unneeded
       `/etc/udev/rules.d/60-uhd-host.rules` copy; `sudo apt autoremove`
       not run. A full from-scratch build there (the wiki's "Changing

@@ -31,9 +31,15 @@ tests, twice; no `gr-qtgui`) and, after the "Changing branches..."
 steps, with `maint-3.10` (3.10.12.0, 269/269, 42 components); Ubuntu
 24.04 with `maint-3.10` (3.10.12.0, 268/268, 42 components incl.
 `gr-qtgui`) and, by a second tester on a clean install, with `main`
-(267/267); a rebuild in place on the LENOVO (fork, 247/247 with FEC /
-VOCODER / CTRLPORT off); and real hardware on the LENOVO, a USRP
-B200mini found, probed, and received from through gr-uhd.
+(267/267), and from a fork with `maint-3.10` (`v2.1`, 268/268, 42
+components); the LENOVO (26.04) with a rebuild in place of `main`
+(fork, 247/247 with FEC / VOCODER / CTRLPORT off) and then a full
+from-scratch build of `maint-3.10` at `-j7` (269/269, 42 components,
+no out-of-memory kill, so the memory limit is exercised). Hardware: on
+the LENOVO a USRP B200mini found, probed, and received from through
+gr-uhd, and an RTL-SDR found by SoapySDR; on the second tester's 24.04
+machine, flowgraphs with an RTL-SDR through gr-soapy and a B200mini
+through gr-uhd.
 **Phase 1 = `v1.2`** (UHD and GNU Radio built from source): tested on
 Ubuntu 24.04 (clean install) and 26.04 — UHD 4.11.0.0 and GNU Radio
 3.10.12.0 (`maint-3.10`) with all 42 components, all tests passing;
@@ -44,10 +50,12 @@ so.** The README and the wiki page have Phase 2 first and stand-alone,
 then Phase 1; the live wiki page "Building GNU Radio from Source Code"
 equals the local draft as of 2026-10-13. Tags `v1.0`, `v1.1`, and `v1.3`
 (memory-aware `make` jobs for Phase 1, never built for real, links still
-on `v1.2`) have no Release. Nothing is waiting on anyone. Open: details
-of the other tester's hardware problem; a full from-scratch build on a
-many-core machine (the memory limit); the `main`/Qt6 path (Qwt for Qt6).
-Details are in Next steps 12 and 13.
+on `v1.2`) have no Release. Nothing is waiting on anyone. The other
+tester's hardware problem is solved (missing SoapySDR modules, fixed in
+`v2.2`). Open: `v2.2` Step 1 on 24.04 and on a clean install; B200mini
+transmit; the `main`/Qt6 path (Qwt for Qt6); an upstream report of the
+`grc_tests` weakness (drafted, not filed). Details are in Next steps 12
+and 13.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
 and programs supporting GNU Radio Wiki documents, which the user writes.
@@ -80,7 +88,7 @@ from here — ask the user to paste page content.
 | Machine | Ubuntu | Role |
 | --- | --- | --- |
 | Laptop | 24.04 | `~/AIwork` trial; 24.04 testing, with both the bash script + the wiki's manual steps and the Python installers. 2026-10-10: Phase 2 (`v2.0`) with `maint-3.10` — all passed |
-| LENOVO desktop | 26.04 | current working machine, `~/gr-wiki-revision`; 26.04 builds of UHD, Volk, GNU Radio. Reloaded with a fresh 26.04 on 2026-10-08 (16 cores, 15 GiB RAM, 4 GB swap); since then UHD from the Ettus PPA and a hand-built GNU Radio `main` in `/usr/local`; `~/gnuradio` is the user's fork |
+| LENOVO desktop | 26.04 | current working machine, `~/gr-wiki-revision`; 26.04 builds of UHD, Volk, GNU Radio. Reloaded with a fresh 26.04 on 2026-10-08 (16 cores, 15 GiB RAM, 4 GB swap); since then UHD from the Ettus PPA. Since 2026-10-12 `~/gnuradio` is a plain clone of `gnuradio/gnuradio` on `maint-3.10` (the earlier fork clone is gone), built with the Phase 2 builder: GNU Radio 3.10.12.0 in `/usr/local`, 42 components. Hardware tests here: USRP B200mini, RTL-SDR. 2026-10-13: `v2.2` Step 1 run for real (13 SoapySDR modules) |
 | GMKtec (clean install) | reloaded per test: 24.04, 26.04.1, 24.04, 26.04 | 2026-09-26: 24.04, tested the wiki page (`v1.0`) from scratch. 2026-10-03: fresh 26.04.1, tested `v1.1`. 2026-10-04: fresh 24.04, tested the current `main` scripts (dependency step, `maint-3.10`) — all passed. 2026-10-10: fresh 26.04, tested Phase 2 (`main`) — all passed |
 
 Ettus has Dockerfiles for both (`uhd-builder-ubuntu2404.Dockerfile` and
@@ -211,7 +219,7 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 - **`README.md`** — user-facing docs, restructured 2026-10-11 so that
   **Phase 2 stands alone and Phase 1 can be removed in one cut**: a short
   intro with one bullet per phase; then `## Phase 2: UHD from the Ettus
-  PPA, GNU Radio from your fork` (download with `v2.0` links, before you
+  PPA, GNU Radio from your fork` (download with `v2.2` links, before you
   start, Step 1 and Step 2 with options tables and the memory note,
   "Changing branches, or removing the installed GNU Radio", "Phase 2
   tested builds", "Phase 2 known limitation", "Phase 2 releases") — it has
@@ -234,12 +242,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   2026-10-10: the user's introduction (Phase 2 goals first, then "Phase 1
   goals (completed)", notes on OOT modules, the README link, and
   "bare-metal" = non-container) → `== Phase 2 ==` (status line: tested on
-  a clean 26.04 with `main` and on 24.04 with `maint-3.10`; downloading the
-  two scripts via `v2.0` raw links; before you start; Step 1; Step 2:
+  clean installs of 26.04 and 24.04 with `main`, on both with
+  `maint-3.10`, and with a B200mini and an RTL-SDR; downloading the
+  two scripts via `v2.2` raw links; before you start; Step 1; Step 2:
   getting the source code, starting a branch, building/testing/installing
   incl. the memory note, the `main`-lacks-`gr-qtgui` note and the
-  `maint-3.10` paragraph, making and submitting a change; checking the
-  result) → `== Phase 1 ==` (the `v1.2` text, unchanged since 2026-10-04:
+  `maint-3.10` paragraph, making and submitting a change, "Changing
+  branches, or removing the installed GNU Radio"; checking the result,
+  with the USRP and SoapySDR paragraphs) → `== Phase 1 ==` (the `v1.2` text, unchanged since 2026-10-04:
   two scripts via tag-pinned raw links, where the dependency lists come
   from, `--branch`, build logs and `make test`, replacing an earlier
   install, checking the result). History: first drafted 2026-09-26,

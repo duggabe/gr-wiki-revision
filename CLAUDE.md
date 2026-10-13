@@ -15,7 +15,7 @@ dependencies with `apt-get` only, the other builds GNU Radio from a clone
 already on the machine.
 
 **Current state (2026-10-13):** GitHub Releases for `v2.2`, `v2.1`,
-`v2.0`, and `v1.2`.
+and `v2.0` (the `v1.2` Release was deleted 2026-10-13; its tag stays).
 **Phase 2 = `v2.2`** (the GitHub "Latest" release since 2026-10-13,
 pushed, Step 1 run for real on the LENOVO: Step 1 also installs
 SoapySDR's device modules, without which `gr-soapy` found no devices;
@@ -44,11 +44,13 @@ through gr-uhd.
 Ubuntu 24.04 (clean install) and 26.04 — UHD 4.11.0.0 and GNU Radio
 3.10.12.0 (`maint-3.10`) with all 42 components, all tests passing;
 reviewed by the GNU Radio developers and documentation people with no
-negative comments. **Direction (user, 2026-10-11): Phase 2 only; Phase 1
-will become history, but removing it is on hold until the user says
-so.** The README and the wiki page have Phase 2 first and stand-alone,
-then Phase 1; the live wiki page "Building GNU Radio from Source Code"
-equals the local draft as of 2026-10-13. Tags `v1.0`, `v1.1`, and `v1.3`
+negative comments. **Phase 1 was cut from the README and the local wiki
+draft on 2026-10-13 (user: "we are ready to cut Phase 1 from the README
+and from the wiki page"); both now describe Phase 2 only, and the user
+plans further editing of both.** The Phase 1 scripts, dependency lists,
+tags, and the `v1.2` Release are still in the repo (removing them was
+not asked for). The live wiki page "Building GNU Radio from Source
+Code" still has Phase 1 until the user updates it from the draft. Tags `v1.0`, `v1.1`, and `v1.3`
 (memory-aware `make` jobs for Phase 1, never built for real, links still
 on `v1.2`) have no Release. Nothing is waiting on anyone. The other
 tester's hardware problem is solved (missing SoapySDR modules, fixed in
@@ -216,8 +218,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   International (CC BY-SA 4.0), added 2026-09-24. Note that Creative
   Commons advises against its licenses for software; kept as-is by choice.
 
-- **`README.md`** — user-facing docs, restructured 2026-10-11 so that
-  **Phase 2 stands alone and Phase 1 can be removed in one cut**: a short
+- **`README.md`** — user-facing docs. **Since 2026-10-13 it is Phase 2
+  only** (389 lines): the short intro with the one Phase 2 bullet, then
+  the `## Phase 2` section described below; the `## Phase 1` section and
+  its intro bullet are gone (last present at commit `ae69854` and at the
+  `v2.2` tag). Still says "Phase 2" throughout; further editing is the
+  user's plan. Before the cut (restructured 2026-10-11 so that
+  **Phase 2 stands alone and Phase 1 can be removed in one cut**): a short
   intro with one bullet per phase; then `## Phase 2: UHD from the Ettus
   PPA, GNU Radio from your fork` (download with `v2.2` links, before you
   start, Step 1 and Step 2 with options tables and the memory note,
@@ -238,8 +245,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   not on GitHub or other machines): the user's copy, in MediaWiki markup,
   of the **live wiki page** "Building GNU Radio from Source Code". Treat
   the wiki as the master copy; after the user edits the live page, the
-  local file is only current if they paste it back. Structure since
-  2026-10-10: the user's introduction (Phase 2 goals first, then "Phase 1
+  local file is only current if they paste it back. **Since 2026-10-13
+  the local file is Phase 2 only** (242 lines): `== Phase 1 ==` to the
+  end is cut, and in the user's introduction the "two phases" sentence
+  and the "Phase 1 goals (completed)" list are removed and "rather than
+  the Phase 1 methods" reads "rather than building UHD from source" (my
+  wording). The introduction now opens directly with "Phase 2 goals are
+  to:", which needs the user's own editing. Structure from 2026-10-10
+  until the cut: the user's introduction (Phase 2 goals first, then "Phase 1
   goals (completed)", notes on OOT modules, the README link, and
   "bare-metal" = non-container) → `== Phase 2 ==` (status line: tested on
   clean installs of 26.04 and 24.04 with `main`, on both with
@@ -537,9 +550,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   material for Phase 2. Nothing has been removed: the Phase 1 scripts,
   tags, `v1.2` Release, README sections, and the wiki's Phase 1 section
   all still exist. The Phase 2 scripts import nothing from Phase 1, so
-  retiring Phase 1 breaks nothing in them. **Wait on removing Phase 1
-  (user, 2026-10-11): do not remove it from the README, the wiki draft,
-  or the repo until the user says so.**
+  retiring Phase 1 breaks nothing in them. The 2026-10-11 hold on
+  removing Phase 1 was lifted for the **README and the wiki page** on
+  2026-10-13 (done, see Next step 13). **The repo itself was not
+  named: leave the Phase 1 scripts and lists in place until the user
+  says so.**
 - **Phase 2 is two steps, for GNU Radio developers** (user, 2026-10-09):
   Step 1 installs everything with `apt-get`; Step 2 builds a clone the
   user made by hand in `$HOME` (normally their fork, to test an issue and
@@ -1466,6 +1481,57 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       line naming the B200mini on both releases and the RTL-SDR on
       24.04. Earlier "draft is ahead of the live page" notes are
       superseded.
+    - **2026-10-13: Phase 1 cut from the README and the local wiki
+      draft** (user: "we are ready to cut Phase 1 from the README and
+      from the wiki page. After that there will be additional editing
+      on both docs"). README: the `## Phase 1` section to the end of
+      the file and the Phase 1 bullet in the intro (834 → 389 lines).
+      Wiki draft: `== Phase 1 ==` to the end, plus the three intro
+      edits listed under Files (368 → 242 lines). Neither file now
+      mentions Phase 1, `v1.x`, or the `*_bare_metal_installer.py`
+      scripts. **The draft is ahead of the live page** until the user
+      pastes it in. Not touched: the Phase 1 scripts and dependency
+      lists in the repo, the tags, the `v1.2` Release, and the Release
+      notes of `v2.x`. The README no longer tells anyone what the
+      Phase 1 files in the repo are. Both docs still call the method
+      "Phase 2" (headings, anchors, status lines); renaming is left to
+      the user's further editing.
+    - **2026-10-13: all mention of phases removed from the README and
+      the local wiki draft** (user: "We want to remove all mention of
+      Phases at all - as if there had not been a Phase 1"). This
+      supersedes the "still call the method Phase 2" notes above and
+      the "Phase 2 ..." heading names given under Files. README: the
+      intro bullet became two paragraphs; the `##` heading is "UHD from
+      the Ettus PPA, GNU Radio from your fork"; sub-headings are
+      "Download the scripts", "Tested builds", "Known limitation",
+      "Releases" (anchors `#tested-builds`, `#known-limitation`,
+      `#releases`); "Phase 2 has/needs/was" became "The scripts ...".
+      Wiki draft: the `== Phase 2 ==` heading is gone and every heading
+      is promoted one level (`===` → `==`, `====` → `===`), so the
+      status line and the two-step overview now sit above the first
+      heading; the intro reads "The goals of these instructions are
+      to:" and "They are useful when..." (my wording in the user's
+      intro). Neither file contains the word "phase". Left alone and
+      flagged to the user: the intro's note that "bare-metal" means
+      "non-container" (the page no longer uses the word), and `v2.0`
+      being called "the first release" in the README. In this file and
+      in conversation "Phase 1" / "Phase 2" remain the working names.
+      **The draft is ahead of the live page.**
+    - **2026-10-13: the `v1.2` GitHub Release was deleted** (user:
+      "option 2" — delete the Release, keep the tags). All seven tags
+      remain and the `v1.x` raw links still work. Releases are now
+      `v2.2` (Latest), `v2.1`, `v2.0` only; earlier statements in this
+      file that a `v1.2` Release exists are superseded. Its notes and
+      asset list are saved in `~/v1.2-release-notes-backup.json` on the
+      LENOVO. Then (user's request, same day) the `v2.x` Release
+      titles and notes were reworded to match: the `v2.0` title is
+      "v2.0: UHD from the Ettus PPA, GNU Radio from your fork"; no
+      note mentions phases, `v1.x`, or the `*_bare_metal_installer.py`
+      scripts (the `v2.0` paragraph about the Phase 1 installers is
+      removed). Their README links use the new anchor
+      `#uhd-from-the-ettus-ppa-gnu-radio-from-your-fork`, which exists
+      on GitHub only once the README is pushed. Tags, `v2.1`/`v2.2`
+      titles, attached scripts, and "Latest" unchanged.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

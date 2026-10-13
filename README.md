@@ -307,8 +307,11 @@ enabled, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and `gr-soapy`.
 **`v2.1`, 2026-10-12, an RTL-SDR on Ubuntu 24.04.** On the second tester's
 machine `SoapySDRUtil --find` found no devices, because no SoapySDR device
 modules were installed. After `sudo apt-get install
-soapysdr0.8-module-rtlsdr` the RTL-SDR was found. `v2.2` installs the
-modules in Step 1.
+soapysdr0.8-module-rtlsdr` the RTL-SDR was found and probed
+(`SoapySDRUtil --find`, `--probe="driver=rtlsdr"`), as a normal user and
+without blacklisting the kernel's DVB driver. `v2.2` installs the modules
+in Step 1. The tester then ran GNU Radio flowgraphs on that machine with
+the RTL-SDR through `gr-soapy` and with a USRP B200mini through `gr-uhd`.
 
 **`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
 tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD

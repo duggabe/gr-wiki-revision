@@ -1380,6 +1380,29 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       `SoapySDRUtil --info`), then push `main` and the tag on the
       user's word, then the live wiki page from the draft, and a
       GitHub Release for `v2.2` if the user asks.
+    - 2026-10-13: **the other tester's SoapySDR check outputs**
+      (`~/Downloads/Soapy-test-results.txt`, read on the LENOVO; his
+      24.04 machine, after installing `soapysdr0.8-module-rtlsdr`):
+      `SoapySDRUtil --info` finds one module, `librtlsdrSupport.so`
+      (0.3.3), factory `rtlsdr`; `--find` lists the dongle (Generic
+      RTL2832U OEM, RTL2838UHIDIR, Rafael Micro R820T tuner);
+      `--probe="driver=rtlsdr"` opens it and prints its properties
+      (1 Rx channel, 24–1764 MHz, 0–49.6 dB gain, sample rates up to
+      3.2 MSps); `lsusb` shows `0bda:2838`. The library detaches and
+      reattaches the kernel's DVB driver by itself ("Detached kernel
+      driver" / "Reattached kernel driver"), so no blacklisting is
+      needed, and it ran as a normal user. So one module package is
+      all an RTL-SDR needs on 24.04 — which is what `v2.2`'s Step 1
+      installs. **He has also run a flowgraph with the RTL-SDR and
+      with an Ettus B200mini using UHD** (user, same day) — so on
+      24.04 (`maint-3.10`, `v2.1` scripts) both `gr-uhd` and an
+      RTL-SDR work in a flowgraph; the RTL-SDR flowgraph used Soapy
+      (user confirmed); whether the B200mini flowgraph transmitted is
+      not known. The user may test B200mini transmit on the LENOVO
+      (26.04) and maybe on the 24.04 laptop.
+      Added to README "Phase 2 tested builds" and the local wiki
+      draft's status line (one more place where the draft is ahead of
+      the live page).
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

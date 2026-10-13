@@ -16,7 +16,10 @@ already on the machine.
 
 **Current state (2026-10-12):** GitHub Releases for `v2.1`, `v2.0`,
 and `v1.2`.
-**Phase 2 = `v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
+**Phase 2 = `v2.2`** (2026-10-12, tag only so far: Step 1 also installs
+SoapySDR's device modules, without which `gr-soapy` found no devices;
+README and wiki draft link `v2.2`; see the end of Next step 13 for
+whether it is pushed and tested) on top of **`v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
 Radio's generated GRC test files before `make test`, since with `v2.0`
 every `make test` after the first failed on `main`; README and wiki
 link `v2.1`) on top of **`v2.0`** (the first Phase 2 release; UHD from the Ettus
@@ -170,7 +173,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   `add-apt-repository -y ppa:ettusresearch/uhd` → `apt-get install -y
   --no-install-recommends uhd-host libuhd-dev` → `apt-get build-dep -y
   gnuradio` → `apt-get install -y python3-qtpy python3-pyqtgraph
-  python3-matplotlib soapysdr-tools` → `uhd_images_downloader`. Options:
+  python3-matplotlib soapysdr-tools` → (since `v2.2`) `apt-get install -y`
+  the SoapySDR device modules → `uhd_images_downloader`. The module list
+  is worked out at that point by `soapy_module_packages()`: the Depends of
+  `soapysdr-module-all` (followed through `soapysdr0.8-module-all`) per
+  `apt-cache depends`, minus `SOAPY_SKIP_MODULES` (`uhd`); 13 packages on
+  26.04, 11 expected on 24.04; a warning and no install if apt does not
+  know the metapackage. Options:
   `--dry-run`, `-y`, `--no-images`, `--sources-path`, `--os-release-path`.
 
 - **`gnuradio_clone_builder.py`** — **Phase 2, Step 2** (in `v2.0`).
@@ -547,6 +556,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   because without it every `make test` after the first fails on a
   `main` build (no `gr-qtgui`). It works around an upstream test
   weakness; drop it if upstream fixes that.
+- **Step 1 installs SoapySDR's device modules, all but the UHD one**
+  (user, 2026-10-12, `v2.2`; chosen over only documenting it). They are
+  Recommends of `libsoapysdr0.8`, which `apt-get build-dep` does not
+  install, so `v2.0`/`v2.1` machines had `gr-soapy` with no drivers. The
+  UHD module is left out because it depends on Ubuntu's own UHD library
+  (4.9 on 26.04), which would sit next to the PPA's. The list comes from
+  apt at run time, not hardcoded, since it differs per release.
 - **GitHub Releases** exist for `v2.1` (Latest, since 2026-10-12),
   `v2.0`, and `v1.2` (created with `--latest=false`), each with its scripts attached as they are at the
   tag; `v1.0`, `v1.1`, and `v1.3` are tags only (`v1.3` by the user's
@@ -1264,6 +1280,96 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       **Live page = local draft again, 2026-10-12.** Also drafted for the user, on request,
       the text of an upstream issue report about `grc_tests` (not
       filed by me).
+    - 2026-10-12: **another result from the other tester: "100% tests
+      passed, 0 tests failed out of 268"** (user; first reported as
+      267, then corrected: "my mistake"), on **`maint-3.10`, Ubuntu
+      24.04** (pasted: `uhd_config_info --version` UHD
+      4.11.0.0-0ubuntu1~noble3, GNU Radio 3.10.12.0), with the
+      **`v2.1`** scripts. 268 is the count of the user's own 24.04
+      `maint-3.10` build, which has all 42 components. His commands
+      (pasted): the two `v2.1` scripts by `wget`, Step 1, `git clone`
+      of his fork (`jesternofool/gnuradio`), `git remote add
+      upstream`, `git fetch upstream`, `git checkout maint-3.10`, then
+      the builder. His fork has only `main` (checked with `gh api`),
+      so `git checkout maint-3.10` made a local branch from
+      `upstream/maint-3.10` by itself (git does that when exactly one
+      remote has the name): **first Phase 2 build from a fork on
+      `maint-3.10`, and from a fork on 24.04**, with a shorter command
+      than the wiki's `git checkout -b <name> upstream/maint-3.10`.
+      `--enabled-components`: **42 components**, incl. `gr-uhd` + RFNoC,
+      `gr-qtgui`, `gr-iio`, `gr-soapy`, thrift (his first paste had 40,
+      without the two `gr-uhd` entries, and went with the mistaken
+      267; the revised paste has all 42, so the build was complete all
+      along and my search for a cause of a missing `gr-uhd` — a Boost
+      `filesystem` theory — is moot). Whether his 24.04 was a clean
+      install this time was not said. Added the same day to README
+      "Phase 2 tested builds" and, in the local wiki draft, to the
+      fork paragraph of the `maint-3.10` text ("usually does not work"
+      became "may fail at first... after `git fetch upstream`, a plain
+      `git checkout maint-3.10` works"; the `checkout -b` commands
+      stay). **The draft is ahead of the live page in that one
+      sentence.** Not added to the `v2.1` Release notes.
+    - 2026-10-12: **other tester's Soapy problem, first output:
+      `SoapySDRUtil --find` prints "No devices found!"** (pasted; on
+      his 24.04 `maint-3.10` machine, as far as known). So SoapySDR
+      itself does not see the device and the problem is below GNU
+      Radio (which is why it shows on both branches). Still unknown:
+      the device, the `--info` output (which driver modules are
+      loaded), the `dpkg -l` output, and whether the device was
+      plugged in. Asked for `lsusb`, `SoapySDRUtil --info`, and
+      `dpkg -l 'soapysdr*' 'libuhd*'`.
+    - 2026-10-12: **cause of the other tester's Soapy problem: no
+      SoapySDR driver modules are installed** (pasted `SoapySDRUtil
+      --info`: lib v0.8.1-4build1, all three module search paths
+      "(missing)", "No modules found!", "No factories found!"). **This
+      is a Phase 2 gap, not his machine:** Step 1 gets `libsoapysdr0.8`
+      through `apt-get build-dep gnuradio` (`libsoapysdr-dev`), and
+      the device modules are only *Recommends* of `libsoapysdr0.8`
+      (`soapysdr0.8-module-all | soapysdr0.8-module`), which
+      `build-dep` evidently does not install; `soapysdr-tools`
+      depends only on the library. So a clean Step 1 machine builds
+      `gr-soapy` but has no device drivers for it. The LENOVO has
+      modules only because the accidental `apt-get install uhd-host
+      libuhd-dev` of 2026-10-08 (Recommends on) brought them
+      (`/var/log/apt/history.log`); the GMKtec having no `libuhd4.9.0`
+      fits too (`soapysdr0.8-module-uhd` would have pulled it). Not
+      checked directly on the GMKtec. Fix for him: install the module
+      for his device, e.g. `sudo apt-get install
+      soapysdr0.8-module-rtlsdr` — **his device is an RTL-SDR**
+      (user, same day), so that is the module; on 24.04 it pulls
+      `librtlsdr2`, and the LENOVO's working set is just
+      `soapysdr0.8-module-rtlsdr` + `librtlsdr0` with its udev rules
+      (the kernel's `dvb_usb_rtl28xxu` driver is loaded there and did
+      not stop `--find`). **Confirmed by the tester the same day:** "I
+      was able to get through installing the SoapySDR RTL-SDR driver
+      and the system is now seeing the SDR." So the missing module was
+      the whole problem. Whether he has run a GRC flowgraph with it
+      was not reported. Avoid
+      `soapysdr0.8-module-all`: it includes `-module-uhd`, which
+      brings Ubuntu's older UHD library next to the PPA's. **Open
+      (user's call): document it, or have Step 1 install the modules
+      (a `v2.2`).** Scripts, README, and wiki draft not changed yet.
+    - 2026-10-12: **`v2.2` written (user: "option 1, make it v2.2").**
+      `gnuradio_dependencies_installer.py` installs the SoapySDR device
+      modules (see Files and Key decisions);
+      `gnuradio_clone_builder.py` is unchanged. Tested on the LENOVO:
+      `--dry-run` lists the 13 modules; the install loop run with the
+      commands mocked substitutes the list correctly and warns and
+      carries on when the metapackage is unknown; `apt-get install -s`
+      of the 13 (Recommends on) would add only the four modules the
+      LENOVO lacks, their libraries, and `limesuite-udev` — no UHD, no
+      GNU Radio. **No real run of the new step yet** (needs sudo), and
+      nothing on 24.04, where the list should be 11 modules (airspy,
+      audio, bladerf, hackrf, lms7, mirisdr, osmosdr, redpitaya,
+      remote, rfspace, rtlsdr; from the noble package index). README:
+      links and intro on `v2.2`, the Step 1 commands and a bullet, a
+      `v2.2` entry in "Phase 2 releases", the RTL-SDR finding in
+      "Phase 2 tested builds". Local wiki draft: links on `v2.2`, a
+      bullet in Step 1's list, and an "If you have an SDR that GNU
+      Radio uses through SoapySDR" paragraph at the end of Phase 2's
+      "Checking the result" — **the draft is ahead of the live page**
+      in those places and the fork sentence. No GitHub Release for
+      `v2.2` yet; `v2.1` is still "Latest".
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

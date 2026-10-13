@@ -17,6 +17,7 @@ It runs the equivalent of:
     sudo apt-get install -y --no-install-recommends uhd-host libuhd-dev
     sudo apt-get build-dep -y gnuradio
     sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools
+    sudo apt-get install -y soapysdr0.8-module-rtlsdr soapysdr0.8-module-hackrf ...
     sudo uhd_images_downloader
 
 Notes on those steps:
@@ -29,6 +30,13 @@ Notes on those steps:
     here. That includes libuhd-dev, which the PPA (added first) provides.
   * The last apt-get line adds run-time packages that a build-dependency list
     doesn't cover.
+  * The second-to-last apt-get line installs SoapySDR's device modules (the
+    drivers gr-soapy uses for an RTL-SDR, HackRF, Airspy, LimeSDR, ...). They
+    are only recommended by the SoapySDR library, and `apt-get build-dep`
+    leaves them out, so without this line gr-soapy would be built but find no
+    devices. The list is whatever Ubuntu's soapysdr-module-all package depends
+    on in this release, except the UHD module: that one needs Ubuntu's own,
+    older UHD library, and USRPs are used through gr-uhd anyway.
   * The uhd-host package installs the udev rules for USRPs itself.
 
 Before changing anything, it stops if it finds something that would conflict:
@@ -73,6 +81,17 @@ EXTRA_PACKAGES = {
     "python3-matplotlib": "imported by GNU Radio's examples and gr-qtgui Python code at run time",
     "soapysdr-tools": "provides SoapySDRUtil, for checking SoapySDR devices used with gr-soapy",
 }
+
+# SoapySDR's device modules: everything this metapackage depends on, except the
+# modules skipped below. Worked out with apt-cache, since the set of modules
+# differs between Ubuntu releases.
+SOAPY_MODULES_METAPACKAGE = "soapysdr-module-all"
+SOAPY_MODULE_PATTERN = re.compile(r"soapysdr[0-9.]*-module-[a-z0-9]+")
+# The UHD module depends on Ubuntu's own UHD library, which would then sit next
+# to the PPA's newer one.
+SOAPY_SKIP_MODULES = ("uhd",)
+# Stands for the module list in the command list until it has been worked out.
+SOAPY_MODULES_PLACEHOLDER = "<SoapySDR device modules>"
 
 # Ubuntu's own GNU Radio, which must not be installed next to a source build.
 CONFLICTING_PACKAGES = ["gnuradio", "gnuradio-dev"]
@@ -133,6 +152,42 @@ def find_source_built_uhd(prefix: str = SOURCE_UHD_PREFIX) -> list[Path]:
     return found
 
 
+def parse_apt_depends(text: str) -> list[str]:
+    """The package names on the "Depends:" lines of `apt-cache depends` output."""
+    return re.findall(r"^\s*\|?Depends:\s*<?([^\s>]+)>?\s*$", text, flags=re.MULTILINE)
+
+
+def soapy_module_packages() -> list[str]:
+    """
+    The SoapySDR device module packages to install: what the metapackage depends
+    on (following its versioned "-module-all" package), minus SOAPY_SKIP_MODULES.
+    Empty if apt doesn't know the metapackage (yet).
+    """
+    modules: set[str] = set()
+    seen: set[str] = set()
+    todo = [SOAPY_MODULES_METAPACKAGE]
+    while todo:
+        package = todo.pop()
+        if package in seen:
+            continue
+        seen.add(package)
+        try:
+            result = subprocess.run(["apt-cache", "depends", package], capture_output=True, text=True)
+        except OSError:
+            return []
+        if result.returncode != 0:
+            continue
+        for name in parse_apt_depends(result.stdout):
+            if not SOAPY_MODULE_PATTERN.fullmatch(name):
+                continue
+            kind = name.rsplit("-module-", 1)[1]
+            if kind == "all":
+                todo.append(name)
+            elif kind not in SOAPY_SKIP_MODULES:
+                modules.add(name)
+    return sorted(modules)
+
+
 def get_commands(download_images: bool) -> list[list[str]]:
     """The commands run (as root) after "Source code" has been enabled."""
     commands = [
@@ -143,6 +198,9 @@ def get_commands(download_images: bool) -> list[list[str]]:
         ["apt-get", "install", "-y", "--no-install-recommends", *UHD_PACKAGES],
         ["apt-get", "build-dep", "-y", "gnuradio"],
         ["apt-get", "install", "-y", *EXTRA_PACKAGES],
+        # Replaced by the real package names when its turn comes: apt only knows
+        # them once the package lists have been refreshed.
+        ["apt-get", "install", "-y", SOAPY_MODULES_PLACEHOLDER],
     ]
     if download_images:
         commands.append(["uhd_images_downloader"])
@@ -277,6 +335,14 @@ def main() -> int:
         print(f"  $ sudo {' '.join(cmd)}")
     for pkg, reason in EXTRA_PACKAGES.items():
         print(f"  added: {pkg} ({reason})")
+    soapy_modules = soapy_module_packages()
+    if soapy_modules:
+        print(f"  {SOAPY_MODULES_PLACEHOLDER}, the drivers gr-soapy uses: " + " ".join(soapy_modules))
+    else:
+        print(
+            f"  {SOAPY_MODULES_PLACEHOLDER}: the drivers gr-soapy uses; the list is worked out "
+            "once the package lists have been refreshed"
+        )
 
     if args.dry_run:
         print("\n--dry-run set: nothing changed.")
@@ -311,6 +377,17 @@ def main() -> int:
     env["DEBIAN_FRONTEND"] = "noninteractive"
     try:
         for cmd in commands:
+            if SOAPY_MODULES_PLACEHOLDER in cmd:
+                soapy_modules = soapy_module_packages()
+                if not soapy_modules:
+                    print(
+                        f"\nwarning: apt doesn't know the {SOAPY_MODULES_METAPACKAGE} package, so no "
+                        "SoapySDR device modules were installed. gr-soapy will be built, but it "
+                        "will find no devices until the module for yours is installed.",
+                        file=sys.stderr,
+                    )
+                    continue
+                cmd = [*(arg for arg in cmd if arg != SOAPY_MODULES_PLACEHOLDER), *soapy_modules]
             run_command(cmd, env)
     except subprocess.CalledProcessError as exc:
         print(f"\nerror: command failed with exit code {exc.returncode}: {' '.join(exc.cmd)}", file=sys.stderr)

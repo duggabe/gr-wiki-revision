@@ -8,7 +8,7 @@ without Docker. They back the "Building GNU Radio from Source Code" page on
 the GNU Radio Wiki.
 
 - **[Phase 2](#phase-2-uhd-from-the-ettus-ppa-gnu-radio-from-your-fork)**
-  (release `v2.1`) is the current method. It is for developers of GNU Radio
+  (release `v2.2`) is the current method. It is for developers of GNU Radio
   itself: it installs [UHD](https://github.com/EttusResearch/uhd) from the
   Ettus Research PPA instead of building it, then builds GNU Radio from your
   own fork, so that you can work on an issue and submit a pull request.
@@ -36,7 +36,7 @@ Phase 2 has been tested on clean installs of Ubuntu 26.04 and
 mkdir -p ~/gr-installers
 cd ~/gr-installers
 for s in gnuradio_dependencies_installer gnuradio_clone_builder; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.1/${s}.py
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.2/${s}.py
 done
 ```
 
@@ -85,6 +85,7 @@ sudo add-apt-repository -y ppa:ettusresearch/uhd
 sudo apt-get install -y --no-install-recommends uhd-host libuhd-dev
 sudo apt-get build-dep -y gnuradio
 sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools
+sudo apt-get install -y soapysdr0.8-module-rtlsdr soapysdr0.8-module-hackrf ...   # see below
 sudo uhd_images_downloader
 ```
 
@@ -96,8 +97,16 @@ sudo uhd_images_downloader
   next to the GNU Radio you are about to build.
 - **`apt-get build-dep gnuradio`** installs the build dependencies of
   Ubuntu's own `gnuradio` package for your release, so no package list is
-  hardcoded. The last `apt-get` line adds run-time packages that list
+  hardcoded. The `apt-get` line after it adds run-time packages that list
   doesn't cover.
+- **SoapySDR device modules** (since `v2.2`) are the drivers `gr-soapy` uses
+  for an RTL-SDR, HackRF, Airspy, bladeRF, LimeSDR, PlutoSDR, and others. The
+  SoapySDR library only recommends them and `apt-get build-dep` leaves them
+  out, so without this step `gr-soapy` is built but finds no devices. The
+  script installs every module that Ubuntu's `soapysdr-module-all` package
+  lists for your release, except the UHD module: that one needs Ubuntu's
+  own, older UHD library, and a USRP is used through `gr-uhd` anyway.
+  `--dry-run` prints the list.
 - **udev rules** for USRP devices are installed by the `uhd-host` package.
   UHD's own Python API (`import uhd`) works without `PYTHONPATH`.
 
@@ -287,6 +296,20 @@ the same clone with the same `main` checkout, `make test` passed 271 of 271
 tests and GNU Radio was installed. That also completes a branch change in
 both directions on Ubuntu 26.04: `main` to `maint-3.10` and back.
 
+**`v2.1`, 2026-10-12, a fork and `maint-3.10` on Ubuntu 24.04.** The
+second tester ran the two `v2.1` scripts on Ubuntu 24.04, cloned a fork of
+GNU Radio that has only the `main` branch, added the `upstream` remote, and
+ran `git fetch upstream` and `git checkout maint-3.10`. UHD from the Ettus
+PPA was 4.11.0.0-0ubuntu1~noble3. It built and installed GNU Radio
+3.10.12.0; `make test` passed 268 of 268 tests. All 42 components are
+enabled, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and `gr-soapy`.
+
+**`v2.1`, 2026-10-12, an RTL-SDR on Ubuntu 24.04.** On the second tester's
+machine `SoapySDRUtil --find` found no devices, because no SoapySDR device
+modules were installed. After `sudo apt-get install
+soapysdr0.8-module-rtlsdr` the RTL-SDR was found. `v2.2` installs the
+modules in Step 1.
+
 **`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
 tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD
 4.11.0.0-0ubuntu1~resolute3 from the Ettus PPA, GNU Radio built from
@@ -331,6 +354,16 @@ built. This was seen on Ubuntu 26.04; the cause has not been looked into.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
+**`v2.2`** (2026-10-12) makes `gnuradio_dependencies_installer.py` install
+SoapySDR's device modules. With `v2.0` and `v2.1`, a machine set up by
+Step 1 had `gr-soapy` but no drivers for it: `SoapySDRUtil --info` printed
+"No modules found!" and `SoapySDRUtil --find` found no devices. A second
+tester met this with an RTL-SDR on Ubuntu 24.04. If you used `v2.0` or
+`v2.1`, you do not need to rebuild GNU Radio: either run the `v2.2` Step 1
+script again, or install the module for your device, for example
+`sudo apt-get install soapysdr0.8-module-rtlsdr`.
+`gnuradio_clone_builder.py` is unchanged from `v2.1`.
+
 **`v2.1`** (2026-10-12) fixes `gnuradio_clone_builder.py` for repeated
 builds of `main`. With `v2.0`, the first `make test` in a clone passed, and
 every later one failed in `grc_tests` (270 of 271 tests passed): GNU Radio's
@@ -341,7 +374,7 @@ files before each `make test`. If you are using `v2.0`, run
 `git -C ~/gnuradio clean -fdX grc/tests/resources` before the script, or
 download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
 
-Further fixes will be tagged `v2.2` and so on; a tag is never moved, so a
+Further fixes will be tagged `v2.3` and so on; a tag is never moved, so a
 link to a tag always gives the same scripts.
 
 ## Phase 1: UHD and GNU Radio 3.10 from source

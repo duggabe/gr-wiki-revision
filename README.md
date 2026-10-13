@@ -106,7 +106,11 @@ sudo uhd_images_downloader
   script installs every module that Ubuntu's `soapysdr-module-all` package
   lists for your release, except the UHD module: that one needs Ubuntu's
   own, older UHD library, and a USRP is used through `gr-uhd` anyway.
-  `--dry-run` prints the list.
+  `--dry-run` prints the list. With the modules installed,
+  `SoapySDRUtil --find` may print lines starting with `ALSA lib` or
+  `RtApi::getDeviceInfo` before it lists your device. They come from
+  SoapySDR's audio module looking at the computer's sound devices and can
+  be ignored.
 - **udev rules** for USRP devices are installed by the `uhd-host` package.
   UHD's own Python API (`import uhd`) works without `PYTHONPATH`.
 
@@ -312,6 +316,13 @@ soapysdr0.8-module-rtlsdr` the RTL-SDR was found and probed
 without blacklisting the kernel's DVB driver. `v2.2` installs the modules
 in Step 1. The tester then ran GNU Radio flowgraphs on that machine with
 the RTL-SDR through `gr-soapy` and with a USRP B200mini through `gr-uhd`.
+
+**`v2.2`, 2026-10-13, Step 1 on Ubuntu 26.04.** The `v2.2` Step 1 script
+was run on an Ubuntu 26.04 desktop that already had some of the SoapySDR
+modules. It installed the missing ones; `SoapySDRUtil --info` then listed 13
+modules (airspy, airspyhf, audio, bladerf, hackrf, hydrasdr, lime, miri,
+osmosdr, plutosdr, redpitaya, remote, rtlsdr). UHD was still the PPA's
+4.11 only, and the installed GNU Radio was unaffected.
 
 **`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
 tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD

@@ -1403,6 +1403,39 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       Added to README "Phase 2 tested builds" and the local wiki
       draft's status line (one more place where the draft is ahead of
       the live page).
+    - 2026-10-13: **`main` and tag `v2.2` pushed** (user: "push it";
+      `main` at `b076002`, tag on `7208a18`); both `v2.2` raw links
+      respond and match the tag. This supersedes "not pushed" above.
+      The new Step 1 step has still had **no real run** (dry-run and
+      mocked only), on either Ubuntu release. The live wiki page still
+      links `v2.1` until the user updates it from the draft; no GitHub
+      Release for `v2.2`, `v2.1` is still "Latest".
+    - 2026-10-13: **first real run of the `v2.2` Step 1 script, on
+      the LENOVO (26.04): the SoapySDR step works.** The apt log shows
+      the script's own command at 16:15, `apt-get install -y` with the
+      13 module names, installing the four the machine lacked (lms7,
+      osmosdr, mirisdr, hydrasdr) and their libraries. `SoapySDRUtil
+      --info` (pasted): 13 modules found, factories airspy, airspyhf,
+      audio, bladerf, hackrf, hydrasdr, lime, miri, osmosdr, plutosdr,
+      redpitaya, remote, rtlsdr — no UHD factory. Checked afterwards:
+      still one UHD (the PPA's 4.11, no `libuhd4.9.0`), no Ubuntu
+      `gnuradio` packages, `from gnuradio import gr, soapy, uhd` works
+      (3.10.12.0). Not a clean machine (9 of the 13 were already
+      there), and `v2.2` is still untested on 24.04 and on a clean
+      install. Added to README "Phase 2 tested builds".
+      `SoapySDRUtil --find` there (pasted) finds the RTL-SDR (driver
+      `rtlsdr`, R820T), but first prints noise: two "ALSA lib ...
+      Invalid CTL pulse" lines and five "RtApi::getDeviceInfo:
+      deviceId argument not found." lines. Those come from the
+      `audio` module (`soapysdr0.8-module-audio`, sound cards as
+      SDRs) scanning the sound devices (my reading: RtApi is the
+      RtAudio library that module uses; not checked by removing it).
+      Harmless, but with `v2.2` every reader gets that module, so the
+      messages could look like errors. **Decided (user, 2026-10-13): keep the
+      script as it is and explain the messages** (not a `v2.3`
+      dropping `audio`). Added a sentence to the SoapySDR paragraph of
+      the local wiki draft's Phase 2 "Checking the result" and to the
+      SoapySDR bullet in README's Step 1.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

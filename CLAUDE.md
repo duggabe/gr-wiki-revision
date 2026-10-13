@@ -49,8 +49,9 @@ draft on 2026-10-13 (user: "we are ready to cut Phase 1 from the README
 and from the wiki page"); both now describe Phase 2 only, and the user
 plans further editing of both.** The Phase 1 scripts, dependency lists,
 tags, and the `v1.2` Release are still in the repo (removing them was
-not asked for). The live wiki page "Building GNU Radio from Source
-Code" still has Phase 1 until the user updates it from the draft. Tags `v1.0`, `v1.1`, and `v1.3`
+not asked for). All mention of phases was then removed from both, and
+from the `v2.x` Release notes. The live wiki page "Building GNU Radio
+from Source Code" equals the local draft as of 2026-10-13. Tags `v1.0`, `v1.1`, and `v1.3`
 (memory-aware `make` jobs for Phase 1, never built for real, links still
 on `v1.2`) have no Release. Nothing is waiting on anyone. The other
 tester's hardware problem is solved (missing SoapySDR modules, fixed in
@@ -1532,6 +1533,11 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       `#uhd-from-the-ettus-ppa-gnu-radio-from-your-fork`, which exists
       on GitHub only once the README is pushed. Tags, `v2.1`/`v2.2`
       titles, attached scripts, and "Latest" unchanged.
+    - **2026-10-13: live wiki page = local draft again** (user
+      updated the page from the draft, after the push of `c20123a`).
+      So the live page has no Phase 1 section and no phase wording,
+      and its headings are one level up. The "draft is ahead of the
+      live page" notes above are superseded.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

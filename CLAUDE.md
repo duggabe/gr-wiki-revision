@@ -14,12 +14,13 @@ developers: one installs UHD from the Ettus PPA and GNU Radio's
 dependencies with `apt-get` only, the other builds GNU Radio from a clone
 already on the machine.
 
-**Current state (2026-10-12):** GitHub Releases for `v2.1`, `v2.0`,
-and `v1.2`.
-**Phase 2 = `v2.2`** (2026-10-12, tag only so far: Step 1 also installs
+**Current state (2026-10-13):** GitHub Releases for `v2.2`, `v2.1`,
+`v2.0`, and `v1.2`.
+**Phase 2 = `v2.2`** (the GitHub "Latest" release since 2026-10-13,
+pushed, Step 1 run for real on the LENOVO: Step 1 also installs
 SoapySDR's device modules, without which `gr-soapy` found no devices;
-README and wiki draft link `v2.2`; see the end of Next step 13 for
-whether it is pushed and tested) on top of **`v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
+README and wiki draft link `v2.2`; the live wiki page links `v2.1`
+until the user updates it from the draft) on top of **`v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
 Radio's generated GRC test files before `make test`, since with `v2.0`
 every `make test` after the first failed on `main`; README and wiki
 link `v2.1`) on top of **`v2.0`** (the first Phase 2 release; UHD from the Ettus
@@ -563,8 +564,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   UHD module is left out because it depends on Ubuntu's own UHD library
   (4.9 on 26.04), which would sit next to the PPA's. The list comes from
   apt at run time, not hardcoded, since it differs per release.
-- **GitHub Releases** exist for `v2.1` (Latest, since 2026-10-12),
-  `v2.0`, and `v1.2` (created with `--latest=false`), each with its scripts attached as they are at the
+- **GitHub Releases** exist for `v2.2` (Latest, since 2026-10-13),
+  `v2.1`, `v2.0`, and `v1.2` (created with `--latest=false`), each with its scripts attached as they are at the
   tag; `v1.0`, `v1.1`, and `v1.3` are tags only (`v1.3` by the user's
   decision, 2026-10-11).
 - **Any build-step failure stops the automated build** (user,
@@ -1436,6 +1437,18 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       dropping `audio`). Added a sentence to the SoapySDR paragraph of
       the local wiki draft's Phase 2 "Checking the result" and to the
       SoapySDR bullet in README's Step 1.
+    - 2026-10-13: **GitHub Release for `v2.2` created and marked
+      "Latest"** (user's request):
+      https://github.com/duggabe/gr-wiki-revision/releases/tag/v2.2 —
+      notes cover the fix, what `v2.0`/`v2.1` users can do, the audio
+      module's messages, the tester's 24.04 results and the LENOVO
+      run, what is untested, a quick start, and known limitations; the
+      two Phase 2 scripts as they are at the tag are attached. `v2.1`
+      lost the "Latest" mark; otherwise the older Releases are
+      unchanged. Also that day: the user's working copy of
+      `gnuradio_dependencies_installer.py` had lost its final newline
+      (not my edit); restored with `git checkout` at the user's
+      request.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

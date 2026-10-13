@@ -1538,6 +1538,13 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       So the live page has no Phase 1 section and no phase wording,
       and its headings are one level up. The "draft is ahead of the
       live page" notes above are superseded.
+    - **2026-10-13 (user): "Basically the wiki page and the README
+      will be the same."** The user is editing
+      `wiki-draft-download-section.txt` first; after that we look at
+      it together and bring the README in line with it (my reading:
+      the wiki draft leads, the README follows). Don't edit the draft
+      or restructure the README until the user says their edit is
+      done.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

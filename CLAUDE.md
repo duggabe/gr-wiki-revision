@@ -19,8 +19,7 @@ already on the machine.
 **Phase 2 = `v2.2`** (the GitHub "Latest" release since 2026-10-13,
 pushed, Step 1 run for real on the LENOVO: Step 1 also installs
 SoapySDR's device modules, without which `gr-soapy` found no devices;
-README and wiki draft link `v2.2`; the live wiki page links `v2.1`
-until the user updates it from the draft) on top of **`v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
+README and the wiki page link `v2.2`) on top of **`v2.1`** (the GitHub "Latest" release, 2026-10-12: the builder removes GNU
 Radio's generated GRC test files before `make test`, since with `v2.0`
 every `make test` after the first failed on `main`; README and wiki
 link `v2.1`) on top of **`v2.0`** (the first Phase 2 release; UHD from the Ettus
@@ -43,7 +42,7 @@ negative comments. **Direction (user, 2026-10-11): Phase 2 only; Phase 1
 will become history, but removing it is on hold until the user says
 so.** The README and the wiki page have Phase 2 first and stand-alone,
 then Phase 1; the live wiki page "Building GNU Radio from Source Code"
-equals the local draft as of 2026-10-12. Tags `v1.0`, `v1.1`, and `v1.3`
+equals the local draft as of 2026-10-13. Tags `v1.0`, `v1.1`, and `v1.3`
 (memory-aware `make` jobs for Phase 1, never built for real, links still
 on `v1.2`) have no Release. Nothing is waiting on anyone. Open: details
 of the other tester's hardware problem; a full from-scratch build on a
@@ -1449,6 +1448,14 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       `gnuradio_dependencies_installer.py` had lost its final newline
       (not my edit); restored with `git checkout` at the user's
       request.
+    - **2026-10-13: live wiki page = local draft again** (user
+      updated the page from the draft). So the live page now links
+      `v2.2` and has the Step 1 SoapySDR bullet, the SoapySDR
+      paragraph in "Checking the result" (with the note on the ALSA /
+      RtApi messages), the reworded fork sentence, and the status
+      line naming the B200mini on both releases and the RTL-SDR on
+      24.04. Earlier "draft is ahead of the live page" notes are
+      superseded.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

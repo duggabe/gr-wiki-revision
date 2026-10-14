@@ -1732,6 +1732,10 @@ leftover comment naming `uhd_bare_metal_installer.py` in
       gr-soapy source blocks (my reading). Not stated:
       receive only or transmit too (HackRF, LimeSDR and the B200mini
       can transmit). Test results stay in this file only.
+    - **2026-10-14: live wiki page = User_talk:Duggabe = local draft
+      again** (user updated both from the draft), so the cut "found and
+      fixed with an RTL-SDR" sentence is gone from the live page too.
+      README matches the draft as of `1f680ae`.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

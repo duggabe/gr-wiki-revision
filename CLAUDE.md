@@ -56,8 +56,9 @@ from Source Code" equals the local draft as of 2026-10-13. Tags `v1.0`, `v1.1`, 
 on `v1.2`) have no Release. Nothing is waiting on anyone. The other
 tester's hardware problem is solved (missing SoapySDR modules, fixed in
 `v2.2`). Open: `v2.2` Step 1 on 24.04 and on a clean install; B200mini
-transmit; the `main`/Qt6 path (Qwt for Qt6); an upstream report of the
-`grc_tests` weakness (drafted, not filed). Details are in Next steps 12
+transmit; the `main`/Qt6 path (Qwt for Qt6); the upstream fix of the
+`grc_tests` weakness (reported to the GNU Radio developers by the user,
+2026-10-14). Details are in Next steps 12
 and 13.
 
 Lives at **https://github.com/duggabe/gr-wiki-revision** (public): scripts
@@ -1556,6 +1557,11 @@ names `uhd_bare_metal_installer.py` (left for a future tag).
       the wiki draft leads, the README follows). Don't edit the draft
       or restructure the README until the user says their edit is
       done.
+    - **2026-10-14: the `grc_tests` weakness has been reported to the
+      GNU Radio developers** (user). How (issue, PR, mailing list or
+      chat) and any issue number were not given. When upstream fixes
+      it, the builder's `git clean -fdX grc/tests/resources` step (and
+      its wiki/README bullet) can go, in a new tag.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

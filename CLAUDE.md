@@ -104,6 +104,17 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 
 ## Files
 
+**2026-10-14: the six Phase 1 files were removed from `main`** (user:
+"remove the six Phase 1 files"): `uhd_bare_metal_installer.py`,
+`gnuradio_bare_metal_installer.py`, `install-uhd-build-deps.sh`,
+`uhd-ubuntu2604-dependencies.txt`, `uhd-dependencies.txt`,
+`gnuradio-dependencies.txt`. They remain at the `v1.x` tags (whose raw
+links still work) and in git history; their entries below are kept as
+the record of what they were. Tracked files now: the two current
+scripts, `README.md`, `LICENSE`, `.gitignore`, `CLAUDE.md`. One
+leftover: a code comment at `gnuradio_dependencies_installer.py:99`
+names `uhd_bare_metal_installer.py` (left for a future tag).
+
 - **`uhd_bare_metal_installer.py`** — the main tool. Fetches UHD's Dockerfile
   from GitHub (or a local path), auto-detects the host OS from
   `/etc/os-release` to pick the matching Dockerfile (e.g. Ubuntu 24.04 →
@@ -553,9 +564,9 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
   all still exist. The Phase 2 scripts import nothing from Phase 1, so
   retiring Phase 1 breaks nothing in them. The 2026-10-11 hold on
   removing Phase 1 was lifted for the **README and the wiki page** on
-  2026-10-13 (done, see Next step 13). **The repo itself was not
-  named: leave the Phase 1 scripts and lists in place until the user
-  says so.**
+  2026-10-13 (done, see Next step 13), and the six Phase 1 files
+  were removed from the repo on 2026-10-14 (see Files). The `v1.x`
+  tags stay.
 - **Phase 2 is two steps, for GNU Radio developers** (user, 2026-10-09):
   Step 1 installs everything with `apt-get`; Step 2 builds a clone the
   user made by hand in `$HOME` (normally their fork, to test an issue and
@@ -1545,6 +1556,10 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
       the wiki draft leads, the README follows). Don't edit the draft
       or restructure the README until the user says their edit is
       done.
+    - **2026-10-14: the six Phase 1 files removed from the repo**
+      (see Files). Both current scripts' `--help` still runs; the
+      `v1.2` raw link still responds. The `v1.3` items below are moot
+      unless the user revives Phase 1.
     - `v1.3`: the user will reload the GMKtec with 26.04 and test it
       there (4 cores, 10 GiB → `-j3`, same as `v1.2`, so a regression
       test only); another tester is using a different computer (what

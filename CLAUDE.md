@@ -1574,6 +1574,21 @@ names `uhd_bare_metal_installer.py` (left for a future tag).
       installed by hand on the LENOVO, so probably not on a clean
       Ubuntu desktop; my inference), a Python one-liner. The user is
       editing the wiki draft; the README follows afterwards.
+    - **2026-10-14: the user does the initial wiki editing on their
+      own wiki page, https://wiki.gnuradio.org/index.php?title=User_talk:Duggabe**
+      (not on the live page), and asked me to update the draft file.
+      Done: the draft's "Downloading the scripts" `wget` loop is
+      replaced by two `python3 -c "import urllib.request;
+      urllib.request.urlretrieve(...)"` commands with
+      `/releases/latest/download/` links (user: "I wanted the Python
+      option"; my first version had the browser and `curl` instead, and
+      I took the Python one to replace both — tested: both files match
+      `v2.2`); "These links point to version
+      v2.2" became "These links always give the latest release; the
+      Releases page lists what changed in each one." The draft has no
+      `wget` left. **The draft is now ahead of the live page**; the
+      README's download section is unchanged until we align it with
+      the draft.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

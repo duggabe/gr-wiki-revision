@@ -1647,6 +1647,11 @@ leftover comment naming `uhd_bare_metal_installer.py` in
       draft: a Boost bullet in Step 1's list (the draft is ahead of the
       live page there). **Not yet run for real**; the proof is a clean
       24.04 run on the GMKtec.
+      Committed `ffac9f9`, tagged `v2.3`, pushed; **GitHub Release
+      `v2.3` created and marked "Latest"** with both scripts attached
+      (title "v2.3: Boost packages for gr-uhd"), so the
+      `/releases/latest/download/` links now serve `v2.3` (checked: both
+      files match the tag).
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

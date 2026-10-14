@@ -1562,6 +1562,18 @@ names `uhd_bare_metal_installer.py` (left for a future tag).
       chat) and any issue number were not given. When upstream fixes
       it, the builder's `git clean -fdX grc/tests/resources` step (and
       its wiki/README bullet) can go, in a new tag.
+    - **2026-10-14: download section to be rewritten** (user): "the
+      developers do not like to use wget". Wanted: download the
+      scripts from the latest Release, without version numbers in the
+      links and without `wget`. Tested: GitHub's
+      `https://github.com/duggabe/gr-wiki-revision/releases/latest/download/<file>`
+      serves the files attached to the "Latest" Release (identical to
+      `v2.2`), so every future Release must have both scripts
+      attached. Options given: the browser via `/releases/latest` +
+      `mv` from `~/Downloads` (my recommendation), `curl -LO` (curl was
+      installed by hand on the LENOVO, so probably not on a clean
+      Ubuntu desktop; my inference), a Python one-liner. The user is
+      editing the wiki draft; the README follows afterwards.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

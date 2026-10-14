@@ -5,7 +5,7 @@ Scripts and programs to support GNU Radio Wiki documents.
 The main content is two Python scripts that build
 [GNU Radio](https://github.com/gnuradio/gnuradio) from source on Ubuntu,
 without Docker. They back the "Building GNU Radio from Source Code" page on
-the GNU Radio Wiki. The current release is `v2.2`.
+the GNU Radio Wiki. The current release is `v2.3`.
 
 The scripts are for developers of GNU Radio itself: they install
 [UHD](https://github.com/EttusResearch/uhd) from the Ettus Research PPA
@@ -33,7 +33,7 @@ They have been tested on clean installs of Ubuntu 26.04 and
 mkdir -p ~/gr-installers
 cd ~/gr-installers
 for s in gnuradio_dependencies_installer gnuradio_clone_builder; do
-  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.2/${s}.py
+  wget https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v2.3/${s}.py
 done
 ```
 
@@ -80,6 +80,7 @@ sudo apt-get update
 sudo apt-get install -y software-properties-common git
 sudo add-apt-repository -y ppa:ettusresearch/uhd
 sudo apt-get install -y --no-install-recommends uhd-host libuhd-dev
+sudo apt-get install -y libboost-dev libboost-chrono-dev libboost-filesystem-dev ...   # see below
 sudo apt-get build-dep -y gnuradio
 sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools
 sudo apt-get install -y soapysdr0.8-module-rtlsdr soapysdr0.8-module-hackrf ...   # see below
@@ -92,6 +93,15 @@ sudo uhd_images_downloader
 - **`--no-install-recommends`** matters: UHD's packages recommend Ubuntu's
   own `gnuradio` packages, which would otherwise be installed into `/usr`,
   next to the GNU Radio you are about to build.
+- **Boost development packages** (since `v2.3`): UHD's cmake files need
+  Boost's `chrono`, `date_time`, `filesystem`, `program_options`,
+  `serialization`, `thread`, and `unit_test_framework`, but the PPA's
+  `libuhd-dev` does not depend on them, and `apt-get build-dep gnuradio`
+  brings only some. Without them GNU Radio's cmake prints
+  `Boost_FOUND = FALSE` under "Configuring gr-uhd support" and builds GNU
+  Radio without `gr-uhd`, with no error. The script installs the same Boost
+  packages that Ubuntu's own `libuhd-dev` depends on (without the Python
+  one).
 - **`apt-get build-dep gnuradio`** installs the build dependencies of
   Ubuntu's own `gnuradio` package for your release, so no package list is
   hardcoded. The `apt-get` line after it adds run-time packages that list
@@ -365,6 +375,22 @@ built. This was seen on Ubuntu 26.04; the cause has not been looked into.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
+**`v2.3`** (2026-10-14) makes `gnuradio_dependencies_installer.py` install
+the Boost development packages that UHD's cmake files need. With `v2.2` and
+earlier, a clean Ubuntu 24.04 machine built GNU Radio without `gr-uhd`:
+`cmake.log` showed `Boost_FOUND = FALSE` and "Disabling gr-uhd support",
+and the build went on without an error. (On Ubuntu 26.04 the missing
+packages happened to come in as dependencies of others.) If you used an
+earlier release, install them, remove the build directory so that cmake
+starts afresh, and run the builder again:
+
+```bash
+sudo apt-get install libboost-chrono-dev libboost-filesystem-dev libboost-serialization-dev
+rm -rf ~/gnuradio/build
+```
+
+`gnuradio_clone_builder.py` is unchanged from `v2.1`.
+
 **`v2.2`** (2026-10-12) makes `gnuradio_dependencies_installer.py` install
 SoapySDR's device modules. With `v2.0` and `v2.1`, a machine set up by
 Step 1 had `gr-soapy` but no drivers for it: `SoapySDRUtil --info` printed
@@ -385,5 +411,5 @@ files before each `make test`. If you are using `v2.0`, run
 `git -C ~/gnuradio clean -fdX grc/tests/resources` before the script, or
 download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
 
-Further fixes will be tagged `v2.3` and so on; a tag is never moved, so a
+Further fixes will be tagged `v2.4` and so on; a tag is never moved, so a
 link to a tag always gives the same scripts.

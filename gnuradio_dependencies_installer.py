@@ -15,6 +15,7 @@ It runs the equivalent of:
     sudo apt-get install -y software-properties-common git
     sudo add-apt-repository -y ppa:ettusresearch/uhd
     sudo apt-get install -y --no-install-recommends uhd-host libuhd-dev
+    sudo apt-get install -y libboost-dev libboost-chrono-dev libboost-date-time-dev ...
     sudo apt-get build-dep -y gnuradio
     sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools
     sudo apt-get install -y soapysdr0.8-module-rtlsdr soapysdr0.8-module-hackrf ...
@@ -25,6 +26,10 @@ Notes on those steps:
   * UHD's packages recommend Ubuntu's own gnuradio packages, so they are
     installed with --no-install-recommends. Otherwise Ubuntu's GNU Radio would
     be installed into /usr, next to the one you are about to build.
+  * The PPA's libuhd-dev doesn't depend on the Boost development packages,
+    although UHD's cmake files need them, so they are installed by name.
+    Without them GNU Radio's cmake can't use UHD and quietly builds GNU Radio
+    without gr-uhd (seen on a clean Ubuntu 24.04).
   * `apt-get build-dep gnuradio` installs the build dependencies of Ubuntu's
     gnuradio package for this Ubuntu release, so the list is never hardcoded
     here. That includes libuhd-dev, which the PPA (added first) provides.
@@ -74,6 +79,22 @@ TOOL_PACKAGES = ["software-properties-common", "git"]
 # UHD from the PPA. uhd-host depends on python3-uhd and the UHD library.
 UHD_PACKAGES = ["uhd-host", "libuhd-dev"]
 
+# The Boost development packages that UHD's cmake files (UHDConfig.cmake) need,
+# as Ubuntu's own libuhd-dev depends on them (without the Python one). The PPA's
+# libuhd-dev doesn't, and `apt-get build-dep gnuradio` brings only some.
+BOOST_PACKAGES = [
+    "libboost-dev",
+    "libboost-chrono-dev",
+    "libboost-date-time-dev",
+    "libboost-exception-dev",
+    "libboost-filesystem-dev",
+    "libboost-program-options-dev",
+    "libboost-regex-dev",
+    "libboost-serialization-dev",
+    "libboost-test-dev",
+    "libboost-thread-dev",
+]
+
 # Run-time dependencies that a build-dependency list doesn't cover.
 EXTRA_PACKAGES = {
     "python3-qtpy": "imported by GNU Radio's Python code at run time",
@@ -96,7 +117,7 @@ SOAPY_MODULES_PLACEHOLDER = "<SoapySDR device modules>"
 # Ubuntu's own GNU Radio, which must not be installed next to a source build.
 CONFLICTING_PACKAGES = ["gnuradio", "gnuradio-dev"]
 
-# Where a UHD built from source (e.g. by uhd_bare_metal_installer.py) keeps its files.
+# Where a UHD built from source and installed with `make install` keeps its files.
 SOURCE_UHD_PREFIX = "/usr/local"
 SOURCE_UHD_PATTERNS = (
     "lib/libuhd.so*",
@@ -196,6 +217,7 @@ def get_commands(download_images: bool) -> list[list[str]]:
         # add-apt-repository also refreshes the package lists.
         ["add-apt-repository", "-y", UHD_PPA],
         ["apt-get", "install", "-y", "--no-install-recommends", *UHD_PACKAGES],
+        ["apt-get", "install", "-y", *BOOST_PACKAGES],
         ["apt-get", "build-dep", "-y", "gnuradio"],
         ["apt-get", "install", "-y", *EXTRA_PACKAGES],
         # Replaced by the real package names when its turn comes: apt only knows

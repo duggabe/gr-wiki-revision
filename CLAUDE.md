@@ -113,8 +113,8 @@ which is why `uhd_bare_metal_installer.py` auto-detects the host OS from
 links still work) and in git history; their entries below are kept as
 the record of what they were. Tracked files now: the two current
 scripts, `README.md`, `LICENSE`, `.gitignore`, `CLAUDE.md`. One
-leftover: a code comment at `gnuradio_dependencies_installer.py:99`
-names `uhd_bare_metal_installer.py` (left for a future tag).
+leftover comment naming `uhd_bare_metal_installer.py` in
+`gnuradio_dependencies_installer.py` was fixed in `v2.3`.
 
 - **`uhd_bare_metal_installer.py`** — the main tool. Fetches UHD's Dockerfile
   from GitHub (or a local path), auto-detects the host OS from
@@ -194,7 +194,9 @@ names `uhd_bare_metal_installer.py` (left for a future tag).
   `/etc/apt/sources.list.d/ubuntu.sources`, backup `.bak`); then `apt-get
   update` → `apt-get install -y software-properties-common git` →
   `add-apt-repository -y ppa:ettusresearch/uhd` → `apt-get install -y
-  --no-install-recommends uhd-host libuhd-dev` → `apt-get build-dep -y
+  --no-install-recommends uhd-host libuhd-dev` → (since `v2.3`)
+  `apt-get install -y` the Boost dev packages UHD's cmake files need →
+  `apt-get build-dep -y
   gnuradio` → `apt-get install -y python3-qtpy python3-pyqtgraph
   python3-matplotlib soapysdr-tools` → (since `v2.2`) `apt-get install -y`
   the SoapySDR device modules → `uhd_images_downloader`. The module list
@@ -1593,6 +1595,58 @@ names `uhd_bare_metal_installer.py` (left for a future tag).
       one level, so the top sections ("Downloading the scripts" through
       "Checking the result") are `==` again and Step 2's subsections
       `===`; the 2026-10-13 promotion to `=` is undone.
+    - **2026-10-14: clean 24.04 test on the GMKtec started; "It did
+      not have the Boost loaded"** (user). Not yet known: which step
+      stopped, the exact error, whether Step 1 finished, which script
+      version. Asked for those. Earlier clean 24.04 runs (`v2.0`, by
+      the other tester) passed, so `v2.2`'s new SoapySDR step is a
+      suspect until shown otherwise (my reading).
+      User then: the build continued; `cmake.log` says "Boost_FOUND =
+      FALSE" (section not yet known). **Likely cause (my reading,
+      awaiting the GMKtec's grep output): the PPA's `libuhd-dev`
+      4.11.0.0-0ubuntu1~resolute3 declares no Boost dependencies at all
+      (Depends: only `libuhd4.11.0`), while Ubuntu's own `libuhd-dev`
+      4.9.0.1 depends on 11 Boost dev packages (chrono, date-time, dev,
+      exception, filesystem, program-options, python, regex,
+      serialization, test, thread).** UHD's `UHDConfig.cmake` does
+      `find_dependency(Boost ... COMPONENTS chrono date_time filesystem
+      program_options serialization thread unit_test_framework)`, so
+      GNU Radio's gr-uhd check fails (and `gr-uhd` is disabled, the
+      build carrying on) unless those happen to be installed. Ubuntu's
+      `gnuradio` Build-Depends (noble and resolute) list none of
+      chrono / filesystem / serialization. On 26.04 (Boost 1.90),
+      `libboost-thread1.90-dev` depends on chrono and
+      `libboost-date-time1.90-dev` on serialization; the LENOVO's
+      `libboost-filesystem1.90-dev` came with the accidental
+      `apt-get install uhd-host libuhd-dev` of 2026-10-08. How the
+      clean 26.04 GMKtec got filesystem (it built `gr-uhd`) is not
+      known. Fits the other tester's first 24.04 list without `gr-uhd`
+      and the user's non-clean laptop (Phase 1 had installed
+      `libboost-all-dev`). Proposed fix: a `v2.3` Step 1 that installs
+      the Boost dev packages UHD needs. **Confirmed 2026-10-14 (user's paste
+      of the GMKtec's `cmake.log`):** under "Configuring gr-uhd
+      support...": `External Dependency Boost_FOUND = FALSE`,
+      `External Dependency UHD_FOUND = 0`, "Disabling gr-uhd support";
+      the call stack runs through `UHDConfig.cmake:31
+      (find_dependency)`. cmake 3.28 (24.04). Which Boost parts are
+      missing was not yet listed (`dpkg -l` not pasted).
+    - **2026-10-14: `v2.3` written (user: "yes, make it v2.3 and link
+      the scripts").** `gnuradio_dependencies_installer.py` has a new
+      step right after the UHD packages: `apt-get install -y` of
+      `BOOST_PACKAGES` (`libboost-dev` plus chrono, date-time,
+      exception, filesystem, program-options, regex, serialization,
+      test, thread `-dev`: Ubuntu's own `libuhd-dev` Depends minus
+      Python). All ten exist on 26.04 (1.90) and 24.04 (1.83; six of
+      them in universe), checked in the package indexes. Dry-run on the
+      LENOVO shows the step; `apt-get install -s` there would add only
+      four unversioned metapackages (chrono, exception, filesystem,
+      serialization). The stale `uhd_bare_metal_installer.py` comment
+      is fixed too. README: release `v2.3`, download links `v2.3`, a
+      line in the Step 1 commands, a Boost bullet, a `v2.3` entry in
+      "Releases" with the workaround for earlier releases. Local wiki
+      draft: a Boost bullet in Step 1's list (the draft is ahead of the
+      live page there). **Not yet run for real**; the proof is a clean
+      24.04 run on the GMKtec.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

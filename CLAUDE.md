@@ -1652,6 +1652,27 @@ leftover comment naming `uhd_bare_metal_installer.py` in
       (title "v2.3: Boost packages for gr-uhd"), so the
       `/releases/latest/download/` links now serve `v2.3` (checked: both
       files match the tag).
+    - **2026-10-14: the other tester: "100% tests passed, 0 tests
+      failed out of 268"** (user). Not reported: script version
+      (`v2.3` or earlier), branch, Ubuntu release, clean install or
+      not, and whether `gr-uhd` is among the enabled components. 268
+      is the count of earlier 24.04 `maint-3.10` builds (my reading).
+      Then pasted from his machine: UHD 4.11.0.0-0ubuntu1~noble3 (so
+      Ubuntu 24.04), GNU Radio 3.10.12.0 (`maint-3.10`),
+      `--enabled-components`: **42 components, incl. `gr-uhd` + RFNoC**,
+      `gr-qtgui`, `gr-iio` + `libad9361`, `gr-soapy`, thrift, JACK,
+      PortAudio, codec2/freedv/gsm. Still not known: script version and
+      whether it was a clean install, so whether it tests the `v2.3`
+      fix is open. **Then (user): "clean 2.3"** — a clean 24.04
+      install with the `v2.3` scripts, so **the Boost fix is confirmed
+      end to end** (`gr-uhd` present where `v2.2` on a clean 24.04
+      lacked it). Added to README "Tested builds" and the local wiki
+      draft's status line ("Ubuntu 24.04 (including a clean install)
+      ... building `maint-3.10`"); the draft is ahead of the live page
+      there and in the Step 1 Boost bullet. The `v2.3` Release notes'
+      "Tested" section now has this run (a table and the 42
+      components) in place of "still to come" (user's request, same
+      day); title, tag, attached scripts, and "Latest" unchanged.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

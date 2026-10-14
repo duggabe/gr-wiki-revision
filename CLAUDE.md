@@ -1589,6 +1589,10 @@ names `uhd_bare_metal_installer.py` (left for a future tag).
       `wget` left. **The draft is now ahead of the live page**; the
       README's download section is unchanged until we align it with
       the draft.
+      Also 2026-10-14 (user): the draft's headings were moved back down
+      one level, so the top sections ("Downloading the scripts" through
+      "Checking the result") are `==` again and Step 2's subsections
+      `===`; the 2026-10-13 promotion to `=` is undone.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

@@ -1721,6 +1721,17 @@ leftover comment naming `uhd_bare_metal_installer.py` in
       and fixed with an RTL-SDR on Ubuntu 24.04." (end of "Checking
       the result"), so **the draft is ahead of the live page by that
       one sentence**.
+    - **2026-10-14: the other tester's device list** (user, pasted):
+      "v2.3, maint-3.10 / Soapy: RTL-SDR, HackRF, LimeSDR, Airspy R2
+      works with Soapy Custom source block / gr-uhd: USRP B200mini".
+      So with `v2.3` on `maint-3.10`, through `gr-soapy`: RTL-SDR,
+      HackRF, LimeSDR, Airspy R2; through `gr-uhd`: B200mini. Presumably
+      his clean 24.04 `v2.3` machine (my assumption; not stated).
+      **The Soapy Custom Source block was used for the Airspy R2 only**
+      (user, same day); the RTL-SDR, HackRF and LimeSDR used their own
+      gr-soapy source blocks (my reading). Not stated:
+      receive only or transmit too (HackRF, LimeSDR and the B200mini
+      can transmit). Test results stay in this file only.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

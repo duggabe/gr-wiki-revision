@@ -275,3 +275,8 @@ Transmit has not been reported for any device.
   `.so.3.11.0git` links; the cause of the missing Thrift on `main`.
 - **Longer term:** Qwt for Qt6, for `gr-qtgui` on `main`.
 - **`~/v1.2-release-notes-backup.json`:** the user may delete it.
+- **Where the scripts will live** (user, 2026-10-14): asked about renaming
+  the repo, then said they will talk to the GNU Radio developers; "the
+  plan is to bring it into the gnuradio/gnuradio repo", details not settled.
+  Nothing changed yet. If it moves, the download links in the wiki draft,
+  README, and Release notes, and the repo URLs here, need updating.

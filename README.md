@@ -23,10 +23,6 @@ with its own script:
 2. `gnuradio_clone_builder.py` builds, tests, and installs GNU Radio from
    your own fork, which you clone into your home directory.
 
-They have been tested on clean installs of Ubuntu 26.04 and
-24.04, and with a USRP B200mini on Ubuntu 26.04; see
-[Tested builds](#tested-builds).
-
 ### Download the scripts
 
 ```bash
@@ -197,6 +193,12 @@ GNU Radio's
 A `main` build made this way does not include `gr-qtgui`; see
 [Known limitation](#known-limitation).
 
+To see which components your build includes:
+
+```bash
+gnuradio-config-info --enabled-components
+```
+
 ### Changing branches, or removing the installed GNU Radio
 
 Do the three steps below before building a different branch or version of
@@ -257,99 +259,6 @@ the release only (for example `libgnuradio-runtime.so.3.10.12.0`), so each
 rebuild replaces them, and the first command above just reports that it
 found no such files.
 
-### Tested builds
-
-**`v2.0`, 2026-10-10, clean install of Ubuntu 26.04.**
-The two scripts were downloaded onto a freshly installed machine and
-run as described above: UHD from the Ettus PPA, then GNU Radio's `main`
-branch built from a fork:
-
-| Component | Script | Version | `make test` |
-| --- | --- | --- | --- |
-| UHD | `sudo python3 gnuradio_dependencies_installer.py` (Ettus PPA) | 4.11.0.0-0ubuntu1~resolute3 | — (not built) |
-| GNU Radio | `sudo python3 gnuradio_clone_builder.py` (`main`) | v3.11.0.0git-1193-g0403558f | 271 of 271 passed |
-
-The build finished without errors. A second run on 2026-10-12, on the same
-machine after another clean install of Ubuntu 26.04, gave the same result: v3.11.0.0git-1193-g0403558f, 271 of 271
-tests passed. A `main` build on that machine has 40 components enabled: all
-those of a `maint-3.10` build except `gr-qtgui` and the Thrift back-end of
-`gr-ctrlport`.
-
-**`v2.0`, 2026-10-12, changing branches on Ubuntu 26.04.** On that same
-clean install, the installed `main` build was removed with the steps in
-[Changing branches, or removing the installed GNU Radio](#changing-branches-or-removing-the-installed-gnu-radio),
-`maint-3.10` was checked out, and `gnuradio_clone_builder.py` was run
-again. It built and installed GNU Radio 3.10.12.0; `make test` passed 269
-of 269 tests. All 42 components are enabled, including `gr-qtgui`, `gr-uhd`,
-`gr-iio`, and `gr-soapy`.
-
-**`v2.0`, 2026-10-10, Ubuntu 24.04.** The scripts were also run on an
-Ubuntu 24.04 laptop (not a clean install), this time with the
-`maint-3.10` branch checked out in the clone. UHD from the Ettus PPA was
-4.11.0.0-0ubuntu1~noble3. It built and installed
-GNU Radio 3.10.12.0; `make test` passed 268 of 268 tests. All 42
-components are enabled, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and
-`gr-soapy`.
-
-**`v2.0`, 2026-10-11, clean install of Ubuntu 24.04.** A second tester ran
-the two scripts on a freshly installed Ubuntu 24.04 machine and built GNU
-Radio's `main` branch: `make test` passed 267 of 267 tests. (The UHD and GNU
-Radio versions were not reported. The number of tests differs between
-Ubuntu releases and branches.)
-
-**`v2.0`, 2026-10-12, a second build of `main` in the same clone.** After
-the `maint-3.10` build above, `main` was checked out again and rebuilt:
-`make test` passed 270 of 271 tests, with `grc_tests` failing. This is the
-problem fixed in `v2.1`; see [Releases](#releases).
-
-**`v2.1`, 2026-10-12, the same build again.** With the `v2.1` builder, in
-the same clone with the same `main` checkout, `make test` passed 271 of 271
-tests and GNU Radio was installed. That also completes a branch change in
-both directions on Ubuntu 26.04: `main` to `maint-3.10` and back.
-
-**`v2.1`, 2026-10-12, a fork and `maint-3.10` on Ubuntu 24.04.** The
-second tester ran the two `v2.1` scripts on Ubuntu 24.04, cloned a fork of
-GNU Radio that has only the `main` branch, added the `upstream` remote, and
-ran `git fetch upstream` and `git checkout maint-3.10`. UHD from the Ettus
-PPA was 4.11.0.0-0ubuntu1~noble3. It built and installed GNU Radio
-3.10.12.0; `make test` passed 268 of 268 tests. All 42 components are
-enabled, including `gr-qtgui`, `gr-uhd`, `gr-iio`, and `gr-soapy`.
-
-**`v2.1`, 2026-10-12, an RTL-SDR on Ubuntu 24.04.** On the second tester's
-machine `SoapySDRUtil --find` found no devices, because no SoapySDR device
-modules were installed. After `sudo apt-get install
-soapysdr0.8-module-rtlsdr` the RTL-SDR was found and probed
-(`SoapySDRUtil --find`, `--probe="driver=rtlsdr"`), as a normal user and
-without blacklisting the kernel's DVB driver. `v2.2` installs the modules
-in Step 1. The tester then ran GNU Radio flowgraphs on that machine with
-the RTL-SDR through `gr-soapy` and with a USRP B200mini through `gr-uhd`.
-
-**`v2.2`, 2026-10-13, Step 1 on Ubuntu 26.04.** The `v2.2` Step 1 script
-was run on an Ubuntu 26.04 desktop that already had some of the SoapySDR
-modules. It installed the missing ones; `SoapySDRUtil --info` then listed 13
-modules (airspy, airspyhf, audio, bladerf, hackrf, hydrasdr, lime, miri,
-osmosdr, plutosdr, redpitaya, remote, rtlsdr). UHD was still the PPA's
-4.11 only, and the installed GNU Radio was unaffected.
-
-**`v2.0`, 2026-10-12, SDR hardware on Ubuntu 26.04.** A USRP B200mini was
-tested on an Ubuntu 26.04 desktop set up with the two scripts (UHD
-4.11.0.0-0ubuntu1~resolute3 from the Ettus PPA, GNU Radio built from
-`main`), as a normal user without `sudo`:
-
-| Test | Result |
-| --- | --- |
-| `uhd_find_devices` | found the B200mini; firmware loaded from `/usr/share/uhd/4.11.0/images` |
-| `uhd_usrp_probe` | FPGA image loaded, operating over USB 3, register loopback test passed |
-| `uhd_rx_cfile -f 100e6 -r 1e6 -N 1000000 /tmp/test.cfile` | 1,000,000 samples received through GNU Radio's `gr-uhd`, no overflows or errors |
-
-Transmitting and other devices were not tested.
-
-To see which components your build includes:
-
-```bash
-gnuradio-config-info --enabled-components
-```
-
 ### Known limitation
 
 GNU Radio's `main` branch (the 3.11 development version) needs Qt6, PyQt6,
@@ -360,7 +269,7 @@ build is not affected.
 
 A `main` build also lacks the Thrift back-end of `gr-ctrlport` (ControlPort
 over Thrift), which a `maint-3.10` build has. `gr-ctrlport` itself is
-built. This was seen on Ubuntu 26.04; the cause has not been looked into.
+built.
 
 ### Releases
 
@@ -394,16 +303,15 @@ rm -rf ~/gnuradio/build
 **`v2.2`** (2026-10-12) makes `gnuradio_dependencies_installer.py` install
 SoapySDR's device modules. With `v2.0` and `v2.1`, a machine set up by
 Step 1 had `gr-soapy` but no drivers for it: `SoapySDRUtil --info` printed
-"No modules found!" and `SoapySDRUtil --find` found no devices. A second
-tester met this with an RTL-SDR on Ubuntu 24.04. If you used `v2.0` or
-`v2.1`, you do not need to rebuild GNU Radio: either run the `v2.2` Step 1
-script again, or install the module for your device, for example
-`sudo apt-get install soapysdr0.8-module-rtlsdr`.
+"No modules found!" and `SoapySDRUtil --find` found no devices. If you
+used `v2.0` or `v2.1`, you do not need to rebuild GNU Radio: either run the
+`v2.2` Step 1 script again, or install the module for your device, for
+example `sudo apt-get install soapysdr0.8-module-rtlsdr`.
 `gnuradio_clone_builder.py` is unchanged from `v2.1`.
 
 **`v2.1`** (2026-10-12) fixes `gnuradio_clone_builder.py` for repeated
 builds of `main`. With `v2.0`, the first `make test` in a clone passed, and
-every later one failed in `grc_tests` (270 of 271 tests passed): GNU Radio's
+every later one failed in `grc_tests`: GNU Radio's
 GRC tests generate Python files in `grc/tests/resources` in the source tree,
 the next test run picks two of them up as tests, and they need `gr-qtgui`,
 which a `main` build does not have. The script now removes those generated

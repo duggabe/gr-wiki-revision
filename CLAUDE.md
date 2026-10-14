@@ -1673,6 +1673,28 @@ leftover comment naming `uhd_bare_metal_installer.py` in
       "Tested" section now has this run (a table and the 42
       components) in place of "still to come" (user's request, same
       day); title, tag, attached scripts, and "Latest" unchanged.
+    - **2026-10-14 (user): "We are going to cut all test results on
+      both the wiki page and the README.md, leaving them only in
+      CLAUDE.md."** So this file is now the only record of the test
+      results; keep recording them here in full. README done the same
+      day: the intro's "They have been tested..." paragraph and the
+      whole "Tested builds" section are gone (incl. the uncommitted
+      `v2.3` entry); its `gnuradio-config-info --enabled-components`
+      snippet moved to the end of Step 2 (before "Changing
+      branches..."); the "Releases" entries lost "A second tester met
+      this..." and "(270 of 271 tests passed)". Release notes on
+      GitHub keep their "Tested" sections (not asked). The wiki draft
+      is being edited by the user; its test-result passages (status
+      line; "This was tested..." in the `maint-3.10` paragraph; "(tested
+      on Ubuntu 24.04)" in the fork paragraph; "This was tested with a
+      USRP B200mini..." in "Checking the result") were cut by me the
+      same day (user: "Please revise the wiki draft"; Release notes
+      stay as they are), along with "this was seen on Ubuntu 26.04" on
+      the Thrift sentence (likewise cut from README's "Known
+      limitation"). The `maint-3.10` paragraph keeps the advice that a
+      plain clone is enough for building and testing. **The user
+      updates the wiki by total replacement**: they paste the whole
+      draft over the page, so the draft must always be complete.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

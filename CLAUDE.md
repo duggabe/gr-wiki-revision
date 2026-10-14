@@ -1695,6 +1695,32 @@ leftover comment naming `uhd_bare_metal_installer.py` in
       plain clone is enough for building and testing. **The user
       updates the wiki by total replacement**: they paste the whole
       draft over the page, so the draft must always be complete.
+    - **2026-10-14: live wiki page = User_talk:Duggabe = local draft**
+      (user: a total replacement of both pages from the draft, after a
+      few edits of their own). The user's edits: the "Notes" list is
+      now one bold line, "Note: Running and developing OOT ... modules
+      does not require GNU Radio to be installed from source." (the
+      README link and the "bare-metal" = "non-container" note are
+      gone); the download commands are chained with `&&` (`mkdir -p
+      ... && cd ... &&`, first `python3 -c ... &&`, second). Checked:
+      the chained block, run as is, downloads both files, identical to
+      `v2.3`. So the live page now has `v2.3`'s Boost bullet and no
+      test results.
+    - **2026-10-14: README rewritten to follow the wiki draft**
+      (user: "yes, update the README"): a Markdown conversion of the
+      whole draft, section by section (draft `==` → `##`, `===` →
+      `###`), under a short repo intro ("this README follows that
+      page", current release `v2.3`). README-only extras kept: the two
+      options tables (after Step 1's list and Step 2's bullets) and
+      the "Releases" section. Dropped: the old `wget` download loop
+      (now the draft's chained Python commands), Step 1's equivalent
+      commands block and its longer bullets (Boost, `build-dep`,
+      SoapySDR detail), and the separate "Known limitation" section
+      (its content is in the draft's `main`/Qt6 paragraph). Also cut
+      from the draft the last test result left in it: "This was found
+      and fixed with an RTL-SDR on Ubuntu 24.04." (end of "Checking
+      the result"), so **the draft is ahead of the live page by that
+      one sentence**.
     - **2026-10-14: the six Phase 1 files removed from the repo**
       (see Files). Both current scripts' `--help` still runs; the
       `v1.2` raw link still responds. The `v1.3` items below are moot

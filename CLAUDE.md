@@ -74,7 +74,7 @@ not been a Phase 1", user, 2026-10-13).
 | Machine | Ubuntu | State |
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini, RTL-SDR, PlutoSDR. |
-| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Last: clean 24.04 with `v2.2` on 2026-10-14, where `gr-uhd` was missing (the Boost problem). Planned (user, 2026-10-14, "in the next few days"): a clean 24.04 install with `v2.3`, then hardware tests: RTL-SDR (receive only), PlutoSDR, and the B200mini with a loopback cable. |
+| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). |
 | Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. |
 | The other tester's machine | 24.04 | Clean install for the `v2.3` test. Fork `jesternofool/gnuradio` (only `main`). |
 
@@ -232,6 +232,7 @@ differences are unexplained).
 | 2026-10-13 | LENOVO, 26.04 (not clean) | `v2.2` Step 1, real run | — | SoapySDR step installed the 4 missing modules; `SoapySDRUtil --info`: 13 modules (airspy, airspyhf, audio, bladerf, hackrf, hydrasdr, lime, miri, osmosdr, plutosdr, redpitaya, remote, rtlsdr); still one UHD |
 | 2026-10-14 | GMKtec, clean 24.04 | `v2.2` (user confirmed) | `maint-3.10` | **`gr-uhd` disabled**: `Boost_FOUND = FALSE` under "Configuring gr-uhd support", call stack through `UHDConfig.cmake:31`; cmake 3.28. Led to `v2.3`. |
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3` | `maint-3.10` | 268/268, 3.10.12.0, UHD 4.11.0.0-0ubuntu1~noble3, 42 components incl. `gr-uhd` + RFNoC: **Boost fix confirmed** |
+| 2026-10-14 | GMKtec, clean 24.04 (user; `~/share/Clean_build_261014.txt`) | `v2.3`, downloaded from the wiki page | `maint-3.10` | 268/268, 3.10.12.0, UHD ~noble3; cmake's "Gnuradio disabled components" list **empty**; 42 components incl. `gr-uhd` + RFNoC, `gr-iio` + `libad9361`, `gr-qtgui`, `gr-soapy`, thrift. `SoapySDRUtil --info`: **11 modules**, exactly the expected 24.04 set (airspy, audio, bladerf, hackrf, lime, miri, osmosdr, redpitaya, remote, rfspace, rtlsdr), no UHD; first real run of `v2.2`'s SoapySDR step on 24.04 and on a clean install. Boost fix confirmed by the user too. |
 
 Phase 1 (`v1.x`, for the record): UHD 4.11.0.0 source builds 109/109 tests
 (LENOVO 26.04, GMKtec clean 26.04.1 and clean 24.04). GNU Radio `main`
@@ -251,20 +252,21 @@ GMKtec, 2026-09-26. `v1.3` never built for real.
 | 2026-10-13 | Other tester, 24.04 | `v2.1`, `maint-3.10` | USRP B200mini | `gr-uhd` | a flowgraph ran (transmit not known) |
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3`, `maint-3.10` | RTL-SDR, HackRF, LimeSDR, Airspy R2 | `gr-soapy` | all work; the Airspy R2 through the Soapy Custom Source block (only it), the others presumably through their own blocks (my reading) |
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3`, `maint-3.10` | USRP B200mini | `gr-uhd` | works |
+| 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | USRP B200mini (315C7B7) | UHD tools, `gr-uhd` | `uhd_find_devices`, `uhd_usrp_probe` (FPGA, USB 3, loopback passed), `uhd_rx_cfile` 8,000,000 bytes; Boost_108300. **Loopback (transmit and receive) worked** (user, 2026-10-15; details not given) |
+| 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | RTL-SDR (RTL2838, R820T) | SoapySDR | `--find` and `--probe="driver=rtlsdr"` work (kernel driver detached/reattached by the library); receive only, as planned. `--find` also lists a "USB Audio and HID" device through the audio module |
+| 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | PlutoSDR | `gr-iio`: PlutoSDR Source and PlutoSDR Sink (user, 2026-10-15) | **"Pluto with loopback cable works."** Both at 2.435 GHz. First PlutoSDR / `gr-iio` test and first transmit reported |
 
-Transmit has not been reported for any device.
+Transmit: PlutoSDR loopback (2.435 GHz) and B200mini loopback, both on the
+GMKtec, clean 24.04, `v2.3`, `maint-3.10` (2026-10-14). Not yet on 26.04.
 
 ## Open items
 
 - **`v2.3` on 26.04:** the Boost step has only had a dry run there
   (`apt-get install -s` on the LENOVO: 4 metapackages). A real Step 1 run on
   the LENOVO, or a clean 26.04 install.
-- **Transmit** with the B200mini (suggested: `uhd_siggen -f 915e6 -s 1e6
-  --sine -x 100e3 -g 0 -m 0.1`, into a dummy load or attenuator); ask
-  whether the other tester transmitted.
-- **PlutoSDR / `gr-iio`:** untested; planned on the GMKtec (see Machines).
-- **Planned GMKtec test** (user, 2026-10-14): clean 24.04 + `v2.3`,
-  RTL-SDR receive, PlutoSDR, B200mini with a loopback cable.
+- **Transmit:** B200mini and PlutoSDR loopbacks work on 24.04
+  (2026-10-14); none on 26.04 yet. Ask whether the other tester
+  transmitted.
 - **RTL-SDR flowgraph on the LENOVO:** not run.
 - **A second `make test` on `maint-3.10`** in the same build, to confirm
   repeated test runs pass there (the `grc_tests` problem was seen on `main`).

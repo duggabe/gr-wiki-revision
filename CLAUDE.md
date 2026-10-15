@@ -48,7 +48,10 @@ not been a Phase 1", user, 2026-10-13).
   MediaWiki; I convert to Markdown for the README. The README is the draft
   section by section, plus README-only parts: a short repo intro, the two
   options tables (keep in sync with the scripts' argparse help), and the
-  "Releases" section.
+  "Releases" section. The options tables' "Option" header is padded with 40
+  `&nbsp;` so GitHub doesn't wrap the options (`239bd31`; checked with
+  GitHub's renderer, and the user confirmed it looks good, 2026-10-15).
+  Keep the padding if the tables change.
 - **The user drafts on https://wiki.gnuradio.org/index.php?title=User_talk:Duggabe**
   and updates the Talk page and the live page by **total replacement** with
   the whole draft. So keep the draft complete and current.

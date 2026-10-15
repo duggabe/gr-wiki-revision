@@ -235,6 +235,7 @@ differences are unexplained).
 | 2026-10-14 | GMKtec, clean 24.04 | `v2.2` (user confirmed) | `maint-3.10` | **`gr-uhd` disabled**: `Boost_FOUND = FALSE` under "Configuring gr-uhd support", call stack through `UHDConfig.cmake:31`; cmake 3.28. Led to `v2.3`. |
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3` | `maint-3.10` | 268/268, 3.10.12.0, UHD 4.11.0.0-0ubuntu1~noble3, 42 components incl. `gr-uhd` + RFNoC: **Boost fix confirmed** |
 | 2026-10-14 | GMKtec, clean 24.04 (user; `~/share/Clean_build_261014.txt`) | `v2.3`, downloaded from the wiki page | `maint-3.10` | 268/268, 3.10.12.0, UHD ~noble3; cmake's "Gnuradio disabled components" list **empty**; 42 components incl. `gr-uhd` + RFNoC, `gr-iio` + `libad9361`, `gr-qtgui`, `gr-soapy`, thrift. `SoapySDRUtil --info`: **11 modules**, exactly the expected 24.04 set (airspy, audio, bladerf, hackrf, lime, miri, osmosdr, redpitaya, remote, rfspace, rtlsdr), no UHD; first real run of `v2.2`'s SoapySDR step on 24.04 and on a clean install. Boost fix confirmed by the user too. |
+| 2026-10-15 | LENOVO, 26.04 | — (plain `make test 2>&1 \| tee make_test.log` in `~/gnuradio/build`, run once by me and once by the user) | `maint-3.10`, 3.10.12.0, the existing build | **269/269, `grc_tests` passed** although the previous run's generated files were still in `grc/tests/resources` (not cleaned): repeated test runs pass on `maint-3.10` without `v2.1`'s `git clean` step. 132 s. The user's own run: "100% tests passed, 0 tests failed out of 269" |
 
 Phase 1 (`v1.x`, for the record): UHD 4.11.0.0 source builds 109/109 tests
 (LENOVO 26.04, GMKtec clean 26.04.1 and clean 24.04). GNU Radio `main`
@@ -273,8 +274,6 @@ Not yet on 26.04.
   (2026-10-14), as do the other tester's HackRF, LimeSDR Mini, and
   B200mini; none on 26.04 yet.
 - **RTL-SDR flowgraph on the LENOVO:** not run.
-- **A second `make test` on `maint-3.10`** in the same build, to confirm
-  repeated test runs pass there (the `grc_tests` problem was seen on `main`).
 - **Unexplained test-count differences** (267 vs 271, 268 vs 269).
 - **Upstream `grc_tests` fix:** when it lands, remove the builder's
   `git clean` step and its doc bullet in a new tag.

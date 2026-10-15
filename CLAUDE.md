@@ -63,8 +63,7 @@ not been a Phase 1", user, 2026-10-13).
   None of them has test results.
 - GitHub Releases: `v2.3` (Latest), `v2.2`, `v2.1`, `v2.0`, all with both
   scripts attached. The `v1.2` Release was deleted 2026-10-13 (tags kept);
-  its notes are backed up in `~/v1.2-release-notes-backup.json` (the user
-  may delete it).
+  the backup of its notes was deleted by the user 2026-10-15.
 - Tracked files: the two scripts, `README.md`, `LICENSE` (CC BY-SA 4.0, by
   choice although CC advises against it for software), `.gitignore`,
   `CLAUDE.md`.
@@ -276,7 +275,6 @@ GMKtec, clean 24.04, `v2.3`, `maint-3.10` (2026-10-14). Not yet on 26.04.
 - **Docs:** the leftover-library command can leave dangling
   `.so.3.11.0git` links; the cause of the missing Thrift on `main`.
 - **Longer term:** Qwt for Qt6, for `gr-qtgui` on `main`.
-- **`~/v1.2-release-notes-backup.json`:** the user may delete it.
 - **Where the scripts will live** (user, 2026-10-14): asked about renaming
   the repo, then said they will talk to the GNU Radio developers; "the
   plan is to bring it into the gnuradio/gnuradio repo", details not settled.

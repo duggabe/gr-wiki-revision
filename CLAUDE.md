@@ -98,6 +98,7 @@ under `/usr/local` (prints the fix commands). Then:
    serialization, test, thread `-dev` packages
 6. `apt-get build-dep -y gnuradio`
 7. `apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools`
+   and (`v2.4`, not yet tagged) `python3-pytest`
 8. (`v2.2`) `apt-get install -y` the SoapySDR device modules, worked out at
    run time by `soapy_module_packages()`: the Depends of
    `soapysdr-module-all` (followed through `soapysdr0.8-module-all`) minus
@@ -214,8 +215,14 @@ the wiki draft, and the same command in the README must stay in sync.
 ## Test results
 
 Kept here only. Test counts differ by release and branch: `main` 271 on
-26.04 (267 on 24.04); `maint-3.10` 269 on 26.04, 268 on 24.04 (the
-differences are unexplained).
+26.04 (267 on 24.04); `maint-3.10` 269 on 26.04, 268 on 24.04. The
+`maint-3.10` difference is test 25, `grc_tests` (user, 2026-10-15). Its
+cause (checked by me): `grc/tests/CMakeLists.txt` adds `grc_tests` only if
+cmake can `import pytest`, and `python3-pytest` is in Ubuntu's `gnuradio`
+Build-Depends on 26.04 (3.10.12.0-6) but not on 24.04 (Launchpad's
+`debian/control` for noble), so `build-dep gnuradio` installs it only on
+26.04. On `main` the same test accounts for one of the four; the other
+three are unexplained.
 
 ### `v2.x` (UHD from the PPA)
 
@@ -236,6 +243,7 @@ differences are unexplained).
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3` | `maint-3.10` | 268/268, 3.10.12.0, UHD 4.11.0.0-0ubuntu1~noble3, 42 components incl. `gr-uhd` + RFNoC: **Boost fix confirmed** |
 | 2026-10-14 | GMKtec, clean 24.04 (user; `~/share/Clean_build_261014.txt`) | `v2.3`, downloaded from the wiki page | `maint-3.10` | 268/268, 3.10.12.0, UHD ~noble3; cmake's "Gnuradio disabled components" list **empty**; 42 components incl. `gr-uhd` + RFNoC, `gr-iio` + `libad9361`, `gr-qtgui`, `gr-soapy`, thrift. `SoapySDRUtil --info`: **11 modules**, exactly the expected 24.04 set (airspy, audio, bladerf, hackrf, lime, miri, osmosdr, redpitaya, remote, rfspace, rtlsdr), no UHD; first real run of `v2.2`'s SoapySDR step on 24.04 and on a clean install. Boost fix confirmed by the user too. |
 | 2026-10-15 | LENOVO, 26.04 | — (plain `make test 2>&1 \| tee make_test.log` in `~/gnuradio/build`, run once by me and once by the user) | `maint-3.10`, 3.10.12.0, the existing build | **269/269, `grc_tests` passed** although the previous run's generated files were still in `grc/tests/resources` (not cleaned): repeated test runs pass on `maint-3.10` without `v2.1`'s `git clean` step. 132 s. The user's own run: "100% tests passed, 0 tests failed out of 269" |
+| 2026-10-15 | GMKtec, clean 24.04 (the `v2.3` install of 2026-10-14) | `v2.3` + `python3-pytest` installed by hand | `maint-3.10` | **269/269** ("100% tests passed, 0 tests failed out of 269"): with pytest, 24.04 adds `grc_tests` and it passes; same count as 26.04 |
 
 Phase 1 (`v1.x`, for the record): UHD 4.11.0.0 source builds 109/109 tests
 (LENOVO 26.04, GMKtec clean 26.04.1 and clean 24.04). GNU Radio `main`
@@ -274,7 +282,13 @@ Not yet on 26.04.
   (2026-10-14), as do the other tester's HackRF, LimeSDR Mini, and
   B200mini; none on 26.04 yet.
 - **RTL-SDR flowgraph on the LENOVO:** not run.
-- **Unexplained test-count differences** (267 vs 271, 268 vs 269).
+- **Test counts:** 268 vs 269 on `maint-3.10` is `grc_tests` (no pytest
+  on 24.04); three of the four on `main` (267 vs 271) are unexplained.
+  `v2.4` (user: "yes, make v2.4", 2026-10-15) installs `python3-pytest`
+  in Step 1 so 24.04 runs `grc_tests` too. With pytest installed by hand,
+  24.04 gave 269/269 (2026-10-15); not yet tried twice in a row or on
+  `main`. pytest is in universe on 24.04 (7.4.4). GNU Radio's pytest check
+  isn't cached, so re-running cmake picks it up.
 - **Upstream `grc_tests` fix:** when it lands, remove the builder's
   `git clean` step and its doc bullet in a new tag.
 - **Docs:** the leftover-library command can leave dangling

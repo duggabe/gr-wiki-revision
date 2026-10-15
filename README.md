@@ -102,8 +102,9 @@ The script:
   `libuhd-dev` doesn't bring them, and without them GNU Radio is built
   without `gr-uhd`, with no error.
 - installs the build dependencies of Ubuntu's own `gnuradio` package for your
-  release (`apt-get build-dep gnuradio`), `git`, and a few packages that are
-  needed at run time.
+  release (`apt-get build-dep gnuradio`), `git`, a few packages that are
+  needed at run time, and `python3-pytest`, without which one of GNU Radio's
+  tests (`grc_tests`) is left out on Ubuntu 24.04.
 - installs SoapySDR's device modules, the drivers `gr-soapy` uses for an
   RTL-SDR, HackRF, Airspy, bladeRF, LimeSDR, PlutoSDR, and others. It
   installs every module Ubuntu packages for your release except the one for
@@ -380,6 +381,16 @@ be rebuilt.
 
 ## Releases
 
+**`v2.4`** (2026-10-15) makes `gnuradio_dependencies_installer.py` install
+`python3-pytest`. GNU Radio's cmake adds the GRC test (`grc_tests`) only
+when pytest is installed. Ubuntu 26.04's build dependencies for GNU Radio
+include it and 24.04's don't, so a 24.04 build ran one test fewer (268
+instead of 269 on `maint-3.10`). If you used an earlier release on 24.04,
+run `sudo apt-get install python3-pytest` and then the builder again; its
+`cmake` step finds pytest without removing the build directory. Nothing
+else changes.
+`gnuradio_clone_builder.py` is unchanged from `v2.1`.
+
 **`v2.3`** (2026-10-14) makes `gnuradio_dependencies_installer.py` install
 the Boost development packages that UHD's cmake files need. With `v2.2` and
 earlier, a clean Ubuntu 24.04 machine built GNU Radio without `gr-uhd`:
@@ -426,5 +437,5 @@ download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
-Further fixes will be tagged `v2.4` and so on; a tag is never moved, so a
+Further fixes will be tagged `v2.5` and so on; a tag is never moved, so a
 link to a tag always gives the same scripts.

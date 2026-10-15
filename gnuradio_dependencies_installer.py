@@ -17,7 +17,7 @@ It runs the equivalent of:
     sudo apt-get install -y --no-install-recommends uhd-host libuhd-dev
     sudo apt-get install -y libboost-dev libboost-chrono-dev libboost-date-time-dev ...
     sudo apt-get build-dep -y gnuradio
-    sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools
+    sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools python3-pytest
     sudo apt-get install -y soapysdr0.8-module-rtlsdr soapysdr0.8-module-hackrf ...
     sudo uhd_images_downloader
 
@@ -33,9 +33,10 @@ Notes on those steps:
   * `apt-get build-dep gnuradio` installs the build dependencies of Ubuntu's
     gnuradio package for this Ubuntu release, so the list is never hardcoded
     here. That includes libuhd-dev, which the PPA (added first) provides.
-  * The last apt-get line adds run-time packages that a build-dependency list
-    doesn't cover.
-  * The second-to-last apt-get line installs SoapySDR's device modules (the
+  * The second-to-last apt-get line adds run-time packages that a
+    build-dependency list doesn't cover, and pytest, which GNU Radio's GRC
+    tests need (Ubuntu 26.04's build dependencies include it, 24.04's don't).
+  * The last apt-get line installs SoapySDR's device modules (the
     drivers gr-soapy uses for an RTL-SDR, HackRF, Airspy, LimeSDR, ...). They
     are only recommended by the SoapySDR library, and `apt-get build-dep`
     leaves them out, so without this line gr-soapy would be built but find no
@@ -95,12 +96,13 @@ BOOST_PACKAGES = [
     "libboost-thread-dev",
 ]
 
-# Run-time dependencies that a build-dependency list doesn't cover.
+# Run-time dependencies that a build-dependency list doesn't cover, and pytest.
 EXTRA_PACKAGES = {
     "python3-qtpy": "imported by GNU Radio's Python code at run time",
     "python3-pyqtgraph": "needed by the filter design tool at run time",
     "python3-matplotlib": "imported by GNU Radio's examples and gr-qtgui Python code at run time",
     "soapysdr-tools": "provides SoapySDRUtil, for checking SoapySDR devices used with gr-soapy",
+    "python3-pytest": "needed by GNU Radio's grc_tests in make test; without it that test is left out",
 }
 
 # SoapySDR's device modules: everything this metapackage depends on, except the

@@ -16,7 +16,7 @@ Radio developers on Ubuntu (24.04 and 26.04), outside Docker:
 - **Step 2, `gnuradio_clone_builder.py`:** builds, tests, and installs
   whatever is checked out in `~/gnuradio` (normally the user's fork).
 
-Current release: **`v2.3`** (GitHub "Latest"). Favour clarity,
+Current release: **`v2.4`** (GitHub "Latest"). Favour clarity,
 reproducibility, and reader choice: the scripts back wiki instructions that
 other people run, often with `sudo`.
 
@@ -38,7 +38,7 @@ not been a Phase 1", user, 2026-10-13).
   results on both the wiki page and the README.md, leaving them only in
   CLAUDE.md"). Record them in full under "Test results" below. The GitHub
   Release notes keep their "Tested" sections (user: "OK").
-- **Tags** are never moved; fixes get a new tag (next: `v2.4`).
+- **Tags** are never moved; fixes get a new tag (next: `v2.5`).
 - **GitHub Releases** are created or edited only on the user's request.
   Every Release must have **both scripts attached**, because the docs
   download from
@@ -64,7 +64,7 @@ not been a Phase 1", user, 2026-10-13).
   from this file.
 - Live wiki page = User_talk:Duggabe = local draft = README (since `1f680ae`).
   None of them has test results.
-- GitHub Releases: `v2.3` (Latest), `v2.2`, `v2.1`, `v2.0`, all with both
+- GitHub Releases: `v2.4` (Latest), `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
   scripts attached. The `v1.2` Release was deleted 2026-10-13 (tags kept);
   the backup of its notes was deleted by the user 2026-10-15.
 - Tracked files: the two scripts, `README.md`, `LICENSE` (CC BY-SA 4.0, by
@@ -98,7 +98,7 @@ under `/usr/local` (prints the fix commands). Then:
    serialization, test, thread `-dev` packages
 6. `apt-get build-dep -y gnuradio`
 7. `apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools`
-   and (`v2.4`, not yet tagged) `python3-pytest`
+   and (`v2.4`) `python3-pytest`
 8. (`v2.2`) `apt-get install -y` the SoapySDR device modules, worked out at
    run time by `soapy_module_packages()`: the Depends of
    `soapysdr-module-all` (followed through `soapysdr0.8-module-all`) minus
@@ -135,6 +135,7 @@ the wiki draft, and the same command in the README must stay in sync.
 | `v2.1` | 2026-10-12 | Builder: `git clean -fdX grc/tests/resources` before `make test`. Commit `22e2ca3`. |
 | `v2.2` | 2026-10-12 | Step 1: SoapySDR device modules. Commit `7208a18`. |
 | `v2.3` | 2026-10-14 | Step 1: Boost dev packages for UHD's cmake files. Commit `ffac9f9`; Release title "v2.3: Boost packages for gr-uhd". |
+| `v2.4` | 2026-10-15 | Step 1: `python3-pytest`, so 24.04 builds run `grc_tests`. Commit `ce9806d`; Release title "v2.4: pytest for the GRC test". Download link checked: gives the `v2.4` Step 1 script. |
 | `v1.0`–`v1.3` | 2026-09-26 – 10-10 | Phase 1, tags only. |
 
 ## Key decisions and why

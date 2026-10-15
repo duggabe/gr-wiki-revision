@@ -58,12 +58,12 @@ not been a Phase 1", user, 2026-10-13).
 - The wiki is behind Cloudflare and can't be fetched from here: ask the user
   to paste content.
 
-## Current state (2026-10-14)
+## Current state (2026-10-15)
 
-- `main` pushed at `03ae87f` before this trim; working tree clean apart
-  from this file.
-- Live wiki page = User_talk:Duggabe = local draft = README (since `1f680ae`).
-  None of them has test results.
+- `main` pushed; `v2.4` released.
+- Live wiki page = User_talk:Duggabe = local draft = README, including
+  `v2.4`'s `python3-pytest` line (user replaced both wiki pages,
+  2026-10-15). None of them has test results.
 - GitHub Releases: `v2.4` (Latest), `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
   scripts attached. The `v1.2` Release was deleted 2026-10-13 (tags kept);
   the backup of its notes was deleted by the user 2026-10-15.

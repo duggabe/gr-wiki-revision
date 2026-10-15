@@ -380,17 +380,6 @@ be rebuilt.
 
 ## Releases
 
-**`v2.0`** (2026-10-10) is the first release, with two scripts:
-
-- **`gnuradio_dependencies_installer.py`** installs UHD from the
-  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd) and
-  GNU Radio's dependencies with `apt-get`; nothing is compiled.
-- **`gnuradio_clone_builder.py`** builds, tests, and installs GNU Radio from
-  a clone that is already on the machine, normally your own fork. It can be
-  run again after every change.
-- **The number of `make` jobs is limited by the machine's memory,** so that
-  the build is not killed for running out of it.
-
 **`v2.3`** (2026-10-14) makes `gnuradio_dependencies_installer.py` install
 the Boost development packages that UHD's cmake files need. With `v2.2` and
 earlier, a clean Ubuntu 24.04 machine built GNU Radio without `gr-uhd`:
@@ -425,6 +414,17 @@ not have. The script now removes those generated files before each
 `make test`. If you are using `v2.0`, run
 `git -C ~/gnuradio clean -fdX grc/tests/resources` before the script, or
 download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
+
+**`v2.0`** (2026-10-10) is the first release, with two scripts:
+
+- **`gnuradio_dependencies_installer.py`** installs UHD from the
+  [Ettus PPA](https://launchpad.net/~ettusresearch/+archive/ubuntu/uhd) and
+  GNU Radio's dependencies with `apt-get`; nothing is compiled.
+- **`gnuradio_clone_builder.py`** builds, tests, and installs GNU Radio from
+  a clone that is already on the machine, normally your own fork. It can be
+  run again after every change.
+- **The number of `make` jobs is limited by the machine's memory,** so that
+  the build is not killed for running out of it.
 
 Further fixes will be tagged `v2.4` and so on; a tag is never moved, so a
 link to a tag always gives the same scripts.

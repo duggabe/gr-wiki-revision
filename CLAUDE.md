@@ -316,7 +316,37 @@ Not yet on 26.04.
   only `lib/`. (USRP udev: no change needed, B200mini works as the normal
   user, 2026-10-16.) Ettus also publishes
   `uhd-builder-fedora44.Dockerfile` (for a UHD-from-source option 2, not
-  chosen). Fedora support in the scripts not decided.
+  chosen). The user finished the Fedora trial 2026-10-16 ("that's all I
+  want to do on Fedora").
+- **Fedora support in the project (proposed by me 2026-10-16, user asked to
+  record it; not decided).** Suggested tag `v3.0`; talk to the developers
+  first (Fedora on the wiki page, the move into `gnuradio/gnuradio`, the
+  `qa_fastnoise` backport).
+  - Step 1: dispatch on `ID` in `/etc/os-release`; Ubuntu path unchanged.
+    Fedora path: `dnf builddep gnuradio`; `dnf install` `uhd uhd-devel
+    uhd-tools uhd-firmware python3-QtPy python3-pyqtgraph python3-matplotlib
+    python3-pytest thrift-devel python3-thrift`; SoapySDR modules from
+    `dnf`'s list of `soapy-*` (no metapackage; `soapy-uhd` can stay, same
+    UHD); no deb-src, PPA, or `uhd_images_downloader`. Conflict check with
+    `rpm -q gnuradio gnuradio-devel python3-gnuradio`, fix with `dnf remove`.
+    UHD is 4.9.0.1 on Fedora vs 4.11 on Ubuntu: document it.
+  - Builder: `rpm -q uhd-devel` instead of `dpkg-query libuhd-dev`;
+    `lib64/python3*/site-packages/...` in `INSTALL_DIR_PATTERNS`; add
+    `/usr/local/lib64` to `ld.so.conf.d` if needed. `qa_fastnoise` fails on
+    Fedora `maint-3.10` and the builder stops on any failed test, so Fedora
+    users would never install: (a) upstream backport of `aee9fd3f7` (my
+    preference), (b) an option to skip named tests, or (c) document the
+    one-line edit.
+  - Docs (draft first, then README): Fedora notes in Step 1; `lib64` in the
+    "Changing branches..." removal commands (kept in sync with the patterns)
+    and in the leftover-library command; `python3-QtPy` spelling, fewer
+    Soapy modules, no udev change needed.
+  - Testing: clean Fedora for every change, and Ubuntu 24.04 / 26.04 must
+    not change. Fedora releases every 6 months (~13 months support): Fedora
+    45 around April 2027.
+  - Unknown before coding (from Fedora, before the GMKtec is reloaded): was
+    the `ld.so.conf.d` line needed; did `dnf builddep` need `dnf5-plugins`;
+    the `dnf search soapy` list; whether Thrift gives 42 components.
 - **Where the scripts will live** (user, 2026-10-14): asked about renaming
   the repo, then said they will talk to the GNU Radio developers; "the
   plan is to bring it into the gnuradio/gnuradio repo", details not settled.

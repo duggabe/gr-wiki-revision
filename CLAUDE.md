@@ -76,7 +76,7 @@ not been a Phase 1", user, 2026-10-13).
 | Machine | Ubuntu | State |
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini, RTL-SDR, PlutoSDR. |
-| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). |
+| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). **Reloaded with Fedora 44** (user, 2026-10-16) for a Fedora trial; see "Fedora 44 trial" under Open items. |
 | Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. |
 | The other tester's machine | 24.04 | Clean install for the `v2.3` test. Fork `jesternofool/gnuradio` (only `main`). |
 
@@ -295,6 +295,22 @@ Not yet on 26.04.
 - **Docs:** the leftover-library command can leave dangling
   `.so.3.11.0git` links; the cause of the missing Thrift on `main`.
 - **Longer term:** Qwt for Qt6, for `gr-qtgui` on `main`.
+- **Fedora 44 trial (GMKtec, started 2026-10-16):** neither script runs on
+  Fedora (Step 1 requires Ubuntu; the builder's `dpkg-query` check for
+  `libuhd-dev` fails, as does `v1.3`, whose UHD installer parses only `apt-get`
+  Dockerfiles and gets the slug `fedoralinux44`). User chose "option 1":
+  Fedora's own UHD 4.9.0.1 + `dnf builddep gnuradio` (Fedora's `gnuradio` is
+  3.10.12.0), then GNU Radio `maint-3.10` built by hand with cmake. Package
+  names checked by me on mdapi.fedoraproject.org (f44): `uhd`, `uhd-devel`,
+  `uhd-tools`, `uhd-firmware`, `boost-devel`, `python3-QtPy`,
+  `python3-pyqtgraph`, `python3-matplotlib`, `python3-pytest`, `SoapySDR`,
+  `soapy-rtlsdr`, `soapy-airspyhf`, `soapy-uhd` (no HackRF / Lime / Pluto /
+  bladeRF Soapy modules found under the names tried). Expected differences
+  (mine, unverified): GNU Radio installs to `/usr/local/lib64`, which
+  Fedora's `ldconfig` may not search; the builder's stale-dir patterns know
+  only `lib/`; USRP udev group. Ettus also publishes
+  `uhd-builder-fedora44.Dockerfile` (for a UHD-from-source option 2, not
+  chosen). Fedora support in the scripts not decided.
 - **Where the scripts will live** (user, 2026-10-14): asked about renaming
   the repo, then said they will talk to the GNU Radio developers; "the
   plan is to bring it into the gnuradio/gnuradio repo", details not settled.

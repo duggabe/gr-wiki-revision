@@ -61,6 +61,9 @@ not been a Phase 1", user, 2026-10-13).
 ## Current state (2026-10-15)
 
 - `main` pushed; `v2.4` released.
+- **On hold** (user, 2026-10-16): "I'm going to wait for the developers
+  decisions before I do anything else" (where the scripts live, Fedora
+  support, the `qa_fastnoise` backport).
 - Live wiki page = User_talk:Duggabe = local draft = README, including
   `v2.4`'s `python3-pytest` line (user replaced both wiki pages,
   2026-10-15). None of them has test results.

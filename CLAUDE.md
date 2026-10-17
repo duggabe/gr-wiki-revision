@@ -79,7 +79,7 @@ not been a Phase 1", user, 2026-10-13).
 | Machine | Ubuntu | State |
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini, RTL-SDR, PlutoSDR. |
-| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). **Reloaded with Fedora 44** (user, 2026-10-16) for a Fedora trial; see "Fedora 44 trial" under Open items. |
+| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). **Reloaded with Fedora 44** (user, 2026-10-16) for a Fedora trial; see "Fedora 44 trial" under Open items. **Reloaded with a clean 26.04** (user, 2026-10-17) for the `v2.4` test; the Fedora unknowns can no longer be checked there. |
 | Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. |
 | The other tester's machine | 24.04 | Clean install for the `v2.3` test. Fork `jesternofool/gnuradio` (only `main`). |
 
@@ -249,6 +249,7 @@ three are unexplained.
 | 2026-10-15 | LENOVO, 26.04 | — (plain `make test 2>&1 \| tee make_test.log` in `~/gnuradio/build`, run once by me and once by the user) | `maint-3.10`, 3.10.12.0, the existing build | **269/269, `grc_tests` passed** although the previous run's generated files were still in `grc/tests/resources` (not cleaned): repeated test runs pass on `maint-3.10` without `v2.1`'s `git clean` step. 132 s. The user's own run: "100% tests passed, 0 tests failed out of 269" |
 | 2026-10-15 | GMKtec, clean 24.04 (the `v2.3` install of 2026-10-14) | `v2.3` + `python3-pytest` installed by hand | `maint-3.10` | **269/269** ("100% tests passed, 0 tests failed out of 269"): with pytest, 24.04 adds `grc_tests` and it passes; same count as 26.04 |
 | 2026-10-16 | GMKtec, clean **Fedora 44** (prompt still shows hostname `ubuntu`) | none: "option 1" by hand (Fedora's UHD 4.9.0.1, `dnf builddep gnuradio`, cmake/make/make install) | plain clone, `maint-3.10` | **Installed and imports**: 3.10.12.0; 41 components, the Ubuntu 42 minus **thrift** (`gr-ctrlport` without its Thrift back-end; Fedora's `builddep` doesn't bring `thrift-devel` / `python3-thrift`, both exist in f44 at 0.20.0), incl. `gr-uhd` + RFNoC, `gr-iio` + `libad9361`, `gr-qtgui`, `gr-soapy`. Python module at `/usr/local/lib64/python3.14/site-packages/gnuradio/` and found by `import gnuradio.gr` (Fedora's Python searches `/usr/local/lib64`). **`make test`: `qa_fastnoise` failed** (user; overall count not given). `ctest -R qa_fastnoise --output-on-failure`: only `test_001_real_laplacian_moments`, 11 of 12 sub-tests pass; `data.var()` = 1.99293 vs 2, off by 0.0071, over `places=2`'s 0.005 and well inside `aee9fd3f7`'s `delta=0.05`. `main` has `aee9fd3f7` (2026-08-26, "qa_fastnoise: Widen the Laplacian variance tolerance": `places=2` → `delta=0.05`, the correct distribution failed `places=2` 2–12% of runs) and `56d230fd3` (2026-06-02, Marcus Müller, "analog/fastnoise+gr::random: simplify, fix unit test"); neither is on `maint-3.10` (checked by me). So it is the flaky tolerance fixed by `aee9fd3f7` on `main`, not a Fedora fault. `aee9fd3f7` doesn't cherry-pick cleanly onto `maint-3.10` (`56d230fd3` changed the same lines on `main`), so the user changed the one line by hand (`places=2` → `delta=0.05`, line 75, checked by me on a copy): **`make test` 269/269** (user, 2026-10-16), the same count as 26.04 and as 24.04 with pytest. Undo with `git restore gr-analog/python/analog/qa_fastnoise.py`. **`gnuradio-companion` works** (user, 2026-10-16; whether a QT GUI flowgraph was run not stated). Disabled-components list, SoapySDR modules, and whether the `ld.so.conf.d` line was needed not reported yet |
+| 2026-10-17 | GMKtec, clean 26.04 | `v2.4` (presumably downloaded from the wiki page; my assumption) | presumably `maint-3.10` (my assumption; not stated) | **269/269** ("100% tests passed, 0 tests failed out of 269", user, 2026-10-17), as expected on 26.04. Step 1 ran: `uhd_config_info --version` = UHD 4.11.0.0-0ubuntu1~resolute3 (user). First real run of `v2.3`'s Boost step and `v2.4`'s `python3-pytest` on 26.04 (my reading: Step 1 finished, since UHD is installed). `SoapySDRUtil --info` (SoapySDR v0.8.1-7build1): **13 modules**, exactly the expected 26.04 set (airspy, airspyhf, audio, bladerf, hackrf, hydrasdr, lime, miri, osmosdr, plutosdr, redpitaya, remote, rtlsdr), no UHD: first run of `v2.2`'s SoapySDR step on a clean 26.04. The three checks "work" (user, 2026-10-17): 3.10.12.0, cmake's disabled-components list empty, 42 components (my reading of "work" = the expected values; numbers not pasted). **`gnuradio-companion` works** (user, 2026-10-17; whether a QT GUI flowgraph was run not stated). B200mini and PlutoSDR loopbacks and RTL-SDR stereo FM work (see Hardware). **Clean 26.04 test of `v2.4` complete: all passed** |
 
 Phase 1 (`v1.x`, for the record): UHD 4.11.0.0 source builds 109/109 tests
 (LENOVO 26.04, GMKtec clean 26.04.1 and clean 24.04). GNU Radio `main`
@@ -274,23 +275,30 @@ GMKtec, 2026-09-26. `v1.3` never built for real.
 | 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10`, Fedora's UHD 4.9.0.1 | RTL-SDR | presumably `gr-soapy` with `soapy-rtlsdr` (my inference; block not stated) | **Received a broadcast FM station in stereo** (user, 2026-10-16): first RTL-SDR flowgraph by the user, and the first device test on Fedora. Presumably audio out through `gr-audio` too (my inference) |
 | 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10`, Fedora's UHD 4.9.0.1 | USRP B200mini | `gr-uhd` | **Loopback file transfer worked** (user, 2026-10-16): transmit and receive with Fedora's UHD 4.9.0.1 and its `uhd-firmware` images, 30 dB attenuator, the user's own flowgraph. Works as the normal user with no udev change (Fedora's `uhd` rules are enough) |
 | 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10` | PlutoSDR | `gr-iio`: PlutoSDR Source and Sink ("PlutoSDR", user) | **Loopback worked** (user, 2026-10-16), the user's own flowgraph; frequency and attenuation not stated |
+| 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | USRP B200mini | `gr-uhd` (presumably; path not stated, my assumption) | **Loopback worked with a 30 dB attenuator** (user, 2026-10-17): **first transmit on 26.04**. UHD tools (`uhd_find_devices` / `uhd_usrp_probe`) not reported |
+| 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | PlutoSDR | presumably `gr-iio` PlutoSDR Source and Sink (my assumption; not stated) | **Loopback worked** (user, 2026-10-17): first PlutoSDR test on 26.04; frequency and attenuation not stated |
+| 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | RTL-SDR | presumably `gr-soapy` (my assumption; block not stated) | **Received a broadcast FM station in stereo** (user, 2026-10-17): first RTL-SDR flowgraph on 26.04 |
 
 Transmit: PlutoSDR loopback (2.435 GHz) and B200mini loopback, both on the
 GMKtec, clean 24.04, `v2.3`, `maint-3.10` (2026-10-14). The other tester
 transmitted with a HackRF, a LimeSDR Mini, and a B200mini on 2026-10-14
 (clean 24.04, `v2.3`, `maint-3.10`). B200mini loopback file transfer on the
 GMKtec with Fedora 44 (2026-10-16), and PlutoSDR loopback there too.
-Not yet on 26.04.
+On 26.04: B200mini loopback with a 30 dB attenuator and PlutoSDR loopback
+on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
 
 ## Open items
 
-- **`v2.3` on 26.04:** the Boost step has only had a dry run there
-  (`apt-get install -s` on the LENOVO: 4 metapackages). A real Step 1 run on
-  the LENOVO, or a clean 26.04 install.
+- ~~**`v2.3` on 26.04**~~ **Closed 2026-10-17:** the Boost step ran for
+  real in `v2.4`'s Step 1 on a clean 26.04 GMKtec, and the build gave
+  269/269 with 42 components (see Test results).
 - **Transmit:** B200mini and PlutoSDR loopbacks work on 24.04
   (2026-10-14), as do the other tester's HackRF, LimeSDR Mini, and
-  B200mini; none on 26.04 yet.
-- **RTL-SDR flowgraph on the LENOVO:** not run.
+  B200mini. On 26.04 the B200mini and PlutoSDR loopbacks work too
+  (GMKtec, clean 26.04, `v2.4`, 2026-10-17). Done on both releases.
+- ~~**RTL-SDR flowgraph on the LENOVO**~~ **Closed 2026-10-17** (user:
+  "close rtlsdr on Lenovo"): covered by the RTL-SDR stereo FM flowgraph on
+  the GMKtec, clean 26.04 (2026-10-17).
 - **Test counts:** 268 vs 269 on `maint-3.10` is `grc_tests` (no pytest
   on 24.04); three of the four on `main` (267 vs 271) are unexplained.
   `v2.4` (user: "yes, make v2.4", 2026-10-15) installs `python3-pytest`

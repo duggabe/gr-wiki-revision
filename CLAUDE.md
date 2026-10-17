@@ -86,7 +86,7 @@ not been a Phase 1", user, 2026-10-13).
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini (serial 315C7B7), RTL-SDR (an RTL-SDR.COM v3), PlutoSDR. **The same three SDRs in all of the user's tests** (user, 2026-10-17), on every machine. |
 | GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). **Reloaded with Fedora 44** (user, 2026-10-16) for a Fedora trial; see "Fedora 44 trial" under Open items. **Reloaded with a clean 26.04** (user, 2026-10-17) for the `v2.4` test; the Fedora unknowns can no longer be checked there. |
-| Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. |
+| Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. **To get a clean 26.10** for the Qt6 trial (user, 2026-10-17; see Open items). |
 | The other tester's machine | 24.04 | Clean install for the `v2.3` test. Fork `jesternofool/gnuradio` (only `main`). |
 
 ## The scripts
@@ -316,7 +316,44 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
   `git clean` step and its doc bullet in a new tag.
 - **Docs:** the leftover-library command can leave dangling
   `.so.3.11.0git` links; the cause of the missing Thrift on `main`.
-- **Longer term:** Qwt for Qt6, for `gr-qtgui` on `main`.
+- **Longer term:** Qwt for Qt6, for `gr-qtgui` on `main`. See the 26.10
+  Qt6 trial below.
+- **Ubuntu 26.10 trial, `main` with Qt6 (proposed 2026-10-17, user asked to
+  record it; not started).** User: "with 26.10 and a little extra from us,
+  we could get main working with Qt6"; the laptop is to get a clean 26.10
+  ("stonking", now the current stable release). Not one of the three
+  decisions on hold, but the developers may want a say.
+  - Checked by me on Launchpad (2026-10-17): the Ettus PPA has **no
+    `stonking` build** (newest `~resolute3`, `~questing1` = 4.10); Ubuntu's
+    own UHD on 26.10 is 4.9.0.1, `gnuradio` 3.10.12.0-6build2, SoapySDR
+    0.8.1. **`libqwt-qt6-dev` 6.3.0 exists on 26.10, not on 26.04.**
+  - GNU Radio's CI image `gnuradio-docker` `ci/ci-ubuntu-26.10-3.11/Dockerfile`
+    (copy in my scratchpad, not kept) adds, beyond our `build-dep` list:
+    `libqt6opengl6-dev`, `libqt6svg6-dev`, `libqwt-qt6-dev`,
+    `python3-pyqt6`, `python3-pyqt6.qtsvg`, `pyqt6-dev-tools`,
+    `libthrift-dev`, `thrift-compiler`, `python3-thrift`. The two `libqt6*`
+    names have no published binaries since lunar / jammy (probably virtual
+    now, my guess); the real ones are `qt6-base-dev` and `qt6-svg-dev`
+    (6.11.2 on 26.10). PyQt6 6.11.0 and Thrift 0.23.0 on 26.10 (6.10.2 and
+    0.22.0 on 26.04). The Thrift packages might explain the missing Thrift
+    on `main` (my guess).
+  - Trial by hand on the laptop: (1) `v2.4` Step 1 as is, to see where it
+    fails (expected: at the PPA, `apt-get update`; not seen yet); (2) point
+    the PPA's sources file at `resolute` and finish Step 1; (3) `sudo apt-get
+    install qt6-base-dev qt6-svg-dev libqwt-qt6-dev python3-pyqt6
+    python3-pyqt6.qtsvg pyqt6-dev-tools libthrift-dev thrift-compiler
+    python3-thrift`; (4) build `main`: `gr-qtgui` and thrift enabled (40
+    components before), `make test`, a QT GUI flowgraph in GRC; (5) build
+    `maint-3.10` too, to check the Qt6 packages don't disturb it.
+  - If it works, `v2.5` (my proposal): Step 1 installs the Qt6 list when
+    apt knows `libqwt-qt6-dev` (worked out at run time, like the SoapySDR
+    step), otherwise prints that a `main` build lacks `gr-qtgui`; 24.04 /
+    26.04 unchanged; builder probably unchanged. UHD on 26.10 needs a
+    decision: wait for Ettus, fall back to the `resolute` build, or use
+    Ubuntu's 4.9.0.1. 26.10 is interim (~9 months, to about July 2027);
+    the wiki page promises only 24.04 and 26.04.
+  - Cost: the laptop is the user's only 24.04 machine; a clean 24.04 can
+    go on the GMKtec when needed.
 - **Fedora 44 trial (GMKtec, started 2026-10-16):** neither script runs on
   Fedora (Step 1 requires Ubuntu; the builder's `dpkg-query` check for
   `libuhd-dev` fails, as does `v1.3`, whose UHD installer parses only `apt-get`

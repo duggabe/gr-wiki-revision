@@ -58,9 +58,13 @@ not been a Phase 1", user, 2026-10-13).
 - The wiki is behind Cloudflare and can't be fetched from here: ask the user
   to paste content.
 
-## Current state (2026-10-15)
+## Current state (2026-10-17)
 
 - `main` pushed; `v2.4` released.
+- `v2.4` tested on both releases: 24.04 (with pytest by hand, 269/269,
+  2026-10-15) and a clean 26.04 GMKtec (all passed, incl. B200mini /
+  PlutoSDR transmit and RTL-SDR, 2026-10-17). Transmit, "`v2.3` on 26.04",
+  and the RTL-SDR flowgraph items closed.
 - **On hold** (user, 2026-10-16): "I'm going to wait for the developers
   decisions before I do anything else" (where the scripts live, Fedora
   support, the `qa_fastnoise` backport).
@@ -68,7 +72,10 @@ not been a Phase 1", user, 2026-10-13).
   `v2.4`'s `python3-pytest` line (user replaced both wiki pages,
   2026-10-15). None of them has test results.
 - GitHub Releases: `v2.4` (Latest), `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
-  scripts attached. The `v1.2` Release was deleted 2026-10-13 (tags kept);
+  scripts attached. `v2.4`'s "Tested" has the 24.04 run and (added
+  2026-10-17) the clean 26.04 GMKtec run; it says `maint-3.10`, `gr-uhd`,
+  and `gr-iio` (my assumptions, not confirmed by the user) and leaves the
+  RTL-SDR block unnamed. The `v1.2` Release was deleted 2026-10-13 (tags kept);
   the backup of its notes was deleted by the user 2026-10-15.
 - Tracked files: the two scripts, `README.md`, `LICENSE` (CC BY-SA 4.0, by
   choice although CC advises against it for software), `.gitignore`,
@@ -78,7 +85,7 @@ not been a Phase 1", user, 2026-10-13).
 
 | Machine | Ubuntu | State |
 | --- | --- | --- |
-| LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini, RTL-SDR, PlutoSDR. |
+| LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini (serial 315C7B7), RTL-SDR (an RTL-SDR.COM v3), PlutoSDR. **The same three SDRs in all of the user's tests** (user, 2026-10-17), on every machine. |
 | GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). **Reloaded with Fedora 44** (user, 2026-10-16) for a Fedora trial; see "Fedora 44 trial" under Open items. **Reloaded with a clean 26.04** (user, 2026-10-17) for the `v2.4` test; the Fedora unknowns can no longer be checked there. |
 | Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. |
 | The other tester's machine | 24.04 | Clean install for the `v2.3` test. Fork `jesternofool/gnuradio` (only `main`). |
@@ -264,20 +271,20 @@ GMKtec, 2026-09-26. `v1.3` never built for real.
 | Date | Who, Ubuntu | Scripts / branch | Device | Path | Result |
 | --- | --- | --- | --- | --- | --- |
 | 2026-10-12 | User, LENOVO 26.04 | `v2.0`, fork `main` -1194 | USRP B200mini (serial 315C7B7) | UHD tools, `gr-uhd` | `uhd_find_devices` found it (firmware from the PPA's images); `uhd_usrp_probe`: FPGA loaded, USB 3, loopback passed, 16 MHz; `uhd_rx_cfile -f 100e6 -r 1e6 -N 1000000` wrote 8,000,000 bytes, no overflows. Normal user, no sudo. Still found after removing the extra udev rules copy. |
-| 2026-10-12 | User, LENOVO 26.04 | `maint-3.10` | RTL-SDR (RTL2838, R820T) | SoapySDR | `SoapySDRUtil --find` sees it; no flowgraph reported |
+| 2026-10-12 | User, LENOVO 26.04 | `maint-3.10` | RTL-SDR.COM v3 (RTL2838, R820T) | SoapySDR | `SoapySDRUtil --find` sees it; no flowgraph reported |
 | 2026-10-12/13 | Other tester, 24.04 | `v2.1`, `maint-3.10` | RTL-SDR (0bda:2838, R820T) | `gr-soapy` | "No modules found!" until `soapysdr0.8-module-rtlsdr` was installed (led to `v2.2`); then `--find` / `--probe` worked as a normal user (the library detaches the DVB driver itself), and a flowgraph ran |
 | 2026-10-13 | Other tester, 24.04 | `v2.1`, `maint-3.10` | USRP B200mini | `gr-uhd` | a flowgraph ran (transmit not known) |
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3`, `maint-3.10` | RTL-SDR, HackRF, LimeSDR Mini, Airspy R2 | `gr-soapy` | all work; the Airspy R2 through the Soapy Custom Source block (only it), the others presumably through their own blocks (my reading). **The HackRF and the LimeSDR Mini also transmitted** (user, 2026-10-15) |
 | 2026-10-14 | Other tester, clean 24.04 | `v2.3`, `maint-3.10` | USRP B200mini | `gr-uhd` | works, **including transmit** (user, 2026-10-15) |
 | 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | USRP B200mini (315C7B7) | UHD tools, `gr-uhd` | `uhd_find_devices`, `uhd_usrp_probe` (FPGA, USB 3, loopback passed), `uhd_rx_cfile` 8,000,000 bytes; Boost_108300. **Loopback (transmit and receive) through `gr-uhd` with a 30 dB attenuator worked** (user, 2026-10-15) |
-| 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | RTL-SDR (RTL2838, R820T) | SoapySDR | `--find` and `--probe="driver=rtlsdr"` work (kernel driver detached/reattached by the library); receive only, as planned. `--find` also lists a "USB Audio and HID" device through the audio module |
+| 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | RTL-SDR.COM v3 (RTL2838, R820T) | SoapySDR | `--find` and `--probe="driver=rtlsdr"` work (kernel driver detached/reattached by the library); receive only, as planned. `--find` also lists a "USB Audio and HID" device through the audio module |
 | 2026-10-14 | User, GMKtec clean 24.04 | `v2.3`, `maint-3.10` | PlutoSDR | `gr-iio`: PlutoSDR Source and PlutoSDR Sink (user, 2026-10-15) | **"Pluto with loopback cable works."** Both at 2.435 GHz. First PlutoSDR / `gr-iio` test |
-| 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10`, Fedora's UHD 4.9.0.1 | RTL-SDR | presumably `gr-soapy` with `soapy-rtlsdr` (my inference; block not stated) | **Received a broadcast FM station in stereo** (user, 2026-10-16): first RTL-SDR flowgraph by the user, and the first device test on Fedora. Presumably audio out through `gr-audio` too (my inference) |
+| 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10`, Fedora's UHD 4.9.0.1 | RTL-SDR.COM v3 | presumably `gr-soapy` with `soapy-rtlsdr` (my inference; block not stated) | **Received a broadcast FM station in stereo** (user, 2026-10-16): first RTL-SDR flowgraph by the user, and the first device test on Fedora. Presumably audio out through `gr-audio` too (my inference) |
 | 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10`, Fedora's UHD 4.9.0.1 | USRP B200mini | `gr-uhd` | **Loopback file transfer worked** (user, 2026-10-16): transmit and receive with Fedora's UHD 4.9.0.1 and its `uhd-firmware` images, 30 dB attenuator, the user's own flowgraph. Works as the normal user with no udev change (Fedora's `uhd` rules are enough) |
 | 2026-10-16 | User, GMKtec clean Fedora 44 | none ("option 1" by hand), `maint-3.10` | PlutoSDR | `gr-iio`: PlutoSDR Source and Sink ("PlutoSDR", user) | **Loopback worked** (user, 2026-10-16), the user's own flowgraph; frequency and attenuation not stated |
 | 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | USRP B200mini | `gr-uhd` (presumably; path not stated, my assumption) | **Loopback worked with a 30 dB attenuator** (user, 2026-10-17): **first transmit on 26.04**. UHD tools (`uhd_find_devices` / `uhd_usrp_probe`) not reported |
 | 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | PlutoSDR | presumably `gr-iio` PlutoSDR Source and Sink (my assumption; not stated) | **Loopback worked** (user, 2026-10-17): first PlutoSDR test on 26.04; frequency and attenuation not stated |
-| 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | RTL-SDR | presumably `gr-soapy` (my assumption; block not stated) | **Received a broadcast FM station in stereo** (user, 2026-10-17): first RTL-SDR flowgraph on 26.04 |
+| 2026-10-17 | User, GMKtec clean 26.04 | `v2.4`, presumably `maint-3.10` (my assumption) | RTL-SDR.COM v3 | presumably `gr-soapy` (my assumption; block not stated) | **Received a broadcast FM station in stereo** (user, 2026-10-17): first RTL-SDR flowgraph on 26.04 |
 
 Transmit: PlutoSDR loopback (2.435 GHz) and B200mini loopback, both on the
 GMKtec, clean 24.04, `v2.3`, `maint-3.10` (2026-10-14). The other tester

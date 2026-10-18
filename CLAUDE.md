@@ -452,8 +452,10 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     0.23.0, same gap on 26.04 (0.22.0); version v3.11.0.0git-1210-g862edb76;
     repro steps; the compiler error. Leaves out this project; optional last
     line offering a PR. **The user presented the text** (2026-10-18; to
-    the GRC developer, my reading); whether it became a GitHub issue, and its
-    number: not known. Full text under "Drafts" at the end of
+    the GRC developer, my reading). **Posted as
+    [gnuradio/gnuradio#8239](https://github.com/gnuradio/gnuradio/issues/8239)**,
+    "Thrift support can't be enabled on main" (user; checked by me with `gh`:
+    opened by `duggabe` 2026-10-18, open). Full text under "Drafts" at the end of
     this file. The edits
     are still in the user's `~/gnuradio` working tree (my reading). Worth an
     upstream issue / PR. GRC not reported yet.
@@ -521,7 +523,7 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
 
 ## Drafts
 
-### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17; presented by the user 2026-10-18)
+### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17; posted as #8239 on 2026-10-18)
 
 Paste each part into the matching field of GNU Radio's bug report form.
 

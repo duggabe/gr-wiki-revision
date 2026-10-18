@@ -434,6 +434,11 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     cached `ENABLE_CTRLPORT_THRIFT`); Not yet checked (ControlPort at run
     time, `maint-3.10` on 26.10, the second test, no Qwt-Qt6 on 26.04).
     **Shared with the GRC developer** (user, 2026-10-18).
+    Updated 2026-10-18 (user asked): the Results table's 26.04 column is now
+    `main` at the same commit (272 of 272, 40 components); the note under it
+    says 26.10 runs exactly one more test (`qa_qtgui`) and that a second
+    plain `make test` on 26.04 fails `grc_tests` (the leftover files, still
+    on `main` at `862edb7`); "The second extra test" bullet removed.
   - **Thrift issue drafted** (user asked, 2026-10-17; text in this
     conversation only, not posted as far as I know). Laid out to match
     GNU Radio's bug report form (What happened / System Information / GNU

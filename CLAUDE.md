@@ -86,7 +86,7 @@ not been a Phase 1", user, 2026-10-13).
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in `/usr/local`, 42 components. 13 SoapySDR modules (`v2.2` Step 1 run for real). `v2.3`'s Boost step not run here (would add 4 small metapackages). Hardware: USRP B200mini (serial 315C7B7), RTL-SDR (an RTL-SDR.COM v3), PlutoSDR. **The same three SDRs in all of the user's tests** (user, 2026-10-17), on every machine. |
 | GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Clean 24.04 with `v2.2` on 2026-10-14 lost `gr-uhd` (the Boost problem); reloaded the same day with a clean 24.04 and `v2.3`: all passed, 42 components, B200mini / RTL-SDR / PlutoSDR tested (see Test results). **Reloaded with Fedora 44** (user, 2026-10-16) for a Fedora trial; see "Fedora 44 trial" under Open items. **Reloaded with a clean 26.04** (user, 2026-10-17) for the `v2.4` test; the Fedora unknowns can no longer be checked there. |
-| Laptop | 24.04 | Not clean (Phase 1 had installed `libboost-all-dev`). Original `~/AIwork` trial. **To get a clean 26.10** for the Qt6 trial (user, 2026-10-17; see Open items). |
+| Laptop (hostname `ASUS`) | 26.10 | **Clean Ubuntu 26.10 loaded** (user, 2026-10-17) for the Qt6 trial (see Open items). Before that: 24.04, not clean (Phase 1 had installed `libboost-all-dev`); original `~/AIwork` trial. |
 | The other tester's machine | 24.04 | Clean install for the `v2.3` test. Fork `jesternofool/gnuradio` (only `main`). |
 
 ## The scripts
@@ -315,7 +315,9 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
 - **Upstream `grc_tests` fix:** when it lands, remove the builder's
   `git clean` step and its doc bullet in a new tag.
 - **Docs:** the leftover-library command can leave dangling
-  `.so.3.11.0git` links; the cause of the missing Thrift on `main`.
+  `.so.3.11.0git` links. (Missing Thrift on `main`: cause found 2026-10-17,
+  a `FindTHRIFT.cmake` call not updated for the keyword macro; see the 26.10
+  trial.)
 - **Longer term:** Qwt for Qt6, for `gr-qtgui` on `main`. See the 26.10
   Qt6 trial below.
 - **Ubuntu 26.10 trial, `main` with Qt6 (proposed 2026-10-17, user asked to
@@ -345,6 +347,79 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     python3-thrift`; (4) build `main`: `gr-qtgui` and thrift enabled (40
     components before), `make test`, a QT GUI flowgraph in GRC; (5) build
     `maint-3.10` too, to check the Qt6 packages don't disturb it.
+  - **Step 1 on the clean 26.10 laptop (2026-10-17): `v2.4` as is "all
+    loaded"** (user); the user thought Ettus now has a 26.10 PPA, but
+    Launchpad still shows none (checked by me). `uhd_config_info --version`:
+    **UHD 4.9.0.1-1.4**, i.e. Ubuntu's own UHD from universe, not the PPA's
+    4.11: Step 1 fell back silently. How the PPA step got through (`apt-get
+    update` warning, or `add-apt-repository` not adding it) not seen yet.
+  - Then (user, 2026-10-17): the Qt6/Thrift `apt-get install` line of
+    step (3), clone of `main` to `~/gnuradio` (fork or upstream not stated),
+    builder: **"no disabled components"**, i.e. cmake's disabled list is
+    empty on `main`: **`gr-qtgui` (Qt6) and thrift are enabled** (my reading).
+    First `main` build with `gr-qtgui`. **`make test`: 273/273** ("100%
+    tests passed, 0 tests failed out of 273", user, 2026-10-17): two more
+    than `main`'s 271 on 26.04. One is **`qa_qtgui`** (test 245, passed;
+    user's `grep -iE "qtgui|ctrlport|thrift"` found only it); the other is
+    unknown (no test name with ctrlport/thrift). Version
+    **v3.11.0.0git-1210-g862edb76** (user). **41 components** (user), one more than
+    `main`'s 40 on 26.04, not the 42 I expected with both `gr-qtgui` and
+    thrift. The user's list: `gr-qtgui` and `gr-ctrlport` present, **`* thrift`
+    missing**. On `main` (`862edb7`, read by me) thrift is a subcomponent of
+    `gr-ctrlport` (`gr_append_subcomponent`), on only if `ENABLE_CTRLPORT_THRIFT`,
+    whose default is a quiet `find_package(THRIFT)` (`FindTHRIFT.cmake`, min
+    0.13: `thrift/Thrift.h`, libthrift, the `thrift` binary, Python `thrift`),
+    so it never shows as disabled. User's `cmake.log`: lines 208-210 "Checking
+    for module 'thrift'", "Found thrift, version 0.23.0", "thrift looking for
+    version 0.13", then nothing. **Cause (found by me reading `862edb7`): a
+    `main` bug.** `GR_PYTHON_CHECK_MODULE` in `GrPython.cmake` now takes
+    keywords (`cmake_parse_arguments`: `DESC MODULE CHECK VAR`; the top-level
+    `CMakeLists.txt` uses them), but `FindTHRIFT.cmake:63` still calls it
+    positionally, `gr_python_check_module("Thrift" thrift "1"
+    PYTHON_THRIFT_FOUND)`, so `PYTHON_THRIFT_FOUND` is never set and
+    `THRIFT_FOUND` stays false. On `maint-3.10` the macro is still positional
+    (`GR_PYTHON_CHECK_MODULE desc mod cmd have`), so thrift works there. This
+    is also **the cause of the missing Thrift on `main` on 26.04**. Which
+    commit changed the macro: not found. Expected in `cmake.log` (not yet
+    seen): "Python checking for  - not found". Suggested test (not run):
+    change line 63 to `gr_python_check_module(DESC "Thrift" MODULE thrift
+    CHECK "1" VAR PYTHON_THRIFT_FOUND)`, rebuild, expect 42 components.
+    Worth an upstream report. User's `CMakeCache.txt` (2026-10-17) fits:
+    `THRIFT_BIN=/usr/bin/thrift`, `THRIFT_INCLUDE_DIRS=/usr/include`,
+    `THRIFT_LIBRARIES=.../libthrift.so`, `PC_THRIFT_VERSION=0.23.0` all found,
+    **no `PYTHON_THRIFT_FOUND`** entry, and **`ENABLE_CTRLPORT_THRIFT:BOOL=OFF`
+    cached**: after the fix, a rebuild in place keeps it OFF, so pass
+    `--cmake-args="-DENABLE_CTRLPORT_THRIFT=ON"` (or remove `build/`).
+    **Fix tried (user, 2026-10-17):** line 63 edited to keywords, builder
+    with `--cmake-args="-DENABLE_CTRLPORT_THRIFT=ON"`: cmake now found Thrift,
+    but **`make -j3` failed** (exit 2, "GNU Radio build failed. Aborting."):
+    `thrift_server_template.h:158: error: conflicting return type specified
+    for 'auto thrift_server_template<...>::i_impl()'`, overriding
+    `thrift_application_base.h:108` `virtual TserverBase* i_impl() = 0;`
+    (compiling `rpcserver_selector.cc`). **Both bugs come from one `main`
+    commit, `24e9f2b7e`** (John Parent, "cmake: Add comprehensive
+    cross-platform installer infrastructure", committed 2026-02-09, 149
+    files; checked by me): it made `GR_PYTHON_CHECK_MODULE` keyword-based
+    without updating `FindTHRIFT.cmake:63` (it did edit that file's HINTS),
+    and changed `TserverBase* i_impl()` to `auto i_impl()` in
+    `thrift_server_template.h` (lines 42, 158). The first hides the second:
+    Thrift is never enabled, so nothing compiles that code. `maint-3.10` has
+    `TserverBase* i_impl()`. The cache now has `ENABLE_CTRLPORT_THRIFT=ON`.
+    Next build (user, 2026-10-17): **with both fixes** ("just (a)": line 63
+    of `FindTHRIFT.cmake` in keywords, and `TserverBase* i_impl()` restored in
+    `thrift_server_template.h` lines 42 and 158), builder with the cached
+    `ENABLE_CTRLPORT_THRIFT=ON`: **built, `make test` 273/273**, so `main`
+    builds with Thrift on 26.10 with a two-part fix (same test count as
+    without Thrift: no Thrift-only tests). **42 components** (user): the
+    41 plus `* thrift` (my reading), the same count as `maint-3.10`. A
+    ControlPort run-time check not done. **`gnuradio-companion` works with a
+    QT GUI Time Sink** (user, 2026-10-17), with **both front ends,
+    `gnuradio-companion --gtk` and `--qt`** (user: "I ran both of them"),
+    each running the same Time Sink flowgraph (user confirmed): `gr-qtgui` with Qt6 works at run
+    time, so **`main` with Qt6 works on 26.10**. Still to do: step (5),
+    `maint-3.10` on 26.10 with the Qt6 packages; the upstream report. The edits
+    are still in the user's `~/gnuradio` working tree (my reading). Worth an
+    upstream issue / PR. GRC not reported yet.
   - If it works, `v2.5` (my proposal): Step 1 installs the Qt6 list when
     apt knows `libqwt-qt6-dev` (worked out at run time, like the SoapySDR
     step), otherwise prints that a `main` build lacks `gr-qtgui`; 24.04 /

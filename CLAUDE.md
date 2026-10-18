@@ -417,7 +417,20 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     `gnuradio-companion --gtk` and `--qt`** (user: "I ran both of them"),
     each running the same Time Sink flowgraph (user confirmed): `gr-qtgui` with Qt6 works at run
     time, so **`main` with Qt6 works on 26.10**. Still to do: step (5),
-    `maint-3.10` on 26.10 with the Qt6 packages; the upstream report. The edits
+    `maint-3.10` on 26.10 with the Qt6 packages; the upstream report.
+  - **Summary for the GRC developer** (user asked, 2026-10-17): a Claude Docs
+    doc, "GNU Radio main with Qt6 on Ubuntu 26.10",
+    https://claude.ai/code/artifact/76d346a7-1652-47de-a7c8-f8ad69f46288
+    (private until the user shares it; exportable to Markdown / PDF).
+    Sections: lead (273/273, both GRC front ends, one extra `apt-get` line);
+    Setup (`main` `862edb7`, `build-dep`, UHD 4.9.0.1, `libqwt-qt6-dev`, the
+    Qt6 install line, the CI Dockerfile's stale `libqt6*` names); Results
+    (26.10 vs 26.04 table: disabled components, 42 vs 40 components, 273 vs
+    271 tests, `--gtk` / `--qt`; `qa_qtgui` and the unidentified second
+    test); Thrift on `main` (the two `24e9f2b7e` bugs with the fixes, the
+    cached `ENABLE_CTRLPORT_THRIFT`); Not yet checked (ControlPort at run
+    time, `maint-3.10` on 26.10, the second test, no Qwt-Qt6 on 26.04).
+    Whether it was sent: not known. The edits
     are still in the user's `~/gnuradio` working tree (my reading). Worth an
     upstream issue / PR. GRC not reported yet.
   - If it works, `v2.5` (my proposal): Step 1 installs the Qt6 list when

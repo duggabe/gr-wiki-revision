@@ -430,7 +430,7 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     test); Thrift on `main` (the two `24e9f2b7e` bugs with the fixes, the
     cached `ENABLE_CTRLPORT_THRIFT`); Not yet checked (ControlPort at run
     time, `maint-3.10` on 26.10, the second test, no Qwt-Qt6 on 26.04).
-    Whether it was sent: not known.
+    **Shared with the GRC developer** (user, 2026-10-18).
   - **Thrift issue drafted** (user asked, 2026-10-17; text in this
     conversation only, not posted as far as I know). Laid out to match
     GNU Radio's bug report form (What happened / System Information / GNU
@@ -443,7 +443,9 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     the cached `ENABLE_CTRLPORT_THRIFT=OFF` note; Ubuntu 26.10, Thrift
     0.23.0, same gap on 26.04 (0.22.0); version v3.11.0.0git-1210-g862edb76;
     repro steps; the compiler error. Leaves out this project; optional last
-    line offering a PR. Issue number: none yet. Full text under "Drafts" at the end of
+    line offering a PR. **The user presented the text** (2026-10-18; to
+    the GRC developer, my reading); whether it became a GitHub issue, and its
+    number: not known. Full text under "Drafts" at the end of
     this file. The edits
     are still in the user's `~/gnuradio` working tree (my reading). Worth an
     upstream issue / PR. GRC not reported yet.
@@ -511,7 +513,7 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
 
 ## Drafts
 
-### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17, not posted yet)
+### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17; presented by the user 2026-10-18)
 
 Paste each part into the matching field of GNU Radio's bug report form.
 

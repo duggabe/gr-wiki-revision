@@ -430,7 +430,21 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     test); Thrift on `main` (the two `24e9f2b7e` bugs with the fixes, the
     cached `ENABLE_CTRLPORT_THRIFT`); Not yet checked (ControlPort at run
     time, `maint-3.10` on 26.10, the second test, no Qwt-Qt6 on 26.04).
-    Whether it was sent: not known. The edits
+    Whether it was sent: not known.
+  - **Thrift issue drafted** (user asked, 2026-10-17; text in this
+    conversation only, not posted as far as I know). Laid out to match
+    GNU Radio's bug report form (What happened / System Information / GNU
+    Radio Version / Specific Version / Steps to Reproduce / Relevant log
+    output). Title: "Thrift support can't be enabled on main:
+    FindTHRIFT.cmake uses the old gr_python_check_module call, and
+    thrift_server_template.h doesn't compile". Content: the two
+    `24e9f2b7e` bugs with both fixes, "the first hides the second", the
+    tested result (`* thrift`, 42 components, 273/273; ControlPort not run),
+    the cached `ENABLE_CTRLPORT_THRIFT=OFF` note; Ubuntu 26.10, Thrift
+    0.23.0, same gap on 26.04 (0.22.0); version v3.11.0.0git-1210-g862edb76;
+    repro steps; the compiler error. Leaves out this project; optional last
+    line offering a PR. Issue number: none yet. Full text under "Drafts" at the end of
+    this file. The edits
     are still in the user's `~/gnuradio` working tree (my reading). Worth an
     upstream issue / PR. GRC not reported yet.
   - If it works, `v2.5` (my proposal): Step 1 installs the Qt6 list when
@@ -494,3 +508,70 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
   plan is to bring it into the gnuradio/gnuradio repo", details not settled.
   Nothing changed yet. If it moves, the download links in the wiki draft,
   README, and Release notes, and the repo URLs here, need updating.
+
+## Drafts
+
+### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17, not posted yet)
+
+Paste each part into the matching field of GNU Radio's bug report form.
+
+~~~~markdown
+**Title:** Thrift support can't be enabled on main: FindTHRIFT.cmake uses the old gr_python_check_module call, and thrift_server_template.h doesn't compile
+
+**What happened?**
+
+On `main`, ControlPort's Thrift back-end is never enabled, even with every Thrift package installed. cmake doesn't list Thrift as disabled; it's silently left out.
+
+There are two bugs, both from 24e9f2b7e ("cmake: Add comprehensive cross-platform installer infrastructure"):
+
+1. **cmake never finds Thrift.** That commit changed `GR_PYTHON_CHECK_MODULE` in `cmake/Modules/GrPython.cmake` to take keyword arguments (`DESC`, `MODULE`, `CHECK`, `VAR`). It didn't update the call in `cmake/Modules/FindTHRIFT.cmake:63`, which still passes them by position:
+
+   ```cmake
+   gr_python_check_module("Thrift" thrift "1" PYTHON_THRIFT_FOUND)
+   ```
+
+   As a result `PYTHON_THRIFT_FOUND` is never set, so `THRIFT_FOUND` stays false and `ENABLE_CTRLPORT_THRIFT` defaults to `OFF`. Because the search is quiet, cmake prints nothing after `thrift looking for version 0.13`. Fix:
+
+   ```cmake
+   gr_python_check_module(DESC "Thrift" MODULE thrift CHECK "1" VAR PYTHON_THRIFT_FOUND)
+   ```
+
+2. **With Thrift enabled, `gnuradio-runtime` doesn't compile.** The same commit changed `TserverBase* i_impl()` to `auto i_impl()` in `gnuradio-runtime/include/gnuradio/thrift_server_template.h` (lines 42 and 158). That function overrides `virtual TserverBase* i_impl() = 0;` in `thrift_application_base.h:108`, so the build fails with "conflicting return type". Changing both lines back to `TserverBase* i_impl()`, as on `maint-3.10`, fixes it.
+
+The first bug hides the second: since Thrift is never enabled, nothing compiles that code.
+
+With both changes, `main` builds with Thrift: `gnuradio-config-info --enabled-components` lists `* thrift` (42 components instead of 41), and `make test` passes 273/273. ControlPort itself was not exercised at run time.
+
+One more thing: after the cmake fix, an existing build directory still has `ENABLE_CTRLPORT_THRIFT:BOOL=OFF` cached. A rebuild needs `-DENABLE_CTRLPORT_THRIFT=ON` or a fresh build directory.
+
+**System Information**
+
+Ubuntu 26.10 (clean install), x86_64. Thrift 0.23.0 (`libthrift-dev`, `thrift-compiler`, `python3-thrift`). The same Thrift gap is seen on `main` on Ubuntu 26.04 (Thrift 0.22.0).
+
+**GNU Radio Version**
+
+3.11 (main)
+
+**Specific Version**
+
+v3.11.0.0git-1210-g862edb76
+
+**Steps to Reproduce the Problem**
+
+1. Install Thrift: `sudo apt-get install libthrift-dev thrift-compiler python3-thrift`
+2. Configure `main`: `cmake ..`
+3. `gnuradio-config-info --enabled-components` (after install) has no `* thrift`. `CMakeCache.txt` has `THRIFT_BIN`, `THRIFT_INCLUDE_DIRS` and `THRIFT_LIBRARIES` set, but no `PYTHON_THRIFT_FOUND`, and `ENABLE_CTRLPORT_THRIFT:BOOL=OFF`.
+4. Apply the cmake fix above and configure with `-DENABLE_CTRLPORT_THRIFT=ON`. `make` then fails as shown below.
+
+**Relevant log output**
+
+```
+gnuradio-runtime/include/gnuradio/thrift_server_template.h:158:6: error: conflicting return type specified for 'auto thrift_server_template<TserverBase, TserverClass, TImplClass>::i_impl() [with TserverBase = rpcserver_base; TserverClass = rpcserver_thrift; TImplClass = rpcserver_booter_thrift]'
+  158 | auto thrift_server_template<TserverBase, TserverClass, TImplClass>::i_impl()
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gnuradio-runtime/include/gnuradio/thrift_application_base.h:108:26: note: overridden function is 'TserverBase* thrift_application_base<TserverBase, TserverClass>::i_impl() [with TserverBase = rpcserver_base; TserverClass = rpcserver_booter_thrift]'
+  108 |     virtual TserverBase* i_impl() = 0;
+```
+
+Optional last line: "I can open a PR with these two changes."
+~~~~

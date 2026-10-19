@@ -628,7 +628,9 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
   user and calls `sudo` only for the commands that need root** (reading A;
   user, 2026-10-19): the apt commands, `add-apt-repository`, the sources-file
   edit, `uhd_images_downloader`; checks, the PPA Release check and the module
-  lookup run unprivileged. Docs drop `sudo` in front of both scripts.
+  lookup run unprivileged. Docs drop `sudo` in front of both scripts. (6) **The intro section of the
+  wiki draft and README gets reworded with `v3.0`, not before** (user,
+  2026-10-19: "as long as we stay on v2.4 Release, we're OK with it as is").
  asked about renaming
   the repo, then said they will talk to the GNU Radio developers; "the
   plan is to bring it into the gnuradio/gnuradio repo", details not settled.

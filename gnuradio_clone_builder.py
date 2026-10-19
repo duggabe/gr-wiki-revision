@@ -665,9 +665,10 @@ def main() -> int:
     print(
         f"\nTo use it, add this line to ~/.profile, then log out and back in:\n"
         f'\n    . "{setup_env}"\n'
-        f"\nUntil then, run it in each terminal where you use GNU Radio."
-        f"\nWithout it, a shell can't find GNU Radio's commands, and Ubuntu may offer"
-        f"\n\"sudo apt install gnuradio\": don't, that installs a second, older GNU Radio."
+        f"\nUntil you do, type that line in each terminal where you use GNU Radio."
+        f"\n\nIf a GNU Radio command gives \"command not found\", that line hasn't been"
+        f"\nrun in that terminal. Ubuntu may then suggest \"sudo apt install gnuradio\":"
+        f"\nDON'T! That installs Ubuntu's older GNU Radio next to this one."
     )
     return 0
 

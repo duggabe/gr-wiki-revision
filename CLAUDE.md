@@ -107,6 +107,11 @@ not been a Phase 1", user, 2026-10-13).
   with `sh`. Not set (my note): `CMAKE_PREFIX_PATH` for out-of-tree modules
   (cmake should find the prefix through `PATH`; to check with a
   `gr_modtool` module build in rc1).
+- **First real run of the `v3.0` scripts** (ASUS, 26.10, not clean: after
+  the manual prefix trial, `~/gnuradio-pkg` and `~/gnuradio/build` removed
+  first; scripts from `main` at `169a139` by raw URL, no tag yet, my
+  suggestion): **Step 1 finished, UHD 4.9.0.1-1.4** (user, 2026-10-19; run as
+  the normal user, my reading). **The no-PPA warning and the Qt6 packages are there** (user, 2026-10-19; my reading: the `step1.log` grep and `dpkg -l` I suggested). Builder (default prefix `~/gnuradio-pkg`, presumably `maint-3.10`, my reading): **`make test` 269/269** (user, 2026-10-19), now with the full Qt6 list installed: step (5) of the Qt6 trial passes (my reading). Install, `setup_env.sh`, desktop GRC not reported yet.
 
 ## Machines
 

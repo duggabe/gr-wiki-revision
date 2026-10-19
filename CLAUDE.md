@@ -459,6 +459,20 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     this file. The edits
     are still in the user's `~/gnuradio` working tree (my reading). Worth an
     upstream issue / PR. GRC not reported yet.
+  - **Does adding the Qt6 packages depend on the OS version?** (user asked,
+    2026-10-18.) Only through `libqwt-qt6-dev`. Checked by me on Launchpad
+    (amd64): `qt6-base-dev` / `qt6-svg-dev` 6.4.2 (24.04), 6.10.2 (26.04),
+    6.11.2 (26.10); `python3-pyqt6` / `python3-pyqt6.qtsvg` / `pyqt6-dev-tools`
+    6.6.1, 6.10.2, 6.11.0; **`libqwt-qt6-dev` only on 26.10** (6.3.0). My
+    proposal: key on the package, not the release (install the Qt6 list when
+    `apt-cache show libqwt-qt6-dev` succeeds, like the SoapySDR step; no
+    version table, 27.04+ automatic); on 24.04 / 26.04 nothing extra, since
+    without Qwt the rest doesn't give `gr-qtgui`; keep the Thrift packages out
+    of Step 1 until #8239 is fixed. Open question: does PyQt6 alone make
+    `gnuradio-companion --qt` work on a `main` build without `gr-qtgui`?
+    Suggested test on the GMKtec (26.04, `main` `862edb7`): `sudo apt-get
+    install python3-pyqt6 python3-pyqt6.qtsvg`, `gnuradio-companion --qt`. If
+    yes, PyQt6 could go in on every release and only Qwt waits.
   - If it works, `v2.5` (my proposal): Step 1 installs the Qt6 list when
     apt knows `libqwt-qt6-dev` (worked out at run time, like the SoapySDR
     step), otherwise prints that a `main` build lacks `gr-qtgui`; 24.04 /

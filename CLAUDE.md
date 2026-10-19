@@ -91,6 +91,22 @@ not been a Phase 1", user, 2026-10-13).
   placeholder, installed only if `apt-cache show libqwt-qt6-dev` finds it.
   Dry runs checked by me on the LENOVO (resolute: PPA kept) and with a fake
   `stonking` os-release (PPA left out; stale entry caught).
+- **`v3.0` builder coded** (2026-10-19, uncommitted, not run for real):
+  `--prefix`, default `~/gnuradio-pkg`; `owns_prefix()` (the prefix or its
+  nearest existing parent belongs to the build user) picks plain `make
+  install` with no `ldconfig`, else `sudo make install` + `sudo ldconfig`
+  (e.g. `--prefix /usr/local`); after a user-prefix install it writes
+  `<prefix>/setup_env.sh` (PATH = `bin`, PYTHONPATH = the parents of
+  `lib*/python3*/{site,dist}-packages/gnuradio`, LD_LIBRARY_PATH = the dirs
+  with `libgnuradio-runtime.so*`; each a `case` guard so sourcing twice adds
+  nothing) and prints the `~/.profile` line and the `sudo apt install
+  gnuradio` warning; stale-dir check in the prefix and `/usr/local`; warns
+  if a GNU Radio is still installed in `/usr/local`. Checked by me: dry runs
+  on the LENOVO (default prefix: warning shown, `make install`; `/usr/local`:
+  sudo steps), and `setup_env.sh` on a fake ASUS-like prefix sourced twice
+  with `sh`. Not set (my note): `CMAKE_PREFIX_PATH` for out-of-tree modules
+  (cmake should find the prefix through `PATH`; to check with a
+  `gr_modtool` module build in rc1).
 
 ## Machines
 

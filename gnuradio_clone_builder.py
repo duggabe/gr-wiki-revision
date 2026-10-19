@@ -10,17 +10,31 @@ first; it installs UHD and everything GNU Radio needs.
 
 This program does not clone anything and does not change branches. It builds
 whatever is checked out in the source directory ($HOME/gnuradio unless
---source-dir says otherwise), so it can be run again after every change:
+--source-dir says otherwise), so it can be run again after every change.
+
+GNU Radio is installed into $HOME/gnuradio-pkg (--prefix chooses another
+directory), so nothing needs root. Run it as your normal user:
 
     cd $HOME/gnuradio
     mkdir build                     (first time only)
     cd build
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/gnuradio-pkg ../ 2>&1 | tee cmake.log
     make -j<jobs> 2>&1 | tee make.log
     git -C $HOME/gnuradio clean -fdX grc/tests/resources
     make test 2>&1 | tee make_test.log
-    sudo make install
-    sudo ldconfig
+    make install
+    # then it writes $HOME/gnuradio-pkg/setup_env.sh
+
+setup_env.sh sets PATH, PYTHONPATH and LD_LIBRARY_PATH so that the shell,
+Python and GNU Radio Companion find this install. Source it from ~/.profile
+(add the line below, then log out and back in), so that it applies in every
+terminal and to programs started from the desktop:
+
+    . "$HOME/gnuradio-pkg/setup_env.sh"
+
+With a prefix you can't write to, such as --prefix /usr/local, the install
+steps are `sudo make install` and `sudo ldconfig` instead (sudo asks for your
+password), and no setup_env.sh is needed or written.
 
 The `git clean` removes the files that GNU Radio's GRC tests generated in the
 source tree during an earlier `make test`. They are not part of the source
@@ -28,7 +42,7 @@ code (git ignores them), but the next test run would pick two of them up as
 tests, and on a build without gr-qtgui those two fail. Nothing else in the
 source tree is touched.
 
-Any failure, including a failing test, stops before `sudo make install`; the
+Any failure, including a failing test, stops before `make install`; the
 logs in the build directory show what went wrong. Use --no-install to stop
 after the tests on purpose.
 
@@ -45,11 +59,15 @@ Before building, it checks that:
   * UHD's development package (libuhd-dev) is installed, i.e. Step 1 was run;
   * Ubuntu's own gnuradio packages are not installed;
   * no empty directories from an earlier, removed GNU Radio install are left
-    under /usr/local (they make GNU Radio's tests fail).
+    in the prefix or under /usr/local (they make GNU Radio's tests fail).
+
+It also warns if an earlier GNU Radio install is still in /usr/local while
+installing somewhere else.
 
 The build runs as you, even when this program is started with sudo, so the
-build directory stays yours. `sudo make install` leaves some root-owned files
-in it; they are given back to you before the next build.
+build directory stays yours. A `sudo make install` (from an earlier install
+into /usr/local) leaves some root-owned files in it; they are given back to
+you before the next build.
 
 Examples
 --------
@@ -57,16 +75,19 @@ Examples
   python3 gnuradio_clone_builder.py --dry-run
 
   # Build, test, and install what is checked out in ~/gnuradio:
-  sudo python3 gnuradio_clone_builder.py
+  python3 gnuradio_clone_builder.py
 
   # Build and test only:
   python3 gnuradio_clone_builder.py --no-install
 
   # Build a clone that is somewhere else:
-  sudo python3 gnuradio_clone_builder.py --source-dir ~/src/gnuradio
+  python3 gnuradio_clone_builder.py --source-dir ~/src/gnuradio
+
+  # Install into /usr/local, as before (needs sudo for the install steps):
+  python3 gnuradio_clone_builder.py --prefix /usr/local
 
   # Use fewer make jobs, and leave out components you don't need:
-  sudo python3 gnuradio_clone_builder.py --jobs 4 \
+  python3 gnuradio_clone_builder.py --jobs 4 \
       --cmake-args="-DENABLE_GR_FEC=OFF -DENABLE_GR_VOCODER=OFF"
 """
 
@@ -87,8 +108,18 @@ REQUIRED_PACKAGES = ["libuhd-dev"]
 # Ubuntu's own GNU Radio, which must not be installed next to a source build.
 CONFLICTING_PACKAGES = ["gnuradio", "gnuradio-dev"]
 
-# Where an earlier GNU Radio install under /usr/local keeps its files.
-INSTALL_PREFIX = "/usr/local"
+# The default install prefix, in the build user's home directory.
+DEFAULT_PREFIX_NAME = "gnuradio-pkg"
+
+# Where earlier versions of these scripts installed GNU Radio. Checked for
+# leftovers whatever the prefix.
+SYSTEM_PREFIX = "/usr/local"
+
+# Files of a GNU Radio installed under a prefix.
+INSTALLED_GNURADIO_PATTERNS = ("bin/gnuradio-config-info", "lib*/libgnuradio-runtime.so*")
+
+# Written into a prefix the build user owns, after `make install`.
+SETUP_ENV_NAME = "setup_env.sh"
 
 # Memory to allow per parallel make job. GNU Radio's Python bindings need
 # about this much for each file being compiled.
@@ -206,7 +237,7 @@ def installed_packages(names: list[str]) -> list[str]:
     return found
 
 
-def find_stale_install_dirs(prefix: str = INSTALL_PREFIX) -> list[Path]:
+def find_stale_install_dirs(prefix: Path) -> list[Path]:
     """
     Return directories left behind by an earlier GNU Radio install that was
     removed file by file (e.g. `xargs rm -f < install_manifest.txt`): they
@@ -218,10 +249,91 @@ def find_stale_install_dirs(prefix: str = INSTALL_PREFIX) -> list[Path]:
     """
     stale = []
     for pattern in INSTALL_DIR_PATTERNS:
-        for path in sorted(Path(prefix).glob(pattern)):
+        for path in sorted(prefix.glob(pattern)):
             if path.is_dir() and not any(p.is_file() for p in path.rglob("*")):
                 stale.append(path)
     return stale
+
+
+def find_installed_gnuradio(prefix: Path) -> list[Path]:
+    """Files of a GNU Radio installed under the prefix."""
+    found = []
+    for pattern in INSTALLED_GNURADIO_PATTERNS:
+        found.extend(sorted(prefix.glob(pattern)))
+    return found
+
+
+def owns_prefix(prefix: Path, owner: pwd.struct_passwd) -> bool:
+    """
+    Whether the build user can install into the prefix without root: the
+    prefix, or else the nearest directory above it that exists, belongs to
+    them.
+    """
+    path = prefix
+    while not path.exists() and path != path.parent:
+        path = path.parent
+    try:
+        return path.stat().st_uid == owner.pw_uid
+    except OSError:
+        return False
+
+
+def python_paths(prefix: Path) -> list[Path]:
+    """
+    The directories under the prefix that hold GNU Radio's Python package,
+    like `find <prefix> -name gnuradio | grep packages` (normally one,
+    lib/python3.X/site-packages).
+    """
+    found = []
+    for pattern in ("lib*/python3*/site-packages/gnuradio", "lib*/python3*/dist-packages/gnuradio"):
+        found.extend(path.parent for path in sorted(prefix.glob(pattern)) if path.is_dir())
+    return found
+
+
+def library_paths(prefix: Path) -> list[Path]:
+    """The directories under the prefix that hold GNU Radio's libraries (lib, or lib64)."""
+    return sorted({path.parent for path in prefix.glob("lib*/libgnuradio-runtime.so*")})
+
+
+def _prepend(variable: str, paths: list[Path]) -> list[str]:
+    """
+    sh lines that put the paths in front of the variable, each only once,
+    so that sourcing the file again changes nothing.
+    """
+    lines = []
+    for path in reversed(paths):
+        p = str(path)
+        lines.append(
+            f'case ":${{{variable}}}:" in *":{p}:"*) ;; '
+            f'*) export {variable}="{p}${{{variable}:+:${variable}}}" ;; esac'
+        )
+    return lines
+
+
+def setup_env_text(prefix: Path) -> str:
+    """The contents of setup_env.sh for a GNU Radio installed under the prefix."""
+    lines = [
+        f"# Environment for the GNU Radio installed in {prefix}.",
+        "# Written by gnuradio_clone_builder.py after `make install`; it is",
+        "# rewritten by every install, so don't edit it. Source it from ~/.profile:",
+        f'#   . "{prefix}/{SETUP_ENV_NAME}"',
+        "",
+        *_prepend("PATH", [prefix / "bin"]),
+        *_prepend("PYTHONPATH", python_paths(prefix)),
+        *_prepend("LD_LIBRARY_PATH", library_paths(prefix)),
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def write_setup_env(prefix: Path) -> Path:
+    """Write <prefix>/setup_env.sh, owned by the build user. Raises OSError on failure."""
+    path = prefix / SETUP_ENV_NAME
+    path.write_text(setup_env_text(prefix), encoding="utf-8")
+    build_user = get_build_user()
+    if build_user:
+        os.chown(path, build_user.pw_uid, build_user.pw_gid)
+    return path
 
 
 def describe_checkout(source_dir: Path) -> str:
@@ -251,20 +363,20 @@ def has_files_not_owned_by(directory: Path, uid: int) -> bool:
     return False
 
 
-def get_build_steps(source_dir: Path, install: bool, jobs: int,
-                    cmake_args: list[str]) -> list[BuildStep]:
+def get_build_steps(source_dir: Path, prefix: Path, user_prefix: bool, install: bool,
+                    jobs: int, cmake_args: list[str]) -> list[BuildStep]:
     """
     Return the steps equivalent to:
 
         cd <source_dir>
         mkdir build                     (first time only)
         cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local <cmake_args> ../ 2>&1 | tee cmake.log
+        cmake -DCMAKE_INSTALL_PREFIX=<prefix> <cmake_args> ../ 2>&1 | tee cmake.log
         make -j<jobs> 2>&1 | tee make.log
         git clean -fdX grc/tests/resources      (in <source_dir>, if it is a git clone)
         make test 2>&1 | tee make_test.log
-        sudo make install
-        sudo ldconfig
+        make install                    (sudo make install; sudo ldconfig
+                                         if the user doesn't own the prefix)
     """
     source = str(source_dir)
     build_dir_path = source_dir / "build"
@@ -282,7 +394,7 @@ def get_build_steps(source_dir: Path, install: bool, jobs: int,
         ))
     steps += [
         BuildStep(
-            ["cmake", f"-DCMAKE_INSTALL_PREFIX={INSTALL_PREFIX}", *cmake_args, "../"],
+            ["cmake", f"-DCMAKE_INSTALL_PREFIX={prefix}", *cmake_args, "../"],
             build_dir, log="cmake.log",
         ),
         BuildStep(["make", f"-j{jobs}"], build_dir, log="make.log"),
@@ -291,7 +403,9 @@ def get_build_steps(source_dir: Path, install: bool, jobs: int,
         # Only git-ignored files (-X) in that one directory are removed.
         steps.append(BuildStep(["git", "clean", "-fdX", GENERATED_TEST_DIR], source))
     steps.append(BuildStep(["make", "test"], build_dir, log="make_test.log"))
-    if install:
+    if install and user_prefix:
+        steps.append(BuildStep(["make", "install"], build_dir))
+    elif install:
         steps += [
             BuildStep(["sudo", "make", "install"], build_dir),
             BuildStep(["sudo", "ldconfig"], build_dir),
@@ -385,6 +499,14 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--prefix", default=None,
+        help=(
+            f"Where to install GNU Radio. Default: {DEFAULT_PREFIX_NAME} in the home directory "
+            "of the invoking user. With a directory you don't own, such as /usr/local, the "
+            "install steps use sudo."
+        ),
+    )
+    parser.add_argument(
         "--jobs", type=int, default=None,
         help=(
             "Number of parallel make jobs. Default: one less than the number of processor "
@@ -401,7 +523,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--no-install", action="store_true",
-        help="Stop after the tests: do not run 'sudo make install' and 'sudo ldconfig'.",
+        help="Stop after the tests: do not install.",
     )
     parser.add_argument(
         "--dry-run", action="store_true",
@@ -433,8 +555,14 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+    if args.prefix:
+        prefix = Path(args.prefix).expanduser().resolve()
+    else:
+        prefix = Path(owner.pw_dir) / DEFAULT_PREFIX_NAME
+    user_prefix = owns_prefix(prefix, owner)
     print(f"Source directory: {source_dir}")
     print(f"Checked out: {describe_checkout(source_dir)}")
+    print(f"Install prefix: {prefix}" + ("" if user_prefix else " (not yours: installed with sudo)"))
 
     # --- 2. Check that Step 1 was run and nothing conflicts ---
     missing = [p for p in REQUIRED_PACKAGES if p not in installed_packages(REQUIRED_PACKAGES)]
@@ -458,7 +586,9 @@ def main() -> int:
         print("Aborting.", file=sys.stderr)
         return 1
 
-    stale_dirs = find_stale_install_dirs()
+    stale_dirs = find_stale_install_dirs(prefix)
+    if prefix != Path(SYSTEM_PREFIX):
+        stale_dirs += find_stale_install_dirs(Path(SYSTEM_PREFIX))
     if stale_dirs:
         print(
             "error: empty directories from an earlier GNU Radio install were found. They make "
@@ -471,9 +601,20 @@ def main() -> int:
         return 1
     print("OK: UHD is installed; no conflicting packages or leftover directories found.")
 
+    if prefix != Path(SYSTEM_PREFIX) and find_installed_gnuradio(Path(SYSTEM_PREFIX)):
+        print(
+            f"\nwarning: an earlier GNU Radio install is still in {SYSTEM_PREFIX}. With "
+            f"{SETUP_ENV_NAME} sourced, the one in {prefix} comes first, but anything started "
+            f"without it would get the old one. Consider removing the old install (see "
+            f"\"Changing branches\" on the wiki page, with the old build directory)."
+        )
+
     # --- 3. Show the plan ---
     jobs = args.jobs or get_make_jobs()
-    steps = get_build_steps(source_dir, install=not args.no_install, jobs=jobs, cmake_args=cmake_args)
+    install = not args.no_install
+    steps = get_build_steps(
+        source_dir, prefix, user_prefix, install=install, jobs=jobs, cmake_args=cmake_args,
+    )
     memory_kb = get_total_memory_kb()
     if args.jobs:
         print(f"\nMake jobs: {jobs} (from --jobs)")
@@ -491,6 +632,8 @@ def main() -> int:
         print(f"  Build user: {owner.pw_name}")
     for step in steps:
         print(f"  $ (cd {step.cwd} && {describe_step(step)})")
+    if install and user_prefix:
+        print(f"  then write {prefix / SETUP_ENV_NAME}")
 
     if args.dry_run:
         print("\n--dry-run set: no commands executed.")
@@ -506,10 +649,26 @@ def main() -> int:
         print("\nerror: GNU Radio build failed. Aborting.", file=sys.stderr)
         return 1
 
-    if args.no_install:
+    if not install:
         print("\nDone. GNU Radio built and tested; --no-install set, so nothing was installed.")
-    else:
-        print("\nDone. GNU Radio built, tested, and installed.")
+        return 0
+    if not user_prefix:
+        print(f"\nDone. GNU Radio built, tested, and installed in {prefix}.")
+        return 0
+
+    try:
+        setup_env = write_setup_env(prefix)
+    except OSError as exc:
+        print(f"\nerror: could not write {prefix / SETUP_ENV_NAME}: {exc}", file=sys.stderr)
+        return 1
+    print(f"\nDone. GNU Radio built, tested, and installed in {prefix}.")
+    print(
+        f"\nTo use it, add this line to ~/.profile, then log out and back in:\n"
+        f'\n    . "{setup_env}"\n'
+        f"\nUntil then, run it in each terminal where you use GNU Radio."
+        f"\nWithout it, a shell can't find GNU Radio's commands, and Ubuntu may offer"
+        f"\n\"sudo apt install gnuradio\": don't, that installs a second, older GNU Radio."
+    )
     return 0
 
 

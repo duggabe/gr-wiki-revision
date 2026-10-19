@@ -38,7 +38,8 @@ not been a Phase 1", user, 2026-10-13).
   results on both the wiki page and the README.md, leaving them only in
   CLAUDE.md"). Record them in full under "Test results" below. The GitHub
   Release notes keep their "Tested" sections (user: "OK").
-- **Tags** are never moved; fixes get a new tag (next: `v2.5`).
+- **Tags** are never moved; fixes get a new tag (next: `v3.0-rc1`,
+  then `v3.0`; user, 2026-10-19).
 - **GitHub Releases** are created or edited only on the user's request.
   Every Release must have **both scripts attached**, because the docs
   download from
@@ -52,9 +53,9 @@ not been a Phase 1", user, 2026-10-13).
   `&nbsp;` so GitHub doesn't wrap the options (`239bd31`; checked with
   GitHub's renderer, and the user confirmed it looks good, 2026-10-15).
   Keep the padding if the tables change.
-- **The user drafts on https://wiki.gnuradio.org/index.php?title=User_talk:Duggabe**
-  and updates the Talk page and the live page by **total replacement** with
-  the whole draft. So keep the draft complete and current.
+- **The user updates the live wiki page by total replacement** with the
+  whole local draft. So keep the draft complete and current. (Drafting on
+  User_talk:Duggabe first was temporary and is dropped, user, 2026-10-19.)
 - The wiki is behind Cloudflare and can't be fetched from here: ask the user
   to paste content.
 
@@ -68,7 +69,7 @@ not been a Phase 1", user, 2026-10-13).
 - **On hold** (user, 2026-10-16): "I'm going to wait for the developers
   decisions before I do anything else" (where the scripts live, Fedora
   support, the `qa_fastnoise` backport).
-- Live wiki page = User_talk:Duggabe = local draft = README, including
+- Live wiki page = local draft = README, including
   `v2.4`'s `python3-pytest` line (user replaced both wiki pages,
   2026-10-15). None of them has test results.
 - GitHub Releases: `v2.4` (Latest), `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
@@ -155,8 +156,36 @@ the wiki draft, and the same command in the README must stay in sync.
   qt6-svg-dev libqwt-qt6-dev python3-pyqt6 python3-pyqt6.qtsvg
   pyqt6-dev-tools`) only when apt knows `libqwt-qt6-dev`. Why: without Qwt
   the rest gives no `gr-qtgui`, and PyQt6 alone makes `gnuradio-companion
-  --qt` lock up on 26.04 `main` (GMKtec, 2026-10-18). Thrift packages: not
-  part of this decision (my proposal: leave them out until #8239 is fixed).
+  --qt` lock up on 26.04 `main` (GMKtec, 2026-10-18). **Thrift packages left
+  out** (user's decision, 2026-10-19: "leave out Thrift (they may drop
+  controlport/thrift support entirely)"): Step 1 adds no `libthrift-dev` /
+  `thrift-compiler` / `python3-thrift` beyond what `build-dep` brings.
+- **No PPA build for the running release: warn and use the distro's UHD
+  (user's decision, 2026-10-19, for `v2.5`; not coded yet):** "warn when no
+  PPA support, use distro UHD". Seen on the ASUS with 26.10 (2026-10-17):
+  the PPA has no `stonking` build and Step 1 silently installed Ubuntu's UHD
+  4.9.0.1-1.4. The ASUS's `/etc/apt/sources.list.d/ettusresearch*` (user,
+  2026-10-19): `Types: deb`, `URIs: https://ppa.launchpadcontent.net/ettusresearch/uhd/ubuntu/`,
+  **`Suites: stonking`**, `Components: main`: `add-apt-repository` wrote the
+  entry anyway and (since Step 1 runs it with `check=True` and went on) exited
+  0. The PPA's `dists/<codename>/Release` gives HTTP 404 for `stonking`, 200
+  for `resolute` and `noble` (checked by me 2026-10-19). The ASUS's
+  `step1.log` (user, 2026-10-19): the update run by `add-apt-repository`
+  printed `Ign:5 ... ettusresearch/uhd/ubuntu stonking InRelease`, `Err:6 ...
+  stonking Release` and **`E: The repository
+  'https://ppa.launchpadcontent.net/ettusresearch/uhd/ubuntu stonking Release'
+  does not have a Release file.`**, yet `add-apt-repository` exited 0 and
+  Step 1 went on: the error is printed but nothing stops on it. My proposed check: fetch that Release URL before
+  `add-apt-repository`; on 404, warn, skip the PPA (no stale entry), and
+  install the same package names from Ubuntu. The ASUS keeps the stale
+  `stonking` entry until removed (`sudo add-apt-repository --remove -y
+  ppa:ettusresearch/uhd`, my suggestion, not run). **SoapySDR UHD module
+  stays out with the distro UHD too** (user's decision, 2026-10-19: "leave
+  it out"). Why: `soapysdr0.8-module-uhd` 0.4.1-7 on 26.10 depends on
+  `libuhd4.9.0` (read by me from the .deb), so once Ettus publishes a build,
+  or someone switches to the PPA, it would keep a second UHD next to
+  `libuhd4.11.0`; module counts stay the same across releases; USRPs work
+  through `gr-uhd` anyway. Users can still `apt-get install` it by hand.
 - **UHD from the Ettus PPA** (the main GNU Radio developer's proposal),
   installed with **`--no-install-recommends`**: `libuhd-dev` recommends
   `gnuradio-dev` and `python3-uhd` recommends `gnuradio`, which put Ubuntu's
@@ -546,7 +575,59 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
   - Unknown before coding (from Fedora, before the GMKtec is reloaded): was
     the `ld.so.conf.d` line needed; did `dnf builddep` need `dnf5-plugins`;
     the `dnf search soapy` list; whether Thrift gives 42 components.
-- **Where the scripts will live** (user, 2026-10-14): asked about renaming
+- **Developer feedback: operate without `sudo` by default** (user,
+  2026-10-19): one of the developers "was thinking of defaults in both steps
+  would be to operate without 'sudo'". Not decided; exact meaning not known.
+  Today (checked by me): Step 1 refuses to run unless root ("installing
+  packages requires root. Re-run with sudo"), docs say `sudo python3
+  gnuradio_dependencies_installer.py`; the builder already works as the
+  normal user (it runs `sudo chown` / `sudo make install` / `sudo ldconfig`
+  itself and only switches users when run under sudo), but the README /
+  draft say `sudo python3 gnuradio_clone_builder.py` (README lines 163, 256).
+  Two readings (mine): (A) run both as the normal user and let each call
+  `sudo` only for the commands that need root; (B) nothing privileged by
+  default (Step 1 only prints its commands; the builder installs into a
+  prefix in the home directory, which needs environment setup).
+  **Then (user, 2026-10-19): the maintainer proposed `mkdir gnuradio-pkg`
+  and installing into it, like (B); the user: "I think it would make
+  everyone happier."** Not decided in detail, not coded. My notes: on
+  `main`, `GrPython.cmake` installs Python modules to
+  `lib/python3.X/site-packages` under the prefix (`posix_prefix` scheme), so
+  using it needs `PATH`, `PYTHONPATH`, `LD_LIBRARY_PATH` (no setup script
+  found upstream; the builder could write one). Step 1 still needs root for
+  `apt-get` whatever the builder does.
+  The user's wiki page https://wiki.gnuradio.org/index.php/ModuleNotFoundError
+  (local copy `ModuleNotFoundError.mediawiki` in the repo dir, gitignored
+  at the user's request, 2026-10-19) covers this: (A) `gnuradio-config-info
+  --prefix`; (B) `find {your-prefix} -name gnuradio | grep "packages"`; (C)
+  `PYTHONPATH` (`lib/{Py-version}/dist-packages` and `site-packages` on
+  Debian/Ubuntu, `lib64/.../site-packages` elsewhere); (D) `LD_LIBRARY_PATH`
+  (`lib` / `lib64`); (E) put them in `~/.bash_aliases`, `~/.bashrc` or
+  `~/.profile`; (F) for GRC started from the GUI, `~/.profile` or
+  `/etc/profile.d/`. Not on it: `PATH` (not needed for `/usr/local`, needed
+  for a home prefix). Its example still says python3.6.
+  **User's decisions for the prefix install (2026-10-19; not coded):**
+  (1) the docs say to source `setup_env.sh` from **`~/.profile`** (user's
+  own preference is `~/.bash_aliases`, but `~/.profile` also covers GRC
+  started from the desktop); (2) default prefix **`~/gnuradio-pkg`**, with a
+  **`--prefix`** option; (3) **the builder writes
+  `~/gnuradio-pkg/setup_env.sh`** after `make install`, with the paths it
+  finds (like section B of the wiki page). (4) **Release: one `v3.0`**
+  (user, 2026-10-19, after asking about "a tag without a release while we
+  test it"): the prefix install plus the `v2.5` decisions (Qt6 when
+  `libqwt-qt6-dev` exists, no Thrift, PPA check with distro-UHD fallback, no
+  Soapy UHD module, `git clean` kept). Tested through tags **`v3.0-rc1`,
+  `v3.0-rc2`, ...** with no Release, so `releases/latest` stays `v2.4` for
+  wiki users; testers download from
+  `https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v3.0-rcN/<file>`.
+  When it passes: tag `v3.0` on the last rc's commit and create the Release
+  with both scripts; only then the user replaces the live wiki page, and the
+  README follows. (No separate `v2.5`.) (5) **Step 1 runs as the normal
+  user and calls `sudo` only for the commands that need root** (reading A;
+  user, 2026-10-19): the apt commands, `add-apt-repository`, the sources-file
+  edit, `uhd_images_downloader`; checks, the PPA Release check and the module
+  lookup run unprivileged. Docs drop `sudo` in front of both scripts.
+ asked about renaming
   the repo, then said they will talk to the GNU Radio developers; "the
   plan is to bring it into the gnuradio/gnuradio repo", details not settled.
   Nothing changed yet. If it moves, the download links in the wiki draft,

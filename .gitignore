@@ -6,3 +6,4 @@ __pycache__/
 .claude/settings.local.json
 claude_notes.txt
 wiki-draft-download-section.txt
+ModuleNotFoundError.mediawiki

@@ -149,6 +149,14 @@ the wiki draft, and the same command in the README must stay in sync.
 
 ## Key decisions and why
 
+- **Qt6 for `main` only where Qwt for Qt6 exists (user's decision,
+  2026-10-19, for `v2.5`; not coded yet):** "Check for libqwt-qt6-dev, add
+  nothing before 26.10." Step 1 installs the Qt6 list (`qt6-base-dev
+  qt6-svg-dev libqwt-qt6-dev python3-pyqt6 python3-pyqt6.qtsvg
+  pyqt6-dev-tools`) only when apt knows `libqwt-qt6-dev`. Why: without Qwt
+  the rest gives no `gr-qtgui`, and PyQt6 alone makes `gnuradio-companion
+  --qt` lock up on 26.04 `main` (GMKtec, 2026-10-18). Thrift packages: not
+  part of this decision (my proposal: leave them out until #8239 is fixed).
 - **UHD from the Ettus PPA** (the main GNU Radio developer's proposal),
   installed with **`--no-install-recommends`**: `libuhd-dev` recommends
   `gnuradio-dev` and `python3-uhd` recommends `gnuradio`, which put Ubuntu's
@@ -179,7 +187,8 @@ the wiki draft, and the same command in the README must stay in sync.
   they import `gnuradio.qtgui`, which a `main` build lacks, so every
   `make test` after the first failed on `main`. Reported upstream by the
   user (2026-10-14; no issue number given). Drop the step when upstream
-  fixes it.
+  fixes it. **Kept** (user's decision, 2026-10-19: "Keep the clean before the
+  make test"), after the bug was seen again on `main` at `862edb76b`.
 - **Memory-aware `make` jobs:** an OOM kill at `make -j15` on the LENOVO's
   15 GiB. 2 GB per job is my estimate, not measured.
 - **Build as the normal user even under `sudo`:** steps not starting with

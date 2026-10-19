@@ -81,6 +81,17 @@ not been a Phase 1", user, 2026-10-13).
   choice although CC advises against it for software), `.gitignore`,
   `CLAUDE.md`.
 
+- **`v3.0` Step 1 coded** (2026-10-19, uncommitted, not run for real): runs as
+  the normal user (`sudo env DEBIAN_FRONTEND=noninteractive ...` for the root
+  commands, one `sudo -v` first; still works under `sudo`); the sources-file
+  edit through `sudo cp -p` + `sudo tee`; `ppa_has_build()` fetches the PPA's
+  `dists/<codename>/Release` (404: warning, no `add-apt-repository`, Ubuntu's
+  UHD; other errors abort); aborts with the `add-apt-repository --remove`
+  fix if a PPA entry names a release with no build; `<Qt6 packages>`
+  placeholder, installed only if `apt-cache show libqwt-qt6-dev` finds it.
+  Dry runs checked by me on the LENOVO (resolute: PPA kept) and with a fake
+  `stonking` os-release (PPA left out; stale entry caught).
+
 ## Machines
 
 | Machine | Ubuntu | State |

@@ -3,11 +3,12 @@
 gnuradio_dependencies_installer.py
 
 Step 1 of building GNU Radio from source on bare metal: installs UHD (the
-USRP Hardware Driver) from Ettus Research's PPA and everything GNU Radio
-needs to build and run, all with apt. Nothing is compiled here; building
-GNU Radio itself is Step 2.
+USRP Hardware Driver), from Ettus Research's PPA where it has a build for this
+Ubuntu release, and everything GNU Radio needs to build and run, all with apt.
+Nothing is compiled here; building GNU Radio itself is Step 2.
 
-It runs the equivalent of:
+Run it as your normal user. It uses sudo only for the commands that need root
+(it asks for your password once), which are the equivalent of:
 
     # enable "Source code" (deb-src) in /etc/apt/sources.list.d/ubuntu.sources,
     # which `apt-get build-dep` needs
@@ -18,11 +19,16 @@ It runs the equivalent of:
     sudo apt-get install -y libboost-dev libboost-chrono-dev libboost-date-time-dev ...
     sudo apt-get build-dep -y gnuradio
     sudo apt-get install -y python3-qtpy python3-pyqtgraph python3-matplotlib soapysdr-tools python3-pytest
+    sudo apt-get install -y qt6-base-dev qt6-svg-dev libqwt-qt6-dev ...
     sudo apt-get install -y soapysdr0.8-module-rtlsdr soapysdr0.8-module-hackrf ...
     sudo uhd_images_downloader
 
 Notes on those steps:
 
+  * Before adding the PPA, it checks that the PPA has a build for this Ubuntu
+    release. If not (as for 26.10 when this was written), it says so, leaves
+    the PPA out, and installs Ubuntu's own (older) UHD under the same package
+    names.
   * UHD's packages recommend Ubuntu's own gnuradio packages, so they are
     installed with --no-install-recommends. Otherwise Ubuntu's GNU Radio would
     be installed into /usr, next to the one you are about to build.
@@ -32,33 +38,39 @@ Notes on those steps:
     without gr-uhd (seen on a clean Ubuntu 24.04).
   * `apt-get build-dep gnuradio` installs the build dependencies of Ubuntu's
     gnuradio package for this Ubuntu release, so the list is never hardcoded
-    here. That includes libuhd-dev, which the PPA (added first) provides.
-  * The second-to-last apt-get line adds run-time packages that a
-    build-dependency list doesn't cover, and pytest, which GNU Radio's GRC
-    tests need (Ubuntu 26.04's build dependencies include it, 24.04's don't).
+    here. That includes libuhd-dev, installed just before.
+  * The apt-get line after it adds run-time packages that a build-dependency
+    list doesn't cover, and pytest, which GNU Radio's GRC tests need (Ubuntu
+    26.04's build dependencies include it, 24.04's don't).
+  * The Qt6 line is for GNU Radio's main branch, which uses Qt6 (maint-3.10
+    uses Qt5, which build-dep installs). It is run only where Ubuntu has Qwt
+    for Qt6 (libqwt-qt6-dev, from Ubuntu 26.10 on): without Qwt, main's
+    gr-qtgui can't be built anyway, and PyQt6 alone makes
+    `gnuradio-companion --qt` hang on Ubuntu 26.04.
   * The last apt-get line installs SoapySDR's device modules (the
     drivers gr-soapy uses for an RTL-SDR, HackRF, Airspy, LimeSDR, ...). They
     are only recommended by the SoapySDR library, and `apt-get build-dep`
     leaves them out, so without this line gr-soapy would be built but find no
     devices. The list is whatever Ubuntu's soapysdr-module-all package depends
-    on in this release, except the UHD module: that one needs Ubuntu's own,
-    older UHD library, and USRPs are used through gr-uhd anyway.
+    on in this release, except the UHD module: that one needs Ubuntu's own
+    UHD library, and USRPs are used through gr-uhd anyway.
   * The uhd-host package installs the udev rules for USRPs itself.
 
 Before changing anything, it stops if it finds something that would conflict:
-Ubuntu's gnuradio package already installed, or a UHD built from source in
-/usr/local (GNU Radio's cmake would find that one first).
+Ubuntu's gnuradio package already installed, a UHD built from source in
+/usr/local (GNU Radio's cmake would find that one first), or an entry for the
+PPA that has no build for this Ubuntu release (apt-get update would fail).
 
 Examples
 --------
-  # Show what would be done, without changing anything (no root needed):
+  # Show what would be done, without changing anything:
   python3 gnuradio_dependencies_installer.py --dry-run
 
   # Install UHD and GNU Radio's dependencies:
-  sudo python3 gnuradio_dependencies_installer.py
+  python3 gnuradio_dependencies_installer.py
 
   # The same, without downloading the USRP FPGA images:
-  sudo python3 gnuradio_dependencies_installer.py --no-images
+  python3 gnuradio_dependencies_installer.py --no-images
 """
 
 from __future__ import annotations
@@ -69,15 +81,22 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 UHD_PPA = "ppa:ettusresearch/uhd"
+# The PPA has a build for an Ubuntu release if this file exists for its codename.
+UHD_PPA_RELEASE_URL = "https://ppa.launchpadcontent.net/ettusresearch/uhd/ubuntu/dists/{codename}/Release"
+# Where add-apt-repository puts the PPA's entry.
+UHD_PPA_SOURCES_GLOB = "/etc/apt/sources.list.d/ettusresearch-ubuntu-uhd-*"
 UBUNTU_SOURCES = "/etc/apt/sources.list.d/ubuntu.sources"
 
 # Needed by the steps themselves: add-apt-repository, and git for Step 2's clone.
 TOOL_PACKAGES = ["software-properties-common", "git"]
 
-# UHD from the PPA. uhd-host depends on python3-uhd and the UHD library.
+# UHD, from the PPA or else from Ubuntu. uhd-host depends on python3-uhd and the
+# UHD library.
 UHD_PACKAGES = ["uhd-host", "libuhd-dev"]
 
 # The Boost development packages that UHD's cmake files (UHDConfig.cmake) need,
@@ -104,6 +123,19 @@ EXTRA_PACKAGES = {
     "soapysdr-tools": "provides SoapySDRUtil, for checking SoapySDR devices used with gr-soapy",
     "python3-pytest": "needed by GNU Radio's grc_tests in make test; without it that test is left out",
 }
+
+# Qt6 for GNU Radio's main branch, installed only if apt knows QT6_KEY_PACKAGE.
+QT6_KEY_PACKAGE = "libqwt-qt6-dev"
+QT6_PACKAGES = [
+    "qt6-base-dev",
+    "qt6-svg-dev",
+    QT6_KEY_PACKAGE,
+    "python3-pyqt6",
+    "python3-pyqt6.qtsvg",
+    "pyqt6-dev-tools",
+]
+# Stands for the Qt6 list in the command list until apt has been asked.
+QT6_PLACEHOLDER = "<Qt6 packages>"
 
 # SoapySDR's device modules: everything this metapackage depends on, except the
 # modules skipped below. Worked out with apt-cache, since the set of modules
@@ -175,6 +207,50 @@ def find_source_built_uhd(prefix: str = SOURCE_UHD_PREFIX) -> list[Path]:
     return found
 
 
+def ppa_has_build(codename: str) -> bool:
+    """
+    Whether the UHD PPA publishes packages for this Ubuntu release. Raises
+    OSError if that can't be found out (no network, or an unexpected answer).
+    """
+    url = UHD_PPA_RELEASE_URL.format(codename=codename)
+    try:
+        with urllib.request.urlopen(url, timeout=30):
+            return True
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return False
+        raise OSError(f"{url} answered HTTP {exc.code}") from exc
+    except urllib.error.URLError as exc:
+        raise OSError(f"could not reach {url}: {exc.reason}") from exc
+
+
+def ppa_entries_for(codename: str) -> list[Path]:
+    """The PPA's sources files that name this Ubuntu release."""
+    found = []
+    for path in sorted(Path("/").glob(UHD_PPA_SOURCES_GLOB.lstrip("/"))):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if codename in path.name or re.search(rf"\b{re.escape(codename)}\b", text):
+            found.append(path)
+    return found
+
+
+def apt_knows(package: str) -> bool:
+    """Whether apt has a real (not only virtual) package of this name."""
+    try:
+        result = subprocess.run(["apt-cache", "show", package], capture_output=True, text=True)
+    except OSError:
+        return False
+    return result.returncode == 0 and "Package:" in result.stdout
+
+
+def qt6_packages() -> list[str]:
+    """The Qt6 list if apt knows QT6_KEY_PACKAGE, otherwise empty."""
+    return list(QT6_PACKAGES) if apt_knows(QT6_KEY_PACKAGE) else []
+
+
 def parse_apt_depends(text: str) -> list[str]:
     """The package names on the "Depends:" lines of `apt-cache depends` output."""
     return re.findall(r"^\s*\|?Depends:\s*<?([^\s>]+)>?\s*$", text, flags=re.MULTILINE)
@@ -211,19 +287,23 @@ def soapy_module_packages() -> list[str]:
     return sorted(modules)
 
 
-def get_commands(download_images: bool) -> list[list[str]]:
-    """The commands run (as root) after "Source code" has been enabled."""
+def get_commands(use_ppa: bool, download_images: bool) -> list[list[str]]:
+    """The commands run as root after "Source code" has been enabled."""
     commands = [
         ["apt-get", "update"],
         ["apt-get", "install", "-y", *TOOL_PACKAGES],
+    ]
+    if use_ppa:
         # add-apt-repository also refreshes the package lists.
-        ["add-apt-repository", "-y", UHD_PPA],
+        commands.append(["add-apt-repository", "-y", UHD_PPA])
+    commands += [
         ["apt-get", "install", "-y", "--no-install-recommends", *UHD_PACKAGES],
         ["apt-get", "install", "-y", *BOOST_PACKAGES],
         ["apt-get", "build-dep", "-y", "gnuradio"],
         ["apt-get", "install", "-y", *EXTRA_PACKAGES],
-        # Replaced by the real package names when its turn comes: apt only knows
-        # them once the package lists have been refreshed.
+        # The placeholders are replaced by the real package names when their
+        # turn comes: apt only knows them once the package lists are refreshed.
+        ["apt-get", "install", "-y", QT6_PLACEHOLDER],
         ["apt-get", "install", "-y", SOAPY_MODULES_PLACEHOLDER],
     ]
     if download_images:
@@ -231,9 +311,27 @@ def get_commands(download_images: bool) -> list[list[str]]:
     return commands
 
 
-def run_command(cmd: list[str], env: dict) -> None:
-    print(f"\n$ {' '.join(cmd)}")
-    subprocess.run(cmd, check=True, env=env)
+def as_root(cmd: list[str], is_root: bool) -> list[str]:
+    """The command to run: through sudo unless already root, with apt kept non-interactive."""
+    if is_root:
+        return cmd
+    # sudo clears the environment, so DEBIAN_FRONTEND is passed through env.
+    return ["sudo", "env", "DEBIAN_FRONTEND=noninteractive", *cmd]
+
+
+def shown(cmd: list[str]) -> str:
+    """The command as printed: without the env part that as_root() adds."""
+    if cmd[:3] == ["sudo", "env", "DEBIAN_FRONTEND=noninteractive"]:
+        cmd = ["sudo", *cmd[3:]]
+    return " ".join(cmd)
+
+
+def run_command(cmd: list[str], env: dict, input_text: str | None = None) -> None:
+    print(f"\n$ {shown(cmd)}")
+    subprocess.run(
+        cmd, check=True, env=env, input=input_text, text=True,
+        stdout=subprocess.DEVNULL if input_text is not None else None,
+    )
 
 
 def _confirm(prompt: str) -> bool:
@@ -245,13 +343,13 @@ def _confirm(prompt: str) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Install UHD from the Ettus PPA and GNU Radio's dependencies with apt.",
+        description="Install UHD (from the Ettus PPA where it has a build) and GNU Radio's dependencies with apt.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
     parser.add_argument(
         "--dry-run", action="store_true",
-        help="Run the checks and print what would be done, without changing anything or requiring root.",
+        help="Run the checks and print what would be done, without changing anything.",
     )
     parser.add_argument(
         "-y", "--yes", action="store_true",
@@ -280,11 +378,20 @@ def main() -> int:
     if info.get("ID") != "ubuntu":
         print(
             f"error: {args.os_release_path} doesn't describe an Ubuntu release "
-            f"(ID={info.get('ID')!r}). The Ettus PPA only has packages for Ubuntu. Aborting.",
+            f"(ID={info.get('ID')!r}). This installer uses Ubuntu's packages. Aborting.",
             file=sys.stderr,
         )
         return 1
-    print(f"Detected host OS: Ubuntu {info.get('VERSION_ID', '?')} ({info.get('VERSION_CODENAME', '?')})")
+    codename = info.get("VERSION_CODENAME", "")
+    if not codename:
+        print(f"error: {args.os_release_path} has no VERSION_CODENAME. Aborting.", file=sys.stderr)
+        return 1
+    print(f"Detected host OS: Ubuntu {info.get('VERSION_ID', '?')} ({codename})")
+
+    is_root = os.geteuid() == 0
+    if not is_root and not args.dry_run and shutil.which("sudo") is None:
+        print("error: sudo is needed to install packages, and it isn't installed. Aborting.", file=sys.stderr)
+        return 1
 
     # --- 2. Check for things that would conflict ---
     conflicting = installed_packages(CONFLICTING_PACKAGES)
@@ -308,7 +415,7 @@ def main() -> int:
         for path in source_uhd:
             print(f"  {path}", file=sys.stderr)
         print(
-            "GNU Radio's cmake would find it before the PPA's UHD. Remove it, then run this "
+            "GNU Radio's cmake would find it before the packaged UHD. Remove it, then run this "
             "installer again. From the build directory it was installed from (e.g. "
             "~/uhd/host/build):",
             file=sys.stderr,
@@ -322,9 +429,34 @@ def main() -> int:
         print("  sudo ldconfig", file=sys.stderr)
         print("Aborting.", file=sys.stderr)
         return 1
-    print("OK: no conflicting GNU Radio packages or source-built UHD found.")
 
-    # --- 3. Work out the change to Ubuntu's sources file ---
+    # --- 3. Check whether the PPA has a build for this release ---
+    try:
+        use_ppa = ppa_has_build(codename)
+    except OSError as exc:
+        print(
+            f"error: could not check whether the Ettus PPA has packages for Ubuntu {codename}: "
+            f"{exc}. apt needs the network too. Aborting.",
+            file=sys.stderr,
+        )
+        return 1
+    if not use_ppa:
+        stale = ppa_entries_for(codename)
+        if stale:
+            print(
+                f"error: the Ettus PPA has no packages for Ubuntu {codename}, but apt has an "
+                "entry for it, which makes `apt-get update` fail:",
+                file=sys.stderr,
+            )
+            for path in stale:
+                print(f"  {path}", file=sys.stderr)
+            print("Remove it, then run this installer again:", file=sys.stderr)
+            print(f"  sudo add-apt-repository --remove -y {UHD_PPA}", file=sys.stderr)
+            print("Aborting.", file=sys.stderr)
+            return 1
+    print("OK: no conflicting GNU Radio packages, source-built UHD, or stale PPA entry found.")
+
+    # --- 4. Work out the change to Ubuntu's sources file ---
     sources_path = Path(args.sources_path)
     try:
         sources_text = sources_path.read_text(encoding="utf-8")
@@ -344,21 +476,42 @@ def main() -> int:
         return 1
     new_sources_text, changed = enable_source_code(sources_text)
     backup_path = sources_path.with_name(sources_path.name + ".bak")
+    sources_commands = [
+        as_root(["cp", "-p", str(sources_path), str(backup_path)], is_root),
+        as_root(["tee", str(sources_path)], is_root),
+    ]
 
-    # --- 4. Show the plan ---
-    commands = get_commands(download_images=not args.no_images)
+    # --- 5. Show the plan ---
+    commands = [as_root(cmd, is_root) for cmd in get_commands(use_ppa, download_images=not args.no_images)]
+    if use_ppa:
+        print(f"\nUHD: from the Ettus PPA, which has packages for Ubuntu {codename}.")
+    else:
+        print(
+            f"\nwarning: the Ettus PPA has no packages for Ubuntu {codename} (yet), so it is left "
+            "out and UHD comes from Ubuntu itself. That UHD is older than the PPA's; GNU Radio "
+            "builds and works with it."
+        )
     print("\nThe following will be done:")
     if changed:
         print(
             f"  enable source code in {sources_path}: {changed} 'Types: deb' line(s) become "
-            f"'Types: deb deb-src' (original saved as {backup_path.name})"
+            f"'Types: deb deb-src' (original saved as {backup_path.name}):"
         )
+        for cmd in sources_commands:
+            print(f"    $ {shown(cmd)}")
     else:
         print(f"  (source code is already enabled in {sources_path})")
     for cmd in commands:
-        print(f"  $ sudo {' '.join(cmd)}")
+        print(f"  $ {shown(cmd)}")
     for pkg, reason in EXTRA_PACKAGES.items():
         print(f"  added: {pkg} ({reason})")
+    if apt_knows(QT6_KEY_PACKAGE):
+        print(f"  {QT6_PLACEHOLDER}, for GNU Radio's main branch: " + " ".join(QT6_PACKAGES))
+    else:
+        print(
+            f"  {QT6_PLACEHOLDER}: installed only if apt knows {QT6_KEY_PACKAGE} once the package "
+            "lists have been refreshed (it exists from Ubuntu 26.10 on)"
+        )
     soapy_modules = soapy_module_packages()
     if soapy_modules:
         print(f"  {SOAPY_MODULES_PLACEHOLDER}, the drivers gr-soapy uses: " + " ".join(soapy_modules))
@@ -372,15 +525,6 @@ def main() -> int:
         print("\n--dry-run set: nothing changed.")
         return 0
 
-    # --- 5. Root check ---
-    if os.geteuid() != 0:
-        print(
-            "\nerror: installing packages requires root. Re-run with sudo, "
-            "or use --dry-run to inspect without installing.",
-            file=sys.stderr,
-        )
-        return 1
-
     # --- 6. Confirm ---
     if not args.yes:
         if not _confirm("\nProceed with installation on this machine? [y/N] "):
@@ -388,22 +532,30 @@ def main() -> int:
             return 1
 
     # --- 7. Execute ---
-    if changed:
-        try:
-            shutil.copy2(sources_path, backup_path)
-            sources_path.write_text(new_sources_text, encoding="utf-8")
-        except OSError as exc:
-            print(f"error: could not update {sources_path}: {exc}", file=sys.stderr)
-            return 1
-        print(f"\nEnabled source code in {sources_path} (original saved as {backup_path}).")
-
     env = os.environ.copy()
     env["DEBIAN_FRONTEND"] = "noninteractive"
     try:
+        if not is_root:
+            # Ask for the password once, before anything changes.
+            run_command(["sudo", "-v"], env)
+        if changed:
+            run_command(sources_commands[0], env)
+            run_command(sources_commands[1], env, input_text=new_sources_text)
+            print(f"Enabled source code in {sources_path} (original saved as {backup_path}).")
         for cmd in commands:
+            if QT6_PLACEHOLDER in cmd:
+                packages = qt6_packages()
+                if not packages:
+                    print(
+                        f"\nnote: apt doesn't know {QT6_KEY_PACKAGE} in this Ubuntu release, so no "
+                        "Qt6 packages were installed. That doesn't matter for maint-3.10 (Qt5); "
+                        "a build of GNU Radio's main branch (Qt6) will have no gr-qtgui."
+                    )
+                    continue
+                cmd = [*(arg for arg in cmd if arg != QT6_PLACEHOLDER), *packages]
             if SOAPY_MODULES_PLACEHOLDER in cmd:
-                soapy_modules = soapy_module_packages()
-                if not soapy_modules:
+                packages = soapy_module_packages()
+                if not packages:
                     print(
                         f"\nwarning: apt doesn't know the {SOAPY_MODULES_METAPACKAGE} package, so no "
                         "SoapySDR device modules were installed. gr-soapy will be built, but it "
@@ -411,10 +563,10 @@ def main() -> int:
                         file=sys.stderr,
                     )
                     continue
-                cmd = [*(arg for arg in cmd if arg != SOAPY_MODULES_PLACEHOLDER), *soapy_modules]
+                cmd = [*(arg for arg in cmd if arg != SOAPY_MODULES_PLACEHOLDER), *packages]
             run_command(cmd, env)
     except subprocess.CalledProcessError as exc:
-        print(f"\nerror: command failed with exit code {exc.returncode}: {' '.join(exc.cmd)}", file=sys.stderr)
+        print(f"\nerror: command failed with exit code {exc.returncode}: {shown(exc.cmd)}", file=sys.stderr)
         return 1
     except OSError as exc:
         print(f"\nerror: could not run a command: {exc}", file=sys.stderr)
@@ -433,7 +585,8 @@ def main() -> int:
         version = subprocess.run(
             ["uhd_config_info", "--version"], capture_output=True, text=True, check=True,
         ).stdout.strip()
-        print(f"\nInstalled: {version}")
+        source = "the Ettus PPA" if use_ppa else "Ubuntu (no PPA build for this release)"
+        print(f"\nInstalled: {version}, from {source}")
     except (OSError, subprocess.CalledProcessError) as exc:
         print(f"\nerror: UHD doesn't run after installation: {exc}", file=sys.stderr)
         return 1

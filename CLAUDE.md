@@ -473,6 +473,14 @@ on the GMKtec, clean 26.04, `v2.4` (2026-10-17).
     Suggested test on the GMKtec (26.04, `main` `862edb7`): `sudo apt-get
     install python3-pyqt6 python3-pyqt6.qtsvg`, `gnuradio-companion --qt`. If
     yes, PyQt6 could go in on every release and only Qwt waits.
+    **Result (user, 2026-10-18): on the GMKtec, installing `python3-pyqt6
+    python3-pyqt6.qtsvg` makes `gnuradio-companion --qt` lock up.** So
+    PyQt6 without Qwt / `gr-qtgui` is not just useless but harmful on 26.04
+    `main`: Step 1 must not install PyQt6 where `libqwt-qt6-dev` is missing
+    (my conclusion). Then (user, 2026-10-18): **"On 26.04 GRC works with Qt5
+    but not Qt6"**: `--qt` runs on PyQt5 and locks up on PyQt6 (my reading;
+    how Qt5 was selected, by removing PyQt6 or with `QT_API=pyqt5`, not
+    stated). Why it hangs on PyQt6 without `gr-qtgui`: not known.
   - If it works, `v2.5` (my proposal): Step 1 installs the Qt6 list when
     apt knows `libqwt-qt6-dev` (worked out at run time, like the SoapySDR
     step), otherwise prints that a `main` build lacks `gr-qtgui`; 24.04 /

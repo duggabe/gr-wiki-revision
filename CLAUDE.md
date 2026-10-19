@@ -44,7 +44,7 @@ not been a Phase 1", user, 2026-10-13).
   Every Release must have **both scripts attached**, because the docs
   download from
   `https://github.com/duggabe/gr-wiki-revision/releases/latest/download/<file>`.
-- **The wiki draft leads; the README follows.** `wiki-draft-download-section.txt`
+- **The wiki draft leads; the README follows.** `wiki-draft-download-section.mediawiki`
   (MediaWiki, gitignored, local only) is the user's text. The user edits in
   MediaWiki; I convert to Markdown for the README. The README is the draft
   section by section, plus README-only parts: a short repo intro, the two

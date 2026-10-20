@@ -107,6 +107,33 @@ not been a Phase 1", user, 2026-10-13).
   with `sh`. Not set (my note): `CMAKE_PREFIX_PATH` for out-of-tree modules
   (cmake should find the prefix through `PATH`; to check with a
   `gr_modtool` module build in rc1).
+- **`v3.0` wiki draft written by me** (2026-10-19, for the user to review;
+  `v2.4` text kept as `wiki-draft-download-section-v2.4.mediawiki`, also
+  gitignored): goals + Step 2 sentence mention `~/gnuradio-pkg`; "Before you
+  start" gains the old three-step `/usr/local` removal for v2.x installs
+  (the `rm -rf` list stays in sync with `INSTALL_DIR_PATTERNS`); Step 1 run
+  without `sudo`, PPA check (26.10 example), Qt6 bullet; Step 2 without
+  `sudo`, `make install`, `--prefix` bullet, "with or without sudo" bullet
+  and "(Version v2.0 ...)" dropped; new sections "Setting up the
+  environment" (`~/.profile` line, log out, "command not found" /
+  **don't!**, link to [[ModuleNotFoundError]]) and "The main branch and Qt6"
+  (26.10 has `gr-qtgui`; Thrift with #8239); "Changing branches..." now `rm
+  -rf ~/gnuradio-pkg ~/gnuradio/build`, plus `grc_setup_freedesktop
+  uninstall` and the `~/.profile` line for full removal; leftover-library
+  commands in `~/gnuradio-pkg/lib` without sudo/ldconfig; "Checking" adds
+  `--prefix` and the desktop entry. Intro rewording (decision 6): not done,
+  waiting for the user's wording. README not updated yet.
+  **The user pasted the whole `v3.0` draft, unaltered, into the live wiki
+  page** (user, 2026-10-19: "I pasted the entire text unaltered"; my reading:
+  the `v3.0` draft, not the `v2.4` backup); the `#` links work (user). So the
+  live page describes `v3.0` while `releases/latest` still gives `v2.4`
+  (mismatch until the `v3.0` Release, or until the `v2.4` text goes back).
+  **Then the user put the `v2.4` text back** (from
+  `wiki-draft-download-section-v2.4.mediawiki`; user, 2026-10-19): live page =
+  `v2.4` again, matching `releases/latest`. The `v3.0` draft goes live only
+  after the `v3.0` Release.
+  README: intro now says `v2.4` (was `v2.3`), and "The next release will be
+  `v3.0`" replaces "Further fixes will be tagged `v2.5`" (user asked).
 - **First real run of the `v3.0` scripts** (ASUS, 26.10, not clean: after
   the manual prefix trial, `~/gnuradio-pkg` and `~/gnuradio/build` removed
   first; scripts from `main` at `169a139` by raw URL, no tag yet, my

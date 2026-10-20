@@ -6,7 +6,7 @@ The main content is two Python scripts that build
 [GNU Radio](https://github.com/gnuradio/gnuradio) from source on Ubuntu,
 without Docker. They back the "Building GNU Radio from Source Code" page on
 the GNU Radio Wiki, and this README follows that page. The current release
-is `v2.3`; see [Releases](#releases).
+is `v2.4`; see [Releases](#releases).
 
 The goals of these instructions are to:
 
@@ -437,5 +437,5 @@ download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
-Further fixes will be tagged `v2.5` and so on; a tag is never moved, so a
+The next release will be `v3.0`; a tag is never moved, so a
 link to a tag always gives the same scripts.

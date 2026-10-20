@@ -178,6 +178,7 @@ the wiki draft, and the same command in the README must stay in sync.
 | `v2.2` | 2026-10-12 | Step 1: SoapySDR device modules. Commit `7208a18`. |
 | `v2.3` | 2026-10-14 | Step 1: Boost dev packages for UHD's cmake files. Commit `ffac9f9`; Release title "v2.3: Boost packages for gr-uhd". |
 | `v2.4` | 2026-10-15 | Step 1: `python3-pytest`, so 24.04 builds run `grc_tests`. Commit `ce9806d`; Release title "v2.4: pytest for the GRC test". Download link checked: gives the `v2.4` Step 1 script. |
+| `v3.0-rc1` | 2026-10-19 | Tag only, no Release: run as the user, PPA check with Ubuntu-UHD fallback, Qt6 where `libqwt-qt6-dev` exists, install into `~/gnuradio-pkg` + `setup_env.sh`. Commit `80b6b8f`; raw URLs checked (200). |
 | `v1.0`–`v1.3` | 2026-09-26 – 10-10 | Phase 1, tags only. |
 
 ## Key decisions and why

@@ -132,6 +132,14 @@ not been a Phase 1", user, 2026-10-13).
   `wiki-draft-download-section-v2.4.mediawiki`; user, 2026-10-19): live page =
   `v2.4` again, matching `releases/latest`. The `v3.0` draft goes live only
   after the `v3.0` Release.
+- **rc1 test by the other tester** (user, 2026-10-19: jesternofool "is
+  available to help again and can install a clean OS much faster"): my
+  suggestion, a **clean 24.04 with `maint-3.10`** first (the PPA / Boost /
+  `add-apt-repository` half of Step 1 and Python 3.12, untested in `v3.0`;
+  compares with the `v2.3` run; the tester's HackRF / LimeSDR Mini / Airspy R2 /
+  B200mini from a home prefix); then `main` from the fork on 24.04, then a
+  clean 26.04; the user keeps 26.10 on the ASUS. Message drafted (full text
+  under "Drafts"); not sent as far as I know.
   README: intro now says `v2.4` (was `v2.3`), and "The next release will be
   `v3.0`" replaces "Further fixes will be tagged `v2.5`" (user asked).
 - **First real run of the `v3.0` scripts** (ASUS, 26.10, not clean: after
@@ -762,4 +770,61 @@ gnuradio-runtime/include/gnuradio/thrift_application_base.h:108:26: note: overri
 ```
 
 Optional last line: "I can open a PR with these two changes."
+~~~~
+
+### rc1 test request for the other tester (drafted 2026-10-19)
+
+For the user to send to jesternofool. Step 3 offers a plain clone first, the
+fork second (the user may swap them).
+
+~~~~markdown
+Hi! Thanks again for testing `v2.3`. If you have time, I'd like your help with the next version, `v3.0`. It's not on the wiki yet; this is a release candidate, `v3.0-rc1`.
+
+**What's new:** neither script is run with `sudo` any more. Step 1 calls `sudo` itself, only for the commands that install packages, and asks for your password once. Step 2 installs GNU Radio into `~/gnuradio-pkg` in your home directory, with no root at all, and writes `~/gnuradio-pkg/setup_env.sh`. One line in `~/.profile` then makes GNU Radio available in every terminal and from the desktop.
+
+**What I'd like tested:** a **clean Ubuntu 24.04**, building **`maint-3.10`**.
+
+```bash
+# 1. Download the two rc1 scripts
+mkdir -p ~/gr-v3 && cd ~/gr-v3
+for f in gnuradio_dependencies_installer.py gnuradio_clone_builder.py; do python3 -c "import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1] + sys.argv[2], sys.argv[2])" https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v3.0-rc1/ $f; done
+
+# 2. Step 1, as yourself (NOT with sudo)
+python3 gnuradio_dependencies_installer.py 2>&1 | tee step1.log
+
+# 3. Get the source; a plain clone is fine for testing:
+cd ~ && git clone https://github.com/gnuradio/gnuradio.git && cd gnuradio && git checkout maint-3.10
+#    (or clone your fork, then: git remote add upstream https://github.com/gnuradio/gnuradio.git
+#     && git fetch upstream && git checkout maint-3.10)
+
+# 4. Step 2, also as yourself (NOT with sudo)
+cd ~/gr-v3 && python3 gnuradio_clone_builder.py 2>&1 | tee step2.log
+
+# 5. Set up the environment, then log out of the desktop and back in
+#    (closing the terminal isn't enough)
+echo '. "$HOME/gnuradio-pkg/setup_env.sh"' >> ~/.profile
+```
+
+After logging back in, open a terminal:
+```bash
+uhd_config_info --version
+gnuradio-config-info --version --prefix
+gnuradio-config-info --enabled-components | tr ';' '\n' | wc -l
+```
+
+**Please report:**
+1. Whether Step 1 finished, and the UHD version. It should be 4.11 from the Ettus PPA.
+2. The `make test` result. I expect 269/269.
+3. The version, the prefix (should be `/home/<you>/gnuradio-pkg/`), and the component count (I expect 42).
+4. Whether GNU Radio Companion shows up in Activities and runs a flowgraph when started from there.
+5. Which devices work: HackRF, LimeSDR Mini, Airspy R2 through Soapy, and the B200mini through UHD, including transmit if you can.
+6. Optional: whether an out-of-tree module builds against it:
+   ```bash
+   cd /tmp && gr_modtool newmod test && cd gr-test && mkdir build && cd build && cmake .. && make
+   ```
+7. Anything odd in `step1.log` or `step2.log`.
+
+**One warning:** if a GNU Radio command ever says "command not found", Ubuntu may suggest `sudo apt install gnuradio`. Don't do that! It installs Ubuntu's older GNU Radio next to this one. It only means the `setup_env.sh` line hasn't been run in that terminal.
+
+Thanks!
 ~~~~

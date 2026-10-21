@@ -57,6 +57,7 @@ not been a Phase 1", user, 2026-10-13).
   whole local draft. So keep the draft complete and current. (Drafting on
   User_talk:Duggabe first was dropped 2026-10-19, but the user is **using it again for the `v3.0` revision**,
   2026-10-21: "Wait until I've made my changes"; then ask for a paste and update the local draft from it.)
+  **Done** (user, 2026-10-21): the user copied the Talk page into the local draft. **Download section changed to the `for` loop** (user asked, 2026-10-21: "The chained python3 calls would hang sometimes"; my guess at the cause: a paste ending on a trailing `&&` leaves bash waiting at its `>` prompt): `mkdir -p ~/gr-installers && cd ~/gr-installers`, then one `for f in ...; do python3 -c "...urlretrieve(sys.argv[1] + sys.argv[2], sys.argv[2])" https://github.com/duggabe/gr-wiki-revision/releases/latest/download/ $f; done` line. Tested by me: it downloads both scripts, identical to `v2.4` (the current latest). The README follows at release time.
 - The wiki is behind Cloudflare and can't be fetched from here: ask the user
   to paste content.
 

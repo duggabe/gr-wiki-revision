@@ -4,22 +4,25 @@ Scripts and programs to support GNU Radio Wiki documents.
 
 The main content is two Python scripts that build
 [GNU Radio](https://github.com/gnuradio/gnuradio) from source on Ubuntu,
-without Docker. They back the "Building GNU Radio from Source Code" page on
-the GNU Radio Wiki, and this README follows that page. The current release
-is `v2.4`; see [Releases](#releases).
+without Docker. They back the
+[Building GNU Radio from Source Code](https://wiki.gnuradio.org/index.php?title=Building_GNU_Radio_from_Source_Code)
+page on the GNU Radio Wiki, and this README follows that page. The current
+release is `v3.0`; see [Releases](#releases).
 
 The goals of these instructions are to:
 
 - Use the Ettus PPA repository for UHD rather than building UHD from source.
 - Use the `~/gnuradio` folder already cloned in the user's system so that
   developers/testers can build from their own fork.
+- Install GNU Radio into a folder in the user's home directory
+  (`~/gnuradio-pkg`), so that neither script has to be run with `sudo`.
 
-They are useful when a Developer of GNU Radio code needs to test additions or
-revisions to the code, and needs to operate outside of a Docker container.
-All others should follow the instructions in
+This package is useful when a Developer of GNU Radio code needs to test
+additions or revisions to the code, and needs to operate outside of a Docker
+container. All others should follow the instructions in
 [LinuxInstall#From_Binaries](https://wiki.gnuradio.org/index.php?title=LinuxInstall#From_Binaries).
 
-**Note: Running and developing OOT (out-of-tree) modules does _not_ require
+**Note: Developing and running OOT (out-of-tree) modules does _not_ require
 GNU Radio to be installed from source.**
 
 ---
@@ -28,7 +31,9 @@ There are two steps, each with its own script. Step 1 installs UHD from the
 Ettus Research PPA and everything GNU Radio needs, using `apt-get`; nothing is
 compiled. Step 2 builds, tests, and installs GNU Radio from your own fork,
 which you clone into your home directory, so that you can work on an issue
-and submit a pull request.
+and submit a pull request. GNU Radio is installed into `~/gnuradio-pkg`, and
+one line in `~/.profile` makes it available in every terminal and from the
+desktop.
 
 ## Downloading the scripts
 
@@ -38,22 +43,22 @@ repository; just download the two scripts. Each one works on its own.
 Download them with Python, which every Ubuntu system has:
 
 ```bash
-mkdir -p ~/gr-installers && cd ~/gr-installers &&
-python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/duggabe/gr-wiki-revision/releases/latest/download/gnuradio_dependencies_installer.py', 'gnuradio_dependencies_installer.py')" &&
-python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/duggabe/gr-wiki-revision/releases/latest/download/gnuradio_clone_builder.py', 'gnuradio_clone_builder.py')"
+mkdir -p ~/gr-installers && cd ~/gr-installers
+for f in gnuradio_dependencies_installer.py gnuradio_clone_builder.py; do python3 -c "import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1] + sys.argv[2], sys.argv[2])" https://github.com/duggabe/gr-wiki-revision/releases/latest/download/ $f; done
 ```
 
 These links always give the latest release; the
 [Releases page](https://github.com/duggabe/gr-wiki-revision/releases) lists
-what changed in each one. Look the scripts over before running them. Don't
-pipe a download straight into `python3`, especially with `sudo`. Both scripts
-have `--help` and `--dry-run`.
+what changed in each one. Look over the scripts before running them, and
+don't pipe a download straight into `python3`. Both scripts have `--help` and
+`--dry-run`.
 
 ## Before you start
 
 The scripts need a system without another GNU Radio or a source-built UHD on
-it. The scripts check for both and stop with the commands to run if they
-find either.
+it. They stop, giving the commands to run, if they find Ubuntu's GNU Radio
+packages or a source-built UHD, and the Step 2 script warns about an earlier
+GNU Radio install in `/usr/local`.
 
 - If Ubuntu's own GNU Radio packages are installed, remove them:
 
@@ -63,7 +68,7 @@ find either.
 
 - If you built UHD from source earlier, remove it. GNU Radio's `cmake` looks
   in `/usr/local` before `/usr`, so it would otherwise keep using that copy
-  instead of the PPA's:
+  instead of the packaged one:
 
   ```bash
   cd ~/uhd/host/build && sudo xargs rm -f < install_manifest.txt
@@ -71,9 +76,29 @@ find either.
   sudo ldconfig
   ```
 
-- If you built and installed GNU Radio from source earlier, remove it with
-  steps 1 and 2 of
-  [Changing branches, or removing the installed GNU Radio](#changing-branches-or-removing-the-installed-gnu-radio).
+- If you built and installed GNU Radio into `/usr/local` earlier (as versions
+  v2.x of these scripts did), remove it. Programs started without the
+  `~/.profile` line below would otherwise still find that copy. Keep the
+  three steps in this order: the first one needs a file inside
+  `~/gnuradio/build`.
+
+  ```bash
+  cd ~/gnuradio/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
+
+  sudo rm -rf /usr/local/lib/python3*/dist-packages/gnuradio \
+              /usr/local/lib/python3*/dist-packages/pmt \
+              /usr/local/include/gnuradio /usr/local/include/pmt \
+              /usr/local/share/gnuradio /usr/local/etc/gnuradio \
+              /usr/local/lib/cmake/gnuradio /usr/local/share/doc/gnuradio-*
+
+  cd && sudo rm -rf ~/gnuradio/build
+  ```
+
+  The first command removes the installed files, the second the empty
+  directories they leave (which make GNU Radio's tests fail), and the third
+  the build directory, which `sudo make install` left partly owned by root.
+  The Step 2 script checks for those empty directories, and stops with the
+  exact command to run if it finds any.
 
 ## Step 1: Installing UHD and the dependencies
 
@@ -84,20 +109,24 @@ cd ~/gr-installers
 python3 gnuradio_dependencies_installer.py --dry-run
 ```
 
-Then run it:
+Then run it, as yourself (not with `sudo`):
 
 ```bash
-sudo python3 gnuradio_dependencies_installer.py
+python3 gnuradio_dependencies_installer.py
 ```
 
-The script:
+The script uses `sudo` itself for the commands that change the system, and
+asks for your password once, before it changes anything. It:
 
 - enables "Source code" in Ubuntu's software sources (the same change as the
   "Source code" box in the "Software & Updates" app), which
   `apt-get build-dep` needs. The original file is saved as
   `/etc/apt/sources.list.d/ubuntu.sources.bak`.
 - adds the Ettus Research PPA (`ppa:ettusresearch/uhd`) and installs UHD from
-  it (`uhd-host` and `libuhd-dev`).
+  it (`uhd-host` and `libuhd-dev`). It first checks that the PPA has packages
+  for your Ubuntu release. If it doesn't (for Ubuntu 26.10, at the time of
+  writing), the script says so, leaves the PPA out, and installs Ubuntu's own
+  UHD, which is older but works with GNU Radio.
 - installs the Boost development packages that UHD needs. The PPA's
   `libuhd-dev` doesn't bring them, and without them GNU Radio is built
   without `gr-uhd`, with no error.
@@ -105,6 +134,9 @@ The script:
   release (`apt-get build-dep gnuradio`), `git`, a few packages that are
   needed at run time, and `python3-pytest`, without which one of GNU Radio's
   tests (`grc_tests`) is left out on Ubuntu 24.04.
+- installs Qt6 and its Python bindings, for the `main` branch, but only where
+  Ubuntu packages Qwt for Qt6 (`libqwt-qt6-dev`, from Ubuntu 26.10 on). See
+  [The main branch and Qt6](#the-main-branch-and-qt6).
 - installs SoapySDR's device modules, the drivers `gr-soapy` uses for an
   RTL-SDR, HackRF, Airspy, bladeRF, LimeSDR, PlutoSDR, and others. It
   installs every module Ubuntu packages for your release except the one for
@@ -120,7 +152,7 @@ The script's options:
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
 | --- | --- |
-| `--dry-run` | Run the checks and print what would be done, without changing anything or requiring root. |
+| `--dry-run` | Run the checks and print what would be done, without changing anything. |
 | `-y`, `--yes` | Do not prompt for confirmation before installing. |
 | `--no-images` | Do not run `uhd_images_downloader` (the USRP FPGA images, a large download). |
 | `--sources-path PATH` | Ubuntu's apt sources file, in which to enable source code (default: `/etc/apt/sources.list.d/ubuntu.sources`). |
@@ -156,11 +188,11 @@ git checkout -b issue8218 upstream/main
 ### Building, testing, and installing
 
 The second script builds whatever is checked out in `~/gnuradio`. It does
-not clone anything and does not change branches:
+not clone anything and does not change branches. Run it as yourself:
 
 ```bash
 cd ~/gr-installers
-sudo python3 gnuradio_clone_builder.py
+python3 gnuradio_clone_builder.py
 ```
 
 It runs the equivalent of:
@@ -168,27 +200,34 @@ It runs the equivalent of:
 ```bash
 cd ~/gnuradio
 mkdir build && cd build        # first time only
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ 2>&1 | tee cmake.log
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/gnuradio-pkg ../ 2>&1 | tee cmake.log
 make -j7 2>&1 | tee make.log   # the number of jobs depends on memory; see below
 git -C ~/gnuradio clean -fdX grc/tests/resources   # see below
 make test 2>&1 | tee make_test.log
-sudo make install
-sudo ldconfig
+make install
 ```
+
+and then writes `~/gnuradio-pkg/setup_env.sh`; see
+[Setting up the environment](#setting-up-the-environment).
 
 - The output of `cmake`, `make`, and `make test` is shown as it runs and
   also saved to `cmake.log`, `make.log`, and `make_test.log` in
   `~/gnuradio/build`. If any step fails, including a failing test, the
   script stops before installing; the logs show what went wrong.
-- The script works with or without `sudo`. Either way, the build runs as
-  you, so `~/gnuradio/build` belongs to you.
+- During `make test`, Ubuntu may report that `python3` crashed. That is the
+  test `qa_uncaught_exception`, which crashes a process on purpose to check
+  that GNU Radio stops a flowgraph whose block throws an error. It can be
+  ignored.
 - Before `make test`, the script removes the files that GNU Radio's GRC tests
   generated in `~/gnuradio/grc/tests/resources` during an earlier test run.
   Without this, on a build that has no `gr-qtgui`, the second and every later
   `make test` fails in `grc_tests`. Only those generated files, which git
-  ignores, are removed; your source code is not touched. (Version v2.0 of
-  the script did not do this.)
+  ignores, are removed; your source code is not touched.
 - To build and test without installing, add `--no-install`.
+- To install somewhere else, add `--prefix`. With a directory you don't own,
+  such as `--prefix /usr/local`, the script installs with `sudo make install`
+  and `sudo ldconfig` (asking for your password), and no `setup_env.sh` is
+  needed.
 - Compiling GNU Radio needs a lot of memory. With too many `make` jobs for
   the memory in the machine, the compiler is killed part-way through the
   build. The script therefore uses one job less than the number of processor
@@ -207,18 +246,48 @@ The script's options:
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
 | --- | --- |
 | `--source-dir DIR` | The GNU Radio clone to build. Default: `gnuradio` in the home directory of the invoking user (`$SUDO_USER` when run via `sudo`). |
+| `--prefix DIR` | Where to install GNU Radio. Default: `gnuradio-pkg` in the home directory of the invoking user. With a directory you don't own, such as `/usr/local`, the install steps use `sudo`. |
 | `--jobs N` | Number of parallel `make` jobs. Default: one less than the number of processor cores, but no more than one per 2 GB of memory. |
 | `--cmake-args "ARGS"` | Extra options for `cmake`, in one quoted string written with `=`, e.g. `--cmake-args="-DENABLE_GR_FEC=OFF -DENABLE_GR_VOCODER=OFF"`. `cmake` remembers them in the build directory until they are changed or the directory is removed. |
-| `--no-install` | Stop after the tests: do not run `sudo make install` and `sudo ldconfig`. |
+| `--no-install` | Stop after the tests: do not install. |
 | `--dry-run` | Run the checks and print the build steps, without running them. |
 | `-y`, `--yes` | Do not prompt for confirmation before building. |
 
+### Setting up the environment
+
+GNU Radio in `~/gnuradio-pkg` is not where the system looks for programs,
+Python modules, and libraries. The file `~/gnuradio-pkg/setup_env.sh`, which
+the script writes after every install, sets `PATH`, `PYTHONPATH`, and
+`LD_LIBRARY_PATH` to include it. Execute the following command once to add a
+line to your `~/.profile` that runs `~/gnuradio-pkg/setup_env.sh`:
+
+```bash
+echo '. "$HOME/gnuradio-pkg/setup_env.sh"' >> ~/.profile
+```
+
+Then log out of the desktop and log back in (closing the terminal is not
+enough). From then on, every terminal, and GNU Radio Companion started from
+the desktop, finds this GNU Radio.
+
+If a GNU Radio command gives "command not found", you didn't log out of the
+desktop and log back in, or the line isn't at the end of `~/.profile`. Ubuntu
+may suggest `sudo apt install gnuradio`: **DON'T!** That installs Ubuntu's
+older GNU Radio next to this one. For more about these variables, see
+[ModuleNotFoundError](https://wiki.gnuradio.org/index.php?title=ModuleNotFoundError)
+on the GNU Radio Wiki.
+
+### The main branch and Qt6
+
 The `main` branch is moving from Qt5 to Qt6. Its QT GUI blocks (`gr-qtgui`)
-need Qt6 and a Qt6 build of Qwt, which Ubuntu 24.04 and 26.04 do not
-package, so a `main` build made this way does not include `gr-qtgui`. It
-also lacks the Thrift back-end of `gr-ctrlport` (ControlPort over Thrift),
-although `gr-ctrlport` itself is built. The list of components that were
-not built is near the end of `cmake.log`.
+need Qt6 and a Qt6 build of Qwt. Ubuntu packages Qwt for Qt6 from 26.10 on,
+and there Step 1 installs Qt6, so a `main` build includes `gr-qtgui`. On
+Ubuntu 24.04 and 26.04 it does not. There, use GNU Radio Companion's default
+front end; `gnuradio-companion --qt` does not work on those releases with
+`main`. A flowgraph's Options block must then be set to "No GUI", since the
+default, "QT GUI", needs `gr-qtgui`. A `main` build also lacks the Thrift
+back-end of `gr-ctrlport` (ControlPort over Thrift), although `gr-ctrlport`
+itself is built ([issue #8239](https://github.com/gnuradio/gnuradio/issues/8239)).
+The list of components that were not built is near the end of `cmake.log`.
 
 To build the 3.10 release series instead, switch to the `maint-3.10` branch
 before running the script. A `maint-3.10` build made this way has every
@@ -253,7 +322,7 @@ so only what changed is rebuilt:
 
 ```bash
 cd ~/gr-installers
-sudo python3 gnuradio_clone_builder.py
+python3 gnuradio_clone_builder.py
 ```
 
 When the change works, commit it and push the branch to your fork. GNU Radio
@@ -273,59 +342,42 @@ in the GNU Radio repository for the coding and pull request guidelines.
 
 ### Changing branches, or removing the installed GNU Radio
 
-Do the three steps below before building a different branch or version of
-GNU Radio (for example changing between `main` and `maint-3.10`), or to
-remove the installed GNU Radio altogether. Keep them in this order: the
-first step needs a file inside `~/gnuradio/build`.
+Before building a different branch or version of GNU Radio (for example
+changing between `main` and `maint-3.10`), remove the installed GNU Radio and
+the build directory, so that the other branch is configured, built, and
+installed from scratch. Your source code and your branches in `~/gnuradio`
+are not touched:
 
-You do not need these steps to rebuild the same branch after changing the
-code. Run `gnuradio_clone_builder.py` again, and the new install is used in
-place of the old one.
+```bash
+rm -rf ~/gnuradio-pkg ~/gnuradio/build
+```
 
-1. Remove the installed files. The build directory has an
-   `install_manifest.txt` listing the files that were installed:
+Then check out the other branch in `~/gnuradio` and run the script again. You
+do not need this to rebuild the same branch after changing the code: run
+`gnuradio_clone_builder.py` again, and the new install replaces the old one.
 
-   ```bash
-   cd ~/gnuradio/build && sudo xargs rm -f < install_manifest.txt && sudo ldconfig
-   ```
+To remove GNU Radio altogether, first remove GNU Radio Companion's menu entry
+and icons, which `make install` put in `~/.local/share`, then the same two
+directories, and then delete the `setup_env.sh` line from `~/.profile`. Keep
+this order: the first command is inside `~/gnuradio/build`.
 
-2. That removes the files but leaves empty directories behind, which make
-   GNU Radio's tests fail on the next build. Remove them too:
-
-   ```bash
-   sudo rm -rf /usr/local/lib/python3*/dist-packages/gnuradio \
-               /usr/local/lib/python3*/dist-packages/pmt \
-               /usr/local/include/gnuradio /usr/local/include/pmt \
-               /usr/local/share/gnuradio /usr/local/etc/gnuradio \
-               /usr/local/lib/cmake/gnuradio /usr/local/share/doc/gnuradio-*
-   ```
-
-   The script checks for these leftover directories before it builds, and
-   stops with the exact command to run if it finds any.
-
-3. Only now remove the build directory, so that the other branch is
-   configured and built from scratch. Your source code and your branches in
-   `~/gnuradio` are not touched:
-
-   ```bash
-   cd && sudo rm -rf ~/gnuradio/build
-   ```
-
-Then check out the other branch in `~/gnuradio` and run the script again.
+```bash
+~/gnuradio/build/grc/scripts/freedesktop/grc_setup_freedesktop uninstall
+rm -rf ~/gnuradio-pkg ~/gnuradio/build
+```
 
 **Libraries left by earlier builds.** On the `main` branch, the names of GNU
 Radio's library files include the version of the code they were built from
 (for example `libgnuradio-runtime.so.v3.11.0.0git-1193-g0403558f`), and that
 version changes with every commit. So when you rebuild after committing a
 change, the new libraries are installed next to the previous ones, which
-stay in `/usr/local/lib`. They do no harm, because programs use the newest
-ones, but they add up. To list the ones that do not belong to the installed
-version, and then remove them:
+stay in `~/gnuradio-pkg/lib`. They do no harm, because programs use the
+newest ones, but they add up. To list the ones that do not belong to the
+installed version, and then remove them:
 
 ```bash
-ls /usr/local/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)"
-ls /usr/local/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)" | sudo xargs -r rm
-sudo ldconfig
+ls ~/gnuradio-pkg/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)"
+ls ~/gnuradio-pkg/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)" | xargs -r rm
 ```
 
 A `maint-3.10` build does not need this. Its library files are named after
@@ -335,14 +387,19 @@ found no such files.
 
 ## Checking the result
 
+After logging in again (see
+[Setting up the environment](#setting-up-the-environment)), open a terminal:
+
 ```bash
 uhd_config_info --version
-gnuradio-config-info --version
+gnuradio-config-info --version --prefix
 gnuradio-config-info --enabled-components
 ```
 
-The list of components should include `gr-uhd`, `gr-iio`, `gr-soapy`, and
-`gnuradio-companion`.
+The prefix should be `~/gnuradio-pkg` (shown in full), and the list of
+components should include `gr-uhd`, `gr-iio`, `gr-soapy`, and
+`gnuradio-companion`. GNU Radio Companion should also be in the desktop's
+list of applications.
 
 If you have a USRP, plug it in and check it with UHD and then through GNU
 Radio. No `sudo` is needed:
@@ -380,6 +437,19 @@ again, or install the module for your device, for example
 be rebuilt.
 
 ## Releases
+
+**`v3.0`** (2026-10-21): neither script is run with `sudo` any more, and GNU
+Radio is installed into `~/gnuradio-pkg`. `gnuradio_clone_builder.py`
+installs with a plain `make install` (`--prefix` chooses another directory)
+and writes `~/gnuradio-pkg/setup_env.sh`, which one line in `~/.profile`
+runs; see [Setting up the environment](#setting-up-the-environment).
+`gnuradio_dependencies_installer.py` runs as you and uses `sudo` itself; it
+checks that the Ettus PPA has packages for your Ubuntu release and otherwise
+installs Ubuntu's own UHD, and it installs Qt6 for the `main` branch where
+Ubuntu packages Qwt for Qt6 (26.10 on). If you used an earlier release,
+remove its `/usr/local` install as shown in [Before you start](#before-you-start),
+then run the builder again and add the `~/.profile` line. On Ubuntu 24.04 and
+26.04 there is no need to run Step 1 again.
 
 **`v2.4`** (2026-10-15) makes `gnuradio_dependencies_installer.py` install
 `python3-pytest`. GNU Radio's cmake adds the GRC test (`grc_tests`) only
@@ -437,5 +507,5 @@ download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
-The next release will be `v3.0`; a tag is never moved, so a
-link to a tag always gives the same scripts.
+Further fixes will be tagged `v3.1`; a tag is never moved, so a link to a
+tag always gives the same scripts.

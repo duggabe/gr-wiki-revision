@@ -859,6 +859,8 @@ Thanks!
 
 ### QT GUI Range slider issue for `gnuradio/gnuradio` (drafted 2026-10-20; not posted)
 
+**Not to be posted** (user, 2026-10-21): the developers are aware of the Range slider issue and have chosen not to create an issue at this time. Text kept for reference.
+
 Laid out like GNU Radio's bug report form. Log section: the user's traceback
 from `--qt` (2026-10-20), with the home prefix shortened to `<prefix>`; the
 fix is untested.

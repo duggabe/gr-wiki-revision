@@ -79,7 +79,13 @@ there had not been a Phase 1", user, 2026-10-13).
 - The user's related wiki page
   https://wiki.gnuradio.org/index.php/ModuleNotFoundError (local copy
   `ModuleNotFoundError.mediawiki`, gitignored) is linked from the draft's
-  environment section.
+  environment section. Revised by me for any install, still generic (no link
+  to this project; section headings A–F kept for anchors): fallback `find`
+  when `gnuradio-config-info` fails, `PATH` in D, Debian/Ubuntu vs
+  Fedora/RPM instead of 32/64-bit, how `~/.profile` takes effect, Python
+  3.12 (24.04) / 3.14 (26.04, 26.10), `/etc/profile.d` needs `sudo`. **The
+  user pasted it to the wiki** (2026-10-22). Pre-revision copy:
+  `ModuleNotFoundError-orig.mediawiki` (gitignored).
 
 ## Current state (2026-10-22)
 

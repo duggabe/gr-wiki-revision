@@ -84,8 +84,8 @@ there had not been a Phase 1", user, 2026-10-13).
   when `gnuradio-config-info` fails, `PATH` in D, Debian/Ubuntu vs
   Fedora/RPM instead of 32/64-bit, how `~/.profile` takes effect, Python
   3.12 (24.04) / 3.14 (26.04, 26.10), `/etc/profile.d` needs `sudo`. **The
-  user pasted it to the wiki** (2026-10-22). Pre-revision copy:
-  `ModuleNotFoundError-orig.mediawiki` (gitignored).
+  user pasted it to the wiki** (2026-10-22); older versions are in the
+  wiki's revision history.
 
 ## Current state (2026-10-22)
 

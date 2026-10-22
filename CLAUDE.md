@@ -106,7 +106,7 @@ B200mini (serial 315C7B7), RTL-SDR (an RTL-SDR.COM v3), PlutoSDR.
 
 | Machine | Ubuntu | State |
 | --- | --- | --- |
-| LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.04 | 16 cores, 15 GiB RAM, 4 GB swap. Reloaded 2026-10-08. UHD 4.11 from the PPA (only UHD; `libuhd4.9.0` removed 2026-10-12). `~/gnuradio` = plain clone of `gnuradio/gnuradio` on `maint-3.10`, GNU Radio 3.10.12.0 in **`/usr/local`** (a `v2.x` install, not moved to a home prefix), 42 components. 13 SoapySDR modules. `v2.3`'s Boost step not run here. `pyqt6-dev-tools` + `python3-pyqt6` installed (via `python3-pyqtgraph`, see Useful facts). |
+| LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.10 | 16 cores, 15 GiB RAM, 4 GB swap. **Reloaded with 26.10** (user, by 2026-10-22; clean presumably, my reading). Seen by me 2026-10-22: Ubuntu's UHD 4.9.0.1-1.4, `~/gnuradio` on `maint-3.10` at `273c82180`, `~/gnuradio-pkg/setup_env.sh` present, nothing in `/usr/local/bin`: so the `v3.0` scripts with the default prefix (my reading; test count, components not reported). User built `maint-3.10` and found [gnuradio/gnuradio#8250](https://github.com/gnuradio/gnuradio/issues/8250) with `gnuradio-companion --qt` (see Useful facts). `~/.gitconfig` and `gh` missing after the reload (my reading of the cause): commits need `-c user.name/email`, pushes fail until `gh auth login` + `gh auth setup-git`. Before (reloaded 2026-10-08): 26.04, UHD 4.11 from the PPA, GNU Radio 3.10.12.0 in `/usr/local`. |
 | GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Last: **clean 26.04 with `v3.0-rc1`** (2026-10-20/21), `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 24.04 (`v2.2`, `v2.3`, 2026-10-14), Fedora 44 (2026-10-16), clean 26.04 (`v2.4`, 2026-10-17). |
 | Laptop (hostname `ASUS`) | 26.10 | Last: **clean 26.10 with `v3.0-rc1`** (2026-10-20), Ubuntu's UHD 4.9.0.1-1.4, Qt6 list installed, `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 26.10 for the Qt6 trial (2026-10-17) and the manual prefix trial (2026-10-19); before that 24.04, not clean. |
 | The other tester's machine (jesternofool) | 24.04 | Reinstalls a clean OS quickly. Clean installs for the `v2.3` and `v3.0-rc1` tests. Fork `jesternofool/gnuradio` (only `main`). Devices: HackRF, LimeSDR Mini, Airspy R2, B200mini, RTL-SDR. |
@@ -308,6 +308,12 @@ notes' "If you used an earlier release") must stay in sync.
   `--qt` on `main` needs the 26.10 Qt6 set. On 24.04 / 26.04 `main`, use
   the default GTK front end and set the Options block to "No GUI" (in the
   draft).
+- **GRC Qt front end closes the wrong tab** (`maint-3.10`, 3.10.12.0,
+  LENOVO 26.10, `gnuradio-companion --qt`): with a second flowgraph open and
+  active, clicking the "X" of the first (Untitled) tab closes the active
+  tab instead. Filed by the user as
+  [gnuradio/gnuradio#8250](https://github.com/gnuradio/gnuradio/issues/8250)
+  (2026-10-22, open). Upstream GRC, not the scripts.
 - `uhd-host` installs the udev rules (`/usr/lib/udev/rules.d/60-uhd-host.rules`);
   no copy in `/etc/udev/rules.d` is needed. FPGA images go to
   `/usr/share/uhd/<version>/images` (`uhd_config_info --images-dir`).

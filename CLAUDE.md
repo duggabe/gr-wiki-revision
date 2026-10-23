@@ -86,6 +86,12 @@ there had not been a Phase 1", user, 2026-10-13).
   3.12 (24.04) / 3.14 (26.04, 26.10), `/etc/profile.d` needs `sudo`. **The
   user pasted it to the wiki** (2026-10-22); older versions are in the
   wiki's revision history.
+- **Generic wiki pages keep older-system instructions:** PyBOMBS is no
+  longer supported, but many users (especially outside the US) still run
+  older systems (user, 2026-10-23). So `UnInstallGR.mediawiki` (local,
+  gitignored; revised by me 2026-10-23, not yet pasted) keeps its PyBOMBS
+  section and the pre-3.10 `~/.gnuradio` / `~/.grc_gnuradio` folders. No
+  Conda section: other wiki pages cover it (user, 2026-10-23).
 
 ## Current state (2026-10-22)
 

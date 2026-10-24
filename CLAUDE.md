@@ -480,8 +480,16 @@ loopbacks.
 - **Test counts:** three of the four extra `main` tests on 26.04 vs 24.04
   (271 vs 267, `v2.0`) are unexplained; `main` on 24.04 not run since
   `v2.0`.
-- **Docs:** the leftover-library command can leave dangling
-  `.so.3.11.0git` links.
+- **Docs, leftover-library command (for `v3.1`; user, 2026-10-23: "save it
+  for v3.1"):** the dangling `.so.3.11.0git` links (2026-10-12) came from
+  switching `main` → `maint-3.10` without clearing the old `/usr/local`
+  prefix; `v3.0`'s "Changing branches" (`rm -rf ~/gnuradio-pkg
+  ~/gnuradio/build`) rules that out, and each `main` install re-points the
+  links to the kept version (my reasoning, not checked on a `main`
+  rebuild). Remaining risk: the command asks whichever
+  `gnuradio-config-info` is first in `PATH`. Change in the wiki draft and
+  README: use `~/gnuradio-pkg/bin/gnuradio-config-info` in both lines (if it
+  fails, the empty pattern lists nothing, so nothing is removed).
 - **26.10 is interim** (~9 months, to about July 2027); the wiki page
   promises 24.04 and 26.04. When Ettus publishes a `stonking` build, Step 1
   picks it up by itself.

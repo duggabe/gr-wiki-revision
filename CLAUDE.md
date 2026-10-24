@@ -176,8 +176,11 @@ parent belongs to the build user), plain `make install`, then
 `<prefix>/setup_env.sh` is written (PATH = `bin`, PYTHONPATH = the parents
 of `lib*/python3*/{site,dist}-packages/gnuradio`, LD_LIBRARY_PATH = the
 dirs with `libgnuradio-runtime.so*`; each a `case` guard, so sourcing twice
-adds nothing) and the `~/.profile` line and the `sudo apt install gnuradio`
-**DON'T!** warning are printed; otherwise (e.g. `--prefix /usr/local`)
+adds nothing) and the `sudo apt install gnuradio` **DON'T!** warning is
+printed, with the `echo '. "$HOME/gnuradio-pkg/setup_env.sh"' >> ~/.profile`
+command, or a note if `~/.profile` already has the line (uncommitted, for
+`v3.1`; `v3.0` printed the bare line, "add this line to ~/.profile", plus a
+per-terminal fallback); otherwise (e.g. `--prefix /usr/local`)
 `sudo make install` + `sudo ldconfig`. `make` jobs = `min(nproc - 1,
 MemTotal // 2 GB)`, at least 1. Aborts if the directory isn't GNU Radio
 source, `libuhd-dev` isn't installed, Ubuntu's `gnuradio` packages are
@@ -469,6 +472,11 @@ loopbacks.
   there; `gnuradio-companion --qt` on `main` doesn't work there (see Useful
   facts). Nothing for the scripts to do.
 - **Step 1 log order:** possible `v3.1` fix (see Key decisions).
+- **Builder `~/.profile` message (`v3.1`):** prints the `echo ... >>
+  ~/.profile` command the docs give instead of "add this line" (user,
+  2026-10-23: "It would be simpler to give the echo style command"); skips
+  it if `~/.profile` already has the line; drops the per-terminal fallback
+  (as in the docs). Uncommitted; not run yet.
 - **Test counts:** three of the four extra `main` tests on 26.04 vs 24.04
   (271 vs 267, `v2.0`) are unexplained; `main` on 24.04 not run since
   `v2.0`.

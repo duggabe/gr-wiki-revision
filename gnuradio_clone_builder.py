@@ -26,11 +26,11 @@ directory), so nothing needs root. Run it as your normal user:
     # then it writes $HOME/gnuradio-pkg/setup_env.sh
 
 setup_env.sh sets PATH, PYTHONPATH and LD_LIBRARY_PATH so that the shell,
-Python and GNU Radio Companion find this install. Source it from ~/.profile
-(add the line below, then log out and back in), so that it applies in every
-terminal and to programs started from the desktop:
+Python and GNU Radio Companion find this install. Source it from ~/.profile,
+so that it applies in every terminal and to programs started from the
+desktop: run this command once, then log out and back in:
 
-    . "$HOME/gnuradio-pkg/setup_env.sh"
+    echo '. "$HOME/gnuradio-pkg/setup_env.sh"' >> ~/.profile
 
 With a prefix you can't write to, such as --prefix /usr/local, the install
 steps are `sudo make install` and `sudo ldconfig` instead (sudo asks for your
@@ -662,13 +662,30 @@ def main() -> int:
         print(f"\nerror: could not write {prefix / SETUP_ENV_NAME}: {exc}", file=sys.stderr)
         return 1
     print(f"\nDone. GNU Radio built, tested, and installed in {prefix}.")
+    home = Path(owner.pw_dir)
+    try:
+        profile_line = f'. "$HOME/{setup_env.relative_to(home)}"'
+    except ValueError:
+        profile_line = f'. "{setup_env}"'
+    try:
+        profile_text = (home / ".profile").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        profile_text = ""
+    if profile_line in profile_text or f'. "{setup_env}"' in profile_text:
+        print(
+            f"\n~/.profile already runs {setup_env}. If you added that line since you"
+            f"\nlast logged in, log out of the desktop and back in."
+        )
+    else:
+        print(
+            f"\nTo use it, run this command once, then log out of the desktop and back in:\n"
+            f"\n    echo {shlex.quote(profile_line)} >> ~/.profile"
+        )
     print(
-        f"\nTo use it, add this line to ~/.profile, then log out and back in:\n"
-        f'\n    . "{setup_env}"\n'
-        f"\nUntil you do, type that line in each terminal where you use GNU Radio."
-        f"\n\nIf a GNU Radio command gives \"command not found\", that line hasn't been"
-        f"\nrun in that terminal. Ubuntu may then suggest \"sudo apt install gnuradio\":"
-        f"\nDON'T! That installs Ubuntu's older GNU Radio next to this one."
+        f"\nIf a GNU Radio command gives \"command not found\", you haven't logged out"
+        f"\nand back in since, or the line isn't in ~/.profile. Ubuntu may then suggest"
+        f"\n\"sudo apt install gnuradio\": DON'T! That installs Ubuntu's older GNU Radio"
+        f"\nnext to this one."
     )
     return 0
 

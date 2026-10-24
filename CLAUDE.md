@@ -89,7 +89,8 @@ there had not been a Phase 1", user, 2026-10-13).
 - **Generic wiki pages keep older-system instructions:** PyBOMBS is no
   longer supported, but many users (especially outside the US) still run
   older systems (user, 2026-10-23). So `UnInstallGR.mediawiki` (local,
-  gitignored; revised by me 2026-10-23, not yet pasted) keeps its PyBOMBS
+  gitignored; revised by me 2026-10-23 with the user's readability edits;
+  **the user pasted it to the wiki**, 2026-10-23) keeps its PyBOMBS
   section and the pre-3.10 `~/.gnuradio` / `~/.grc_gnuradio` folders. No
   Conda section: other wiki pages cover it (user, 2026-10-23).
 

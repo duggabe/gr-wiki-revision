@@ -120,7 +120,7 @@ B200mini (serial 315C7B7), RTL-SDR (an RTL-SDR.COM v3), PlutoSDR.
 | Machine | Ubuntu | State |
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.10 | 16 cores, 15 GiB RAM, 4 GB swap. **Reloaded with 26.10** (user, by 2026-10-22; clean presumably, my reading). Seen by me 2026-10-22: Ubuntu's UHD 4.9.0.1-1.4, `~/gnuradio` on `maint-3.10` at `273c82180`, `~/gnuradio-pkg/setup_env.sh` present, nothing in `/usr/local/bin`: so the `v3.0` scripts with the default prefix (user confirmed, 2026-10-22). **`make test` 269/269, 42 components** (user, 2026-10-22). User built `maint-3.10` and found [gnuradio/gnuradio#8250](https://github.com/gnuradio/gnuradio/issues/8250) with `gnuradio-companion --qt` (see Useful facts). Before (reloaded 2026-10-08): 26.04, UHD 4.11 from the PPA, GNU Radio 3.10.12.0 in `/usr/local`. |
-| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. Last: **clean 26.04 with `v3.0-rc1`** (2026-10-20/21), `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 24.04 (`v2.2`, `v2.3`, 2026-10-14), Fedora 44 (2026-10-16), clean 26.04 (`v2.4`, 2026-10-17). |
+| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. **Now: clean Debian 13** (user, 2026-10-29), for the Debian look: no root password set at install, so the user's `sudo` works (user); SMB link set up; the whole LENOVO is shared over SMB (user; `~/share` on the LENOVO only holds a copy of `smb.conf` for editing). Nothing is mounted on the LENOVO side, so the GMKtec writes to the LENOVO, not the reverse (my reading). Before: **clean 26.04 with `v3.0-rc1`** (2026-10-20/21), `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 24.04 (`v2.2`, `v2.3`, 2026-10-14), Fedora 44 (2026-10-16), clean 26.04 (`v2.4`, 2026-10-17). |
 | Laptop (hostname `ASUS`) | 26.10 | Last: **clean 26.10 with `v3.0-rc1`** (2026-10-20), Ubuntu's UHD 4.9.0.1-1.4, Qt6 list installed, `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 26.10 for the Qt6 trial (2026-10-17) and the manual prefix trial (2026-10-19); before that 24.04, not clean. |
 | The other tester's machine (jesternofool) | 24.04 | Reinstalls a clean OS quickly. Clean installs for the `v2.3` and `v3.0-rc1` tests. Fork `jesternofool/gnuradio` (only `main`). Devices: HackRF, LimeSDR Mini, Airspy R2, B200mini, RTL-SDR. |
 
@@ -530,6 +530,51 @@ loopbacks.
     modules, no udev change.
   - Testing: clean Fedora for every change; Ubuntu must not change. Fedora
     45 around April 2027.
+
+- **Debian support (asked about by the user 2026-10-29; not decided; talk
+  to the developers first, like Fedora).**
+  - Debian's packages (Debian's package database, 2026-10-29): UHD 4.3.0.0
+    (12 bookworm) / 4.8.0.0 (13 trixie) / 4.9.0.1 (forky); Debian's GNU
+    Radio 3.10.5.1 / 3.10.12.0 / 3.10.12.0; Python 3.11 / 3.13; Qwt 6.1.4
+    (Qt5 only) in 12 and 13, `libqwt-qt6-dev` (6.3.0) only in forky;
+    `soapysdr0.8-module-all` in all three.
+  - **A developer's report** (via the user, 2026-10-29): on Debian 13 he
+    "had to manually install qwt but had to checkout version qwt-6.3 and
+    not use the main git branch", and he didn't use the scripts but ran
+    each command by hand. My reading: Qwt for Qt6 built from source, for
+    `main`'s `gr-qtgui` (Debian 13 has no `libqwt-qt6-dev`); not known:
+    which branch, results, whether `deb-src` / `sudo` needed setting up.
+  - My proposal: Step 1 accepts `ID=debian`; no PPA (Debian's UHD, the
+    26.10 path); enable `deb-src` in the one-line `sources.list` format as
+    well as deb822 (what the Debian 13 installer writes not checked); a
+    check and fix text for a user without `sudo` (root password set at
+    install; not the case on the GMKtec, where no root password was set
+    and `sudo` works, user 2026-10-29). The Qt6 step needs no change (keyed on `libqwt-qt6-dev`), so
+    `main` on Debian 13 gets no `gr-qtgui`, as on Ubuntu 24.04 / 26.04;
+    building Qwt from source is outside the apt-only scripts (at most a
+    docs note). Builder: wording only. Docs: Debian notes. Target Debian 13
+    (and later) only, my recommendation. Testing: clean Debian 13 on the
+    GMKtec, both branches, the three SDRs; Ubuntu re-run.
+  - **Debian 13 is a `maint-3.10` system** (user, 2026-10-29: "It seems
+    to be a 'maint-3.10' oriented system"). GNU Radio's CI agrees
+    (`gnuradio/gnuradio-docker` `ci/`, checked 2026-10-29): Debian 13 has
+    only `ci-debian-13-3.10` (Qt5: `libqwt-qt5-dev`, `qtbase5-dev`,
+    `python3-pyqt5`, Debian's `libuhd-dev`, `libsoapysdr-dev`, Thrift,
+    `python3-pytest`); 3.11 (`main`) is paired with Debian 14
+    (`ci-debian-14-3.11`, besides `ci-debian-14-3.10`), as with Ubuntu
+    26.10 (`ci-ubuntu-26.10-3.11`). So Debian 13 support would mean
+    `maint-3.10` only (my reading).
+  - **Debian 13 sources** (GMKtec, netinst 13.7.0 with firmware,
+    `/home/barry/debian13-sources.txt`, 2026-10-29): only the one-line
+    `/etc/apt/sources.list` (`sources.list.d/` empty, no deb822 file);
+    **`deb-src` lines already enabled** for `trixie`, `trixie-security`,
+    `trixie-updates`; components `main non-free-firmware` only (GNU Radio,
+    UHD, SoapySDR are all in `main`). So `apt-get build-dep` needs no
+    change on a fresh Debian 13; Step 1 would only check for `deb-src` (and
+    add the matching lines if missing). Checked by me in Debian 13's
+    packages: `libuhd-dev` 4.8.0.0 Recommends `gnuradio-dev` (so
+    `--no-install-recommends` still needed) and has no Boost dependencies
+    (Boost list still needed); `uhd-host` ships `uhd_images_downloader`.
 
 ## Drafts
 

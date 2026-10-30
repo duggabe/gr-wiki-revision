@@ -382,7 +382,7 @@ upstream: 271 (-1193, 26.04), 272 / 273 (-1210, 26.04 / 26.10), 274 / 275
 | 2026-10-20/21 | GMKtec, **clean 26.04** | `v3.0-rc1` | `maint-3.10` | **UHD 4.11.0.0-0ubuntu1~resolute3** (PPA path); 13 SoapySDR modules; Qt6 `note:` (no `libqwt-qt6-dev`); `python3-pyqt6` 6.10.2 `ii` anyway (via `python3-pyqtgraph`). **269/269**; 3.10.12.0, `/home/barry/gnuradio-pkg/`, **42 components**; GRC from Activities with a QT GUI Time Sink (Qt5). |
 | 2026-10-21 | same | same | "Changing branches", then `main` -1216 | **274/274**, **40 components** (no `gr-qtgui`, no Thrift), as expected. `gnuradio-companion --qt`: `ModuleNotFoundError: No module named 'PyQt6.QtSvg'`. GTK GRC: qtgui blocks missing; a "QT GUI" flowgraph fails (`cannot import name 'qtgui'`), **with "No GUI" it works**. Not the scripts (`v2.4` installs the same). **Clean 26.04 rc1 test: all passed.** |
 | by 2026-10-22 | LENOVO, 26.10 (reloaded; clean presumably, my reading) | `v3.0` (user confirmed) | `maint-3.10` at `273c82180`, `~/gnuradio-pkg` | **269/269, 42 components** (user, 2026-10-22); Ubuntu's UHD 4.9.0.1-1.4. First 26.10 run of the released `v3.0` (byte-identical to rc1). `gnuradio-companion --qt` runs (user confirmed, 2026-10-22); #8250 (wrong tab closed) is upstream. |
-| 2026-10-29 | GMKtec, **clean Debian 13** (trixie, netinst 13.7.0) | **Debian draft** (uncommitted working tree, copied over SMB) | `maint-3.10`, `~/gnuradio-pkg` (my reading: the steps I gave) | **UHD 4.8.0.0+ds1-2** (Debian's), **269/269**, 3.10.12.0, prefix `/home/barry/gnuradio-pkg/`, **42 components** (user's paste, 2026-10-29): the same as Ubuntu's `maint-3.10`. **A flowgraph runs from the desktop** (user; GRC from the desktop via the `~/.profile` line, my reading). First run of the scripts on Debian. SDRs not reported yet. |
+| 2026-10-29 | GMKtec, **clean Debian 13** (trixie, netinst 13.7.0) | **Debian draft** (uncommitted working tree, copied over SMB) | `maint-3.10`, `~/gnuradio-pkg` (my reading: the steps I gave) | **UHD 4.8.0.0+ds1-2** (Debian's), **269/269**, 3.10.12.0, prefix `/home/barry/gnuradio-pkg/`, **42 components** (user's paste, 2026-10-29): the same as Ubuntu's `maint-3.10`. **A flowgraph runs from the desktop** (user; GRC from the desktop via the `~/.profile` line, my reading). First run of the scripts on Debian. **`uhd_find_devices`: "Could not find path for image: usrp_b200_fw.hex", no devices** (user, 2026-10-30): the images are in `/usr/share/uhd/4.8.0/images`, but `uhd_config_info` gives `Package path: /lib` and an empty images directory (Debian's UHD loaded through `/lib`, a link to `/usr/lib`, so it looks under `/share`; my reading). Led to the builder's `UHD_IMAGES_DIR` line. Step 1's plan listed **11 SoapySDR modules**, the same set as 24.04 (airspy, audio, bladerf, hackrf, lms7, mirisdr, osmosdr, redpitaya, remote, rfspace, rtlsdr; no plutosdr). SDRs not reported yet. |
 
 ### `v2.x` (UHD from the PPA)
 
@@ -594,7 +594,18 @@ loopbacks.
     line. **Run on the clean Debian 13 GMKtec** (user, 2026-10-29),
     `maint-3.10`: UHD 4.8.0.0+ds1-2, 269/269, 3.10.12.0 in
     `~/gnuradio-pkg`, 42 components, and a flowgraph runs
-    from the desktop (see Test results). Still to do: the three SDRs, an
+    from the desktop (see Test results). **USRP images on Debian 13
+    (user, 2026-10-30: "add UHD_IMAGES_DIR to setup_env.sh in the
+    builder"):** Debian's UHD 4.8 reports no images directory although
+    `uhd_images_downloader` filled `/usr/share/uhd/4.8.0/images`; the
+    builder's `uhd_images_dir_to_set()` runs `uhd_config_info --version
+    --images-dir` (with `UHD_IMAGES_DIR` removed from its environment), and
+    if the images directory is empty and `/usr/share/uhd/<version>/images`
+    has files, `setup_env.sh` gets `[ -n "$UHD_IMAGES_DIR" ] || export
+    UHD_IMAGES_DIR=...`. Uncommitted. Checked by me: on the LENOVO (26.10,
+    images dir `/usr/share/uhd/4.9.0/images`) nothing is added and
+    `setup_env.sh` comes out identical; with a faked Debian answer the line
+    is added. Not run on Debian yet. Still to do: the three SDRs, an
     Ubuntu re-run of the draft, then the developers' decision.
 
 ## Drafts

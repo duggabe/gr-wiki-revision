@@ -26,7 +26,9 @@ directory), so nothing needs root. Run it as your normal user:
     # then it writes $HOME/gnuradio-pkg/setup_env.sh
 
 setup_env.sh sets PATH, PYTHONPATH and LD_LIBRARY_PATH so that the shell,
-Python and GNU Radio Companion find this install. Source it from ~/.profile,
+Python and GNU Radio Companion find this install. Where UHD can't find its
+own FPGA images (Debian 13's UHD looks under /share instead of /usr/share),
+it also sets UHD_IMAGES_DIR. Source it from ~/.profile,
 so that it applies in every terminal and to programs started from the
 desktop: run this command once, then log out and back in:
 
@@ -96,6 +98,7 @@ from __future__ import annotations
 import argparse
 import os
 import pwd
+import re
 import shlex
 import subprocess
 import sys
@@ -121,6 +124,10 @@ INSTALLED_GNURADIO_PATTERNS = ("bin/gnuradio-config-info", "lib*/libgnuradio-run
 
 # Written into a prefix the build user owns, after `make install`.
 SETUP_ENV_NAME = "setup_env.sh"
+
+# Where the uhd-host package's uhd_images_downloader puts the USRP images,
+# under UHD's version (4.8.0 for UHD 4.8.0.0).
+UHD_IMAGES_PARENT = Path("/usr/share/uhd")
 
 # Memory to allow per parallel make job. GNU Radio's Python bindings need
 # about this much for each file being compiled.
@@ -311,7 +318,36 @@ def _prepend(variable: str, paths: list[Path]) -> list[str]:
     return lines
 
 
-def setup_env_text(prefix: Path) -> str:
+def uhd_images_dir_to_set() -> Path | None:
+    """
+    The USRP images directory to give UHD through UHD_IMAGES_DIR, or None if
+    UHD finds its images by itself or there are none.
+
+    UHD works out its images directory from where libuhd was loaded. Debian
+    13's UHD 4.8 is loaded through /lib (a link to /usr/lib), so it looks
+    under /share/uhd and reports no images directory, although
+    uhd_images_downloader put the images in /usr/share/uhd/<version>/images.
+    """
+    env = {k: v for k, v in os.environ.items() if k != "UHD_IMAGES_DIR"}
+    try:
+        info = subprocess.run(
+            ["uhd_config_info", "--version", "--images-dir"],
+            capture_output=True, text=True, env=env,
+        ).stdout
+    except OSError:
+        return None
+    images = re.search(r"^Images directory:(.*)$", info, re.MULTILINE)
+    version = re.search(r"UHD[ _](\d+\.\d+\.\d+)", info)
+    if not images or images.group(1).strip() or not version:
+        return None
+    path = UHD_IMAGES_PARENT / version.group(1) / "images"
+    try:
+        return path if any(path.iterdir()) else None
+    except OSError:
+        return None
+
+
+def setup_env_text(prefix: Path, uhd_images_dir: Path | None = None) -> str:
     """The contents of setup_env.sh for a GNU Radio installed under the prefix."""
     lines = [
         f"# Environment for the GNU Radio installed in {prefix}.",
@@ -322,15 +358,20 @@ def setup_env_text(prefix: Path) -> str:
         *_prepend("PATH", [prefix / "bin"]),
         *_prepend("PYTHONPATH", python_paths(prefix)),
         *_prepend("LD_LIBRARY_PATH", library_paths(prefix)),
-        "",
     ]
+    if uhd_images_dir:
+        lines += [
+            "# UHD doesn't find its USRP images by itself on this system.",
+            f'[ -n "$UHD_IMAGES_DIR" ] || export UHD_IMAGES_DIR="{uhd_images_dir}"',
+        ]
+    lines.append("")
     return "\n".join(lines)
 
 
 def write_setup_env(prefix: Path) -> Path:
     """Write <prefix>/setup_env.sh, owned by the build user. Raises OSError on failure."""
     path = prefix / SETUP_ENV_NAME
-    path.write_text(setup_env_text(prefix), encoding="utf-8")
+    path.write_text(setup_env_text(prefix, uhd_images_dir_to_set()), encoding="utf-8")
     build_user = get_build_user()
     if build_user:
         os.chown(path, build_user.pw_uid, build_user.pw_gid)

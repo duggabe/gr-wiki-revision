@@ -57,7 +57,7 @@ Before building, it checks that:
 
   * the source directory exists and holds GNU Radio's source code;
   * UHD's development package (libuhd-dev) is installed, i.e. Step 1 was run;
-  * Ubuntu's own gnuradio packages are not installed;
+  * Ubuntu's or Debian's own gnuradio packages are not installed;
   * no empty directories from an earlier, removed GNU Radio install are left
     in the prefix or under /usr/local (they make GNU Radio's tests fail).
 
@@ -105,7 +105,8 @@ from pathlib import Path
 # Installed by gnuradio_dependencies_installer.py (Step 1).
 REQUIRED_PACKAGES = ["libuhd-dev"]
 
-# Ubuntu's own GNU Radio, which must not be installed next to a source build.
+# Ubuntu's or Debian's own GNU Radio, which must not be installed next to a
+# source build.
 CONFLICTING_PACKAGES = ["gnuradio", "gnuradio-dev"]
 
 # The default install prefix, in the build user's home directory.
@@ -578,7 +579,7 @@ def main() -> int:
     conflicting = installed_packages(CONFLICTING_PACKAGES)
     if conflicting:
         print(
-            "error: Ubuntu's own GNU Radio is installed (" + ", ".join(conflicting) + "). It would "
+            "error: the system's own GNU Radio packages are installed (" + ", ".join(conflicting) + "). They would "
             "sit next to the GNU Radio built here. Remove it, then run this program again:",
             file=sys.stderr,
         )
@@ -684,7 +685,7 @@ def main() -> int:
     print(
         f"\nIf a GNU Radio command gives \"command not found\", you haven't logged out"
         f"\nand back in since, or the line isn't in ~/.profile. Ubuntu may then suggest"
-        f"\n\"sudo apt install gnuradio\": DON'T! That installs Ubuntu's older GNU Radio"
+        f"\n\"sudo apt install gnuradio\": DON'T! That installs the system's older GNU Radio"
         f"\nnext to this one."
     )
     return 0

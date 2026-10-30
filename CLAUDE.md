@@ -382,6 +382,7 @@ upstream: 271 (-1193, 26.04), 272 / 273 (-1210, 26.04 / 26.10), 274 / 275
 | 2026-10-20/21 | GMKtec, **clean 26.04** | `v3.0-rc1` | `maint-3.10` | **UHD 4.11.0.0-0ubuntu1~resolute3** (PPA path); 13 SoapySDR modules; Qt6 `note:` (no `libqwt-qt6-dev`); `python3-pyqt6` 6.10.2 `ii` anyway (via `python3-pyqtgraph`). **269/269**; 3.10.12.0, `/home/barry/gnuradio-pkg/`, **42 components**; GRC from Activities with a QT GUI Time Sink (Qt5). |
 | 2026-10-21 | same | same | "Changing branches", then `main` -1216 | **274/274**, **40 components** (no `gr-qtgui`, no Thrift), as expected. `gnuradio-companion --qt`: `ModuleNotFoundError: No module named 'PyQt6.QtSvg'`. GTK GRC: qtgui blocks missing; a "QT GUI" flowgraph fails (`cannot import name 'qtgui'`), **with "No GUI" it works**. Not the scripts (`v2.4` installs the same). **Clean 26.04 rc1 test: all passed.** |
 | by 2026-10-22 | LENOVO, 26.10 (reloaded; clean presumably, my reading) | `v3.0` (user confirmed) | `maint-3.10` at `273c82180`, `~/gnuradio-pkg` | **269/269, 42 components** (user, 2026-10-22); Ubuntu's UHD 4.9.0.1-1.4. First 26.10 run of the released `v3.0` (byte-identical to rc1). `gnuradio-companion --qt` runs (user confirmed, 2026-10-22); #8250 (wrong tab closed) is upstream. |
+| 2026-10-29 | GMKtec, **clean Debian 13** (trixie, netinst 13.7.0) | **Debian draft** (uncommitted working tree, copied over SMB) | `maint-3.10`, `~/gnuradio-pkg` (my reading: the steps I gave) | **UHD 4.8.0.0+ds1-2** (Debian's), **269/269**, 3.10.12.0, prefix `/home/barry/gnuradio-pkg/`, **42 components** (user's paste, 2026-10-29): the same as Ubuntu's `maint-3.10`. **A flowgraph runs from the desktop** (user; GRC from the desktop via the `~/.profile` line, my reading). First run of the scripts on Debian. SDRs not reported yet. |
 
 ### `v2.x` (UHD from the PPA)
 
@@ -575,6 +576,26 @@ loopbacks.
     packages: `libuhd-dev` 4.8.0.0 Recommends `gnuradio-dev` (so
     `--no-install-recommends` still needed) and has no Boost dependencies
     (Boost list still needed); `uhd-host` ships `uhd_images_downloader`.
+  - **Debian changes drafted** (user, 2026-10-29: "yes, draft the Debian
+    changes"; uncommitted in the working tree, not run on Debian yet). Step
+    1: `ID` `ubuntu` or `debian` (`DISTRO_NAMES`); on Debian no PPA check
+    and no `software-properties-common` (`DEBIAN_TOOL_PACKAGES = ["git"]`);
+    sources file `debian.sources` (deb822) if present, else `sources.list`,
+    where `enable_source_code_one_line()` adds a `deb-src` line after each
+    `deb` line that has none (cdrom left alone; a second run adds nothing);
+    `SUDO_HINT` (root password set at install: `su -`, `apt-get install
+    sudo`, `usermod -aG sudo <user>`) when `sudo` is missing or `sudo -v`
+    fails; messages name the distro. `--sources-path` now defaults per
+    distro. Checked by me: Ubuntu `--dry-run` output byte-identical to
+    `v3.0`'s on the LENOVO; Debian `--dry-run` with a fake os-release and
+    the GMKtec's `sources.list` ("already enabled"), and with its `deb-src`
+    lines removed (3 added, identical to the original). Builder: "Ubuntu's
+    own" → "the system's own" in the conflict error and the **DON'T!**
+    line. **Run on the clean Debian 13 GMKtec** (user, 2026-10-29),
+    `maint-3.10`: UHD 4.8.0.0+ds1-2, 269/269, 3.10.12.0 in
+    `~/gnuradio-pkg`, 42 components, and a flowgraph runs
+    from the desktop (see Test results). Still to do: the three SDRs, an
+    Ubuntu re-run of the draft, then the developers' decision.
 
 ## Drafts
 

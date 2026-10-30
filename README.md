@@ -376,8 +376,8 @@ newest ones, but they add up. To list the ones that do not belong to the
 installed version, and then remove them:
 
 ```bash
-ls ~/gnuradio-pkg/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)"
-ls ~/gnuradio-pkg/lib/libgnuradio-*.so.v* | grep -v -- "$(gnuradio-config-info --version)" | xargs -r rm
+ls ~/gnuradio-pkg/lib/libgnuradio-*.so.v* | grep -v -- "$(~/gnuradio-pkg/bin/gnuradio-config-info --version)"
+ls ~/gnuradio-pkg/lib/libgnuradio-*.so.v* | grep -v -- "$(~/gnuradio-pkg/bin/gnuradio-config-info --version)" | xargs -r rm
 ```
 
 A `maint-3.10` build does not need this. Its library files are named after

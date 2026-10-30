@@ -474,7 +474,19 @@ loopbacks.
 - **Qt6 on 24.04 / 26.04:** `gr-qtgui` on `main` waits for Qwt for Qt6
   there; `gnuradio-companion --qt` on `main` doesn't work there (see Useful
   facts). Nothing for the scripts to do.
-- **Step 1 log order:** possible `v3.1` fix (see Key decisions).
+- **`v3.1-rc1` (user, 2026-10-30: "let's create a v3.1-rc1 but don't
+  mark it Latest. include the changes we have planned for it such as the
+  log-order fix"):** contents: the builder's `~/.profile` echo message
+  (`d9197fa`); the log-order fix, `sys.stdout.reconfigure(line_buffering=True)`
+  at the start of `main()` in **both** scripts (the builder's own `$ ...`
+  lines before its unlogged steps had the same problem, my addition); the
+  docs' leftover-library command with
+  `~/gnuradio-pkg/bin/gnuradio-config-info` (README and wiki draft).
+  Checked by me: Step 1 `--dry-run` output byte-identical to `v3.0`'s;
+  builder `--dry-run` runs; a line-buffered print stays in order with a
+  child's output in a pipe. To be a GitHub **pre-release, not Latest**
+  (user's request), both scripts attached, so `releases/latest` stays
+  `v3.0`.
 - **Builder `~/.profile` message (`v3.1`):** prints the `echo ... >>
   ~/.profile` command the docs give instead of "add this line" (user,
   2026-10-23: "It would be simpler to give the echo style command"); skips

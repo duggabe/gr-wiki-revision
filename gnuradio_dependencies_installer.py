@@ -342,6 +342,9 @@ def _confirm(prompt: str) -> bool:
 
 
 def main() -> int:
+    # Print each line as it is written, also into a pipe (`| tee step.log`),
+    # so that this script's own lines stay in order with the commands' output.
+    sys.stdout.reconfigure(line_buffering=True)
     parser = argparse.ArgumentParser(
         description="Install UHD (from the Ettus PPA where it has a build) and GNU Radio's dependencies with apt.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

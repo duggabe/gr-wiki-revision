@@ -205,6 +205,7 @@ notes' "If you used an earlier release") must stay in sync.
 | `v2.4` | 2026-10-15 | Step 1: `python3-pytest`, so 24.04 builds run `grc_tests`. Commit `ce9806d`; Release title "v2.4: pytest for the GRC test". |
 | `v3.0-rc1` | 2026-10-19 | Tag only, no Release. Commit `80b6b8f`. |
 | `v3.0` | 2026-10-21 | Tag on `80b6b8f` (= `v3.0-rc1`, no rc2). Both scripts run as the normal user; PPA check with Ubuntu-UHD fallback; Qt6 list where `libqwt-qt6-dev` exists; install into `~/gnuradio-pkg` + `setup_env.sh`. Release title "v3.0: no sudo, GNU Radio in your home directory", marked Latest; `releases/latest/download` checked byte-identical. Notes: What's changed, If you used an earlier release (the three `/usr/local` removal steps), Tested (24.04 / 26.04 / 26.10 table + hardware table), Quick start (download loop, links to the wiki page and README), Known limitations (`main` without `gr-qtgui` on 24.04/26.04, #8239, Range slider, the `python3` crash dialog). README converted in `42540ca`. |
+| `v3.1-rc1` | 2026-10-30 | Tag (annotated) on `ce7229d`. **GitHub pre-release, not Latest** (user's request), both scripts attached and checked byte-identical; `releases/latest` still `v3.0` (checked). Title "v3.1-rc1: release candidate (not for general use yet)". Contents: builder `~/.profile` echo message (`d9197fa`), log-order fix in both scripts, full-path leftover-library command in the README (wiki draft too, not pasted). Not run on a real build yet. |
 | `v1.0`–`v1.3` | 2026-09-26 – 10-10 | Phase 1, tags only. |
 
 ## Key decisions and why

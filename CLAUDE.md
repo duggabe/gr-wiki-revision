@@ -382,7 +382,7 @@ upstream: 271 (-1193, 26.04), 272 / 273 (-1210, 26.04 / 26.10), 274 / 275
 | 2026-10-20/21 | GMKtec, **clean 26.04** | `v3.0-rc1` | `maint-3.10` | **UHD 4.11.0.0-0ubuntu1~resolute3** (PPA path); 13 SoapySDR modules; Qt6 `note:` (no `libqwt-qt6-dev`); `python3-pyqt6` 6.10.2 `ii` anyway (via `python3-pyqtgraph`). **269/269**; 3.10.12.0, `/home/barry/gnuradio-pkg/`, **42 components**; GRC from Activities with a QT GUI Time Sink (Qt5). |
 | 2026-10-21 | same | same | "Changing branches", then `main` -1216 | **274/274**, **40 components** (no `gr-qtgui`, no Thrift), as expected. `gnuradio-companion --qt`: `ModuleNotFoundError: No module named 'PyQt6.QtSvg'`. GTK GRC: qtgui blocks missing; a "QT GUI" flowgraph fails (`cannot import name 'qtgui'`), **with "No GUI" it works**. Not the scripts (`v2.4` installs the same). **Clean 26.04 rc1 test: all passed.** |
 | by 2026-10-22 | LENOVO, 26.10 (reloaded; clean presumably, my reading) | `v3.0` (user confirmed) | `maint-3.10` at `273c82180`, `~/gnuradio-pkg` | **269/269, 42 components** (user, 2026-10-22); Ubuntu's UHD 4.9.0.1-1.4. First 26.10 run of the released `v3.0` (byte-identical to rc1). `gnuradio-companion --qt` runs (user confirmed, 2026-10-22); #8250 (wrong tab closed) is upstream. |
-| 2026-10-29 | GMKtec, **clean Debian 13** (trixie, netinst 13.7.0) | **Debian draft** (uncommitted working tree, copied over SMB) | `maint-3.10`, `~/gnuradio-pkg` (my reading: the steps I gave) | **UHD 4.8.0.0+ds1-2** (Debian's), **269/269**, 3.10.12.0, prefix `/home/barry/gnuradio-pkg/`, **42 components** (user's paste, 2026-10-29): the same as Ubuntu's `maint-3.10`. **A flowgraph runs from the desktop** (user; GRC from the desktop via the `~/.profile` line, my reading). First run of the scripts on Debian. **`uhd_find_devices`: "Could not find path for image: usrp_b200_fw.hex", no devices** (user, 2026-10-30): the images are in `/usr/share/uhd/4.8.0/images`, but `uhd_config_info` gives `Package path: /lib` and an empty images directory (Debian's UHD loaded through `/lib`, a link to `/usr/lib`, so it looks under `/share`; my reading). Led to the builder's `UHD_IMAGES_DIR` line. Step 1's plan listed **11 SoapySDR modules**, the same set as 24.04 (airspy, audio, bladerf, hackrf, lms7, mirisdr, osmosdr, redpitaya, remote, rfspace, rtlsdr; no plutosdr). SDRs not reported yet. |
+| 2026-10-29 | GMKtec, **clean Debian 13** (trixie, netinst 13.7.0) | **Debian draft** (uncommitted working tree, copied over SMB) | `maint-3.10`, `~/gnuradio-pkg` (my reading: the steps I gave) | **UHD 4.8.0.0+ds1-2** (Debian's), **269/269**, 3.10.12.0, prefix `/home/barry/gnuradio-pkg/`, **42 components** (user's paste, 2026-10-29): the same as Ubuntu's `maint-3.10`. **A flowgraph runs from the desktop** (user; GRC from the desktop via the `~/.profile` line, my reading). First run of the scripts on Debian. **`uhd_find_devices`: "Could not find path for image: usrp_b200_fw.hex", no devices** (user, 2026-10-30): the images are in `/usr/share/uhd/4.8.0/images`, but `uhd_config_info` gives `Package path: /lib` and an empty images directory (Debian's UHD loaded through `/lib`, a link to `/usr/lib`, so it looks under `/share`; my reading). Led to the builder's `UHD_IMAGES_DIR` line (`a8a93dc`); with it, **the B200mini is found** (user, 2026-10-30; my reading: builder `a8a93dc` re-run, then a new login). Step 1's plan listed **11 SoapySDR modules**, the same set as 24.04 (airspy, audio, bladerf, hackrf, lms7, mirisdr, osmosdr, redpitaya, remote, rfspace, rtlsdr; no plutosdr). SDRs not reported yet. |
 
 ### `v2.x` (UHD from the PPA)
 
@@ -448,6 +448,8 @@ GMKtec, 2026-09-26. `v1.3` never built for real.
 | 2026-10-20 | Other tester, 24.04 (presumably clean, my reading) | `v3.0-rc1`, `maint-3.10` (my reading), `~/gnuradio-pkg`, UHD 4.11.0.0~noble3 | RTL-SDR, Airspy R2 | `gr-soapy` (tester) | **Both work** (tester via the user, 2026-10-20) |
 | 2026-10-20 | Other tester, 24.04 (presumably clean, my reading) | same | LimeSDR Mini, HackRF | `gr-soapy` (tester) | **Both work, receive and transmit** (tester via the user, 2026-10-20) |
 | 2026-10-20 | Other tester, 24.04 (presumably clean, my reading) | same | USRP B200mini | `gr-uhd` (tester: "the UHD driver") | **Works, receive and transmit** (tester via the user, 2026-10-20) |
+| 2026-10-30 | User, GMKtec **clean Debian 13** | Debian draft (`fa1db6b`) + builder `a8a93dc` (`UHD_IMAGES_DIR`), `maint-3.10`, `~/gnuradio-pkg`, Debian's UHD 4.8.0.0+ds1-2 | USRP B200mini | `gr-uhd` (my reading) | **Found** once `UHD_IMAGES_DIR` was set; **loopback works** (user, 2026-10-30; 30 dB attenuator presumably, my reading): first USRP use on Debian |
+| 2026-10-30 | User, GMKtec **clean Debian 13** | same | RTL-SDR.COM v3 | presumably `gr-soapy` (my reading) | **Works** (user, 2026-10-30; presumably the usual broadcast FM in stereo, my reading). PlutoSDR not working on Debian yet (USB network; see Open items) |
 
 Transmit: on 24.04 (GMKtec, `v2.3`; the other tester with a HackRF, a
 LimeSDR Mini and a B200mini, `v2.3` and `v3.0-rc1`), on 26.04 (GMKtec,
@@ -533,7 +535,45 @@ loopbacks.
     45 around April 2027.
 
 - **Debian support (asked about by the user 2026-10-29; not decided; talk
-  to the developers first, like Fedora).**
+  to the developers first, like Fedora). PAUSED (user, 2026-10-30: "With
+  all of the differences involved with Debian, I want to save some notes
+  and stop work on it").** Where it stands: Step 1's Debian path
+  (`fa1db6b`) and the builder's `UHD_IMAGES_DIR` line (`a8a93dc`) are on
+  `main`, pushed, untagged (`releases/latest` is still `v3.0`). On Ubuntu
+  both are checked only by me (dry-run identical; `setup_env.sh`
+  identical on the LENOVO), not by a real Ubuntu run. **Before `v3.1`,
+  decide** whether to keep them in (harmless on Ubuntu, my reading) or
+  revert them; either way `v3.1` needs a real Ubuntu run. Debian 13
+  results: Step 1 and builder OK, 269/269, 42 components, GRC from the
+  desktop, B200mini found and loopback OK (with `UHD_IMAGES_DIR`);
+  RTL-SDR works (user, 2026-10-30); PlutoSDR not working yet. Differences found on
+  Debian 13, each needing its own handling:
+  1. no PPA (Debian's UHD 4.8), one-line `sources.list` (`deb-src`
+     already on), possibly no `sudo` (root password set at install);
+  2. UHD can't find its images (loaded through `/lib`, so `Package path:
+     /lib`, empty images dir), fixed by `UHD_IMAGES_DIR`;
+  3. **PlutoSDR over USB:** `lsusb` sees it (`0456:b673`) and the USB
+     network interface `enx00e022e5fb58` appears, but NetworkManager
+     leaves it `disconnected` with no address, so `ip:pluto.local` fails
+     ("Avahi Resolver: Failed to resolve host 'pluto.local'", "Unable to
+     create context") and `ping 192.168.3.1` gets nothing. (The user's
+     Pluto is at `192.168.3.1`, not the factory `192.168.2.1`; resolved
+     from the LENOVO with `avahi-resolve`.) `nmcli device connect
+     enx00e022e5fb58` connected it, **but the GMKtec's Remote Desktop
+     from the LENOVO stopped working** (user, 2026-10-30); cause not
+     checked (my guess: the Pluto's DHCP gave a default route and/or DNS;
+     untested fix: `nmcli connection modify <name> ipv4.never-default yes
+     ipv4.ignore-auto-dns yes ipv6.method ignore`). The user unplugged the
+     Pluto and rebooted: connectivity back. Whether the saved NM profile
+     reconnects when the Pluto is plugged in again: not known (my note: it
+     probably will, with the same effect). Workaround not tried: a `usb:`
+     URI from `iio_info -s` in the PlutoSDR blocks, which needs no
+     network;
+  4. `qt.qpa.plugin: Could not find the Qt platform plugin "wayland"`
+     when running a flowgraph: harmless, Qt5 falls back to XWayland;
+     Debian's desktop lacks `qtwayland5`, which Ubuntu's has (my reading);
+  5. the GNOME Settings Remote Desktop switch locks up; set up with
+     `grdctl` instead (see Machines).
   - Debian's packages (Debian's package database, 2026-10-29): UHD 4.3.0.0
     (12 bookworm) / 4.8.0.0 (13 trixie) / 4.9.0.1 (forky); Debian's GNU
     Radio 3.10.5.1 / 3.10.12.0 / 3.10.12.0; Python 3.11 / 3.13; Qwt 6.1.4
@@ -605,8 +645,11 @@ loopbacks.
     UHD_IMAGES_DIR=...`. Uncommitted. Checked by me: on the LENOVO (26.10,
     images dir `/usr/share/uhd/4.9.0/images`) nothing is added and
     `setup_env.sh` comes out identical; with a faked Debian answer the line
-    is added. Not run on Debian yet. Still to do: the three SDRs, an
-    Ubuntu re-run of the draft, then the developers' decision.
+    is added. Committed in `a8a93dc`; **on the Debian 13 GMKtec the B200mini
+    is found now** (user, 2026-10-30); **B200mini loopback works** (user,
+    2026-10-30); **RTL-SDR works** (user, 2026-10-30). Paused before the
+    PlutoSDR works (see the PAUSED
+    note above).
 
 ## Drafts
 

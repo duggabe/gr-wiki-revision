@@ -537,13 +537,13 @@ loopbacks.
 - **Debian support (asked about by the user 2026-10-29; not decided; talk
   to the developers first, like Fedora). PAUSED (user, 2026-10-30: "With
   all of the differences involved with Debian, I want to save some notes
-  and stop work on it").** Where it stands: Step 1's Debian path
-  (`fa1db6b`) and the builder's `UHD_IMAGES_DIR` line (`a8a93dc`) are on
-  `main`, pushed, untagged (`releases/latest` is still `v3.0`). On Ubuntu
-  both are checked only by me (dry-run identical; `setup_env.sh`
-  identical on the LENOVO), not by a real Ubuntu run. **Before `v3.1`,
-  decide** whether to keep them in (harmless on Ubuntu, my reading) or
-  revert them; either way `v3.1` needs a real Ubuntu run. Debian 13
+  and stop work on it").** **Code reverted** (user, 2026-10-30: "revert
+  the code to before Debian"): both scripts restored to `6346964`, so
+  Step 1 is identical to `v3.0` again and the builder differs from `v3.0`
+  only by `d9197fa` (the `~/.profile` echo message). The Debian code stays
+  in history: Step 1's Debian path and builder wording in `fa1db6b`, the
+  builder's `UHD_IMAGES_DIR` line in `a8a93dc`; restore from there if
+  Debian support is taken up again. Debian 13
   results: Step 1 and builder OK, 269/269, 42 components, GRC from the
   desktop, B200mini found and loopback OK (with `UHD_IMAGES_DIR`);
   RTL-SDR works (user, 2026-10-30); PlutoSDR not working yet. Differences found on

@@ -7,14 +7,11 @@ USRP Hardware Driver), from Ettus Research's PPA where it has a build for this
 Ubuntu release, and everything GNU Radio needs to build and run, all with apt.
 Nothing is compiled here; building GNU Radio itself is Step 2.
 
-It also runs on Debian. There the PPA (which is for Ubuntu) is left out and UHD
-comes from Debian itself; everything else is the same.
-
 Run it as your normal user. It uses sudo only for the commands that need root
 (it asks for your password once), which are the equivalent of:
 
-    # enable "Source code" (deb-src) in /etc/apt/sources.list.d/ubuntu.sources
-    # (on Debian: /etc/apt/sources.list), which `apt-get build-dep` needs
+    # enable "Source code" (deb-src) in /etc/apt/sources.list.d/ubuntu.sources,
+    # which `apt-get build-dep` needs
     sudo apt-get update
     sudo apt-get install -y software-properties-common git
     sudo add-apt-repository -y ppa:ettusresearch/uhd
@@ -31,8 +28,7 @@ Notes on those steps:
   * Before adding the PPA, it checks that the PPA has a build for this Ubuntu
     release. If not (as for 26.10 when this was written), it says so, leaves
     the PPA out, and installs Ubuntu's own (older) UHD under the same package
-    names. On Debian, software-properties-common and the PPA are left out,
-    and UHD always comes from Debian.
+    names.
   * UHD's packages recommend Ubuntu's own gnuradio packages, so they are
     installed with --no-install-recommends. Otherwise Ubuntu's GNU Radio would
     be installed into /usr, next to the one you are about to build.
@@ -95,17 +91,9 @@ UHD_PPA_RELEASE_URL = "https://ppa.launchpadcontent.net/ettusresearch/uhd/ubuntu
 # Where add-apt-repository puts the PPA's entry.
 UHD_PPA_SOURCES_GLOB = "/etc/apt/sources.list.d/ettusresearch-ubuntu-uhd-*"
 UBUNTU_SOURCES = "/etc/apt/sources.list.d/ubuntu.sources"
-# Debian's sources: deb822 if the system has been converted to it, otherwise the
-# one-line format a Debian 13 installation writes.
-DEBIAN_SOURCES = ("/etc/apt/sources.list.d/debian.sources", "/etc/apt/sources.list")
 
-# The systems this installer knows, by ID in /etc/os-release.
-DISTRO_NAMES = {"ubuntu": "Ubuntu", "debian": "Debian"}
-
-# Needed by the steps themselves: add-apt-repository (Ubuntu only), and git for
-# Step 2's clone.
+# Needed by the steps themselves: add-apt-repository, and git for Step 2's clone.
 TOOL_PACKAGES = ["software-properties-common", "git"]
-DEBIAN_TOOL_PACKAGES = ["git"]
 
 # UHD, from the PPA or else from Ubuntu. uhd-host depends on python3-uhd and the
 # UHD library.
@@ -160,20 +148,8 @@ SOAPY_SKIP_MODULES = ("uhd",)
 # Stands for the module list in the command list until it has been worked out.
 SOAPY_MODULES_PLACEHOLDER = "<SoapySDR device modules>"
 
-# Ubuntu's or Debian's own GNU Radio, which must not be installed next to a
-# source build.
+# Ubuntu's own GNU Radio, which must not be installed next to a source build.
 CONFLICTING_PACKAGES = ["gnuradio", "gnuradio-dev"]
-
-# What to do when sudo is missing or doesn't let the user in: on Debian, setting
-# a root password during installation leaves the first user out of the sudo group.
-SUDO_HINT = (
-    "On Debian, this happens if a root password was set during installation. Fix it as "
-    "root, then log out and back in:\n"
-    "  su -\n"
-    "  apt-get install sudo\n"
-    f"  usermod -aG sudo {os.environ.get('SUDO_USER') or os.environ.get('USER') or '<your-username>'}\n"
-    "  exit"
-)
 
 # Where a UHD built from source and installed with `make install` keeps its files.
 SOURCE_UHD_PREFIX = "/usr/local"
@@ -206,40 +182,6 @@ def enable_source_code(sources_text: str) -> tuple[str, int]:
 
 def has_types_lines(sources_text: str) -> bool:
     return re.search(r"^Types:", sources_text, flags=re.MULTILINE) is not None
-
-
-def enable_source_code_one_line(sources_text: str) -> tuple[str, int]:
-    """
-    Return the one-line-format sources text (sources.list) with "Source code"
-    enabled, i.e. a matching `deb-src` line added after every `deb` line that
-    has none, and the number of lines added. cdrom entries are left alone.
-    """
-    lines = sources_text.splitlines(keepends=True)
-    existing = {line.split(None, 1)[1].strip() for line in lines if re.match(r"deb-src\s", line)}
-    result = []
-    added = 0
-    for line in lines:
-        result.append(line)
-        match = re.match(r"deb\s+(\S.*?)\s*$", line)
-        if match and not match.group(1).startswith("cdrom:") and match.group(1) not in existing:
-            result.append(f"deb-src {match.group(1)}\n")
-            existing.add(match.group(1))
-            added += 1
-    return "".join(result), added
-
-
-def has_deb_lines(sources_text: str) -> bool:
-    return re.search(r"^deb\s", sources_text, flags=re.MULTILINE) is not None
-
-
-def default_sources_path(distro: str) -> str:
-    """The apt sources file to enable source code in, for this system."""
-    if distro == "debian":
-        for path in DEBIAN_SOURCES:
-            if Path(path).is_file():
-                return path
-        return DEBIAN_SOURCES[-1]
-    return UBUNTU_SOURCES
 
 
 def installed_packages(names: list[str]) -> list[str]:
@@ -345,11 +287,11 @@ def soapy_module_packages() -> list[str]:
     return sorted(modules)
 
 
-def get_commands(use_ppa: bool, download_images: bool, distro: str = "ubuntu") -> list[list[str]]:
+def get_commands(use_ppa: bool, download_images: bool) -> list[list[str]]:
     """The commands run as root after "Source code" has been enabled."""
     commands = [
         ["apt-get", "update"],
-        ["apt-get", "install", "-y", *(DEBIAN_TOOL_PACKAGES if distro == "debian" else TOOL_PACKAGES)],
+        ["apt-get", "install", "-y", *TOOL_PACKAGES],
     ]
     if use_ppa:
         # add-apt-repository also refreshes the package lists.
@@ -401,7 +343,7 @@ def _confirm(prompt: str) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Install UHD (from the Ettus PPA where it has a build) and GNU Radio's dependencies with apt, on Ubuntu or Debian.",
+        description="Install UHD (from the Ettus PPA where it has a build) and GNU Radio's dependencies with apt.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -418,9 +360,8 @@ def main() -> int:
         help="Do not run uhd_images_downloader (the USRP FPGA images, a large download).",
     )
     parser.add_argument(
-        "--sources-path",
-        help=f"The apt sources file in which to enable source code (default: {UBUNTU_SOURCES} on "
-        f"Ubuntu; on Debian {DEBIAN_SOURCES[0]} if it exists, else {DEBIAN_SOURCES[1]}).",
+        "--sources-path", default=UBUNTU_SOURCES,
+        help=f"Ubuntu's apt sources file, in which to enable source code (default: {UBUNTU_SOURCES}).",
     )
     parser.add_argument(
         "--os-release-path", default="/etc/os-release",
@@ -434,33 +375,29 @@ def main() -> int:
     except OSError as exc:
         print(f"error: could not read {args.os_release_path}: {exc}", file=sys.stderr)
         return 1
-    distro = info.get("ID", "")
-    if distro not in DISTRO_NAMES:
+    if info.get("ID") != "ubuntu":
         print(
-            f"error: {args.os_release_path} doesn't describe an Ubuntu or Debian release "
-            f"(ID={info.get('ID')!r}). This installer uses their packages. Aborting.",
+            f"error: {args.os_release_path} doesn't describe an Ubuntu release "
+            f"(ID={info.get('ID')!r}). This installer uses Ubuntu's packages. Aborting.",
             file=sys.stderr,
         )
         return 1
-    distro_name = DISTRO_NAMES[distro]
     codename = info.get("VERSION_CODENAME", "")
     if not codename:
         print(f"error: {args.os_release_path} has no VERSION_CODENAME. Aborting.", file=sys.stderr)
         return 1
-    print(f"Detected host OS: {distro_name} {info.get('VERSION_ID', '?')} ({codename})")
+    print(f"Detected host OS: Ubuntu {info.get('VERSION_ID', '?')} ({codename})")
 
     is_root = os.geteuid() == 0
     if not is_root and not args.dry_run and shutil.which("sudo") is None:
-        print("error: sudo is needed to install packages, and it isn't installed.", file=sys.stderr)
-        print(SUDO_HINT, file=sys.stderr)
-        print("Aborting.", file=sys.stderr)
+        print("error: sudo is needed to install packages, and it isn't installed. Aborting.", file=sys.stderr)
         return 1
 
     # --- 2. Check for things that would conflict ---
     conflicting = installed_packages(CONFLICTING_PACKAGES)
     if conflicting:
         print(
-            f"error: {distro_name}'s own GNU Radio is installed (" + ", ".join(conflicting) + "). It would "
+            "error: Ubuntu's own GNU Radio is installed (" + ", ".join(conflicting) + "). It would "
             "sit next to the GNU Radio you are about to build from source. Remove it, then run "
             "this installer again:",
             file=sys.stderr,
@@ -493,19 +430,17 @@ def main() -> int:
         print("Aborting.", file=sys.stderr)
         return 1
 
-    # --- 3. Check whether the PPA has a build for this release (Ubuntu only) ---
-    use_ppa = False
-    if distro == "ubuntu":
-        try:
-            use_ppa = ppa_has_build(codename)
-        except OSError as exc:
-            print(
-                f"error: could not check whether the Ettus PPA has packages for Ubuntu {codename}: "
-                f"{exc}. apt needs the network too. Aborting.",
-                file=sys.stderr,
-            )
-            return 1
-    if distro == "ubuntu" and not use_ppa:
+    # --- 3. Check whether the PPA has a build for this release ---
+    try:
+        use_ppa = ppa_has_build(codename)
+    except OSError as exc:
+        print(
+            f"error: could not check whether the Ettus PPA has packages for Ubuntu {codename}: "
+            f"{exc}. apt needs the network too. Aborting.",
+            file=sys.stderr,
+        )
+        return 1
+    if not use_ppa:
         stale = ppa_entries_for(codename)
         if stale:
             print(
@@ -519,39 +454,27 @@ def main() -> int:
             print(f"  sudo add-apt-repository --remove -y {UHD_PPA}", file=sys.stderr)
             print("Aborting.", file=sys.stderr)
             return 1
-    if distro == "ubuntu":
-        print("OK: no conflicting GNU Radio packages, source-built UHD, or stale PPA entry found.")
-    else:
-        print("OK: no conflicting GNU Radio packages or source-built UHD found.")
+    print("OK: no conflicting GNU Radio packages, source-built UHD, or stale PPA entry found.")
 
-    # --- 4. Work out the change to the apt sources file ---
-    sources_path = Path(args.sources_path or default_sources_path(distro))
-    by_hand = (
-        "Enable 'Source code' in the 'Software & Updates' app instead"
-        if distro == "ubuntu"
-        else "Add a deb-src line for each deb line by hand instead"
-    )
+    # --- 4. Work out the change to Ubuntu's sources file ---
+    sources_path = Path(args.sources_path)
     try:
         sources_text = sources_path.read_text(encoding="utf-8")
     except OSError as exc:
         print(
-            f"error: could not read {sources_path}: {exc}. {by_hand}, or pass --sources-path. Aborting.",
+            f"error: could not read {sources_path}: {exc}. Enable 'Source code' in the "
+            f"'Software & Updates' app instead, or pass --sources-path. Aborting.",
             file=sys.stderr,
         )
         return 1
-    if has_types_lines(sources_text):
-        new_sources_text, changed = enable_source_code(sources_text)
-        change_text = f"{changed} 'Types: deb' line(s) become 'Types: deb deb-src'"
-    elif distro == "debian" and has_deb_lines(sources_text):
-        new_sources_text, changed = enable_source_code_one_line(sources_text)
-        change_text = f"{changed} deb-src line(s) added, one after each deb line"
-    else:
+    if not has_types_lines(sources_text):
         print(
             f"error: {sources_path} has no 'Types:' lines -- its format isn't the expected one. "
-            f"{by_hand}. Aborting.",
+            f"Enable 'Source code' in the 'Software & Updates' app instead. Aborting.",
             file=sys.stderr,
         )
         return 1
+    new_sources_text, changed = enable_source_code(sources_text)
     backup_path = sources_path.with_name(sources_path.name + ".bak")
     sources_commands = [
         as_root(["cp", "-p", str(sources_path), str(backup_path)], is_root),
@@ -559,13 +482,9 @@ def main() -> int:
     ]
 
     # --- 5. Show the plan ---
-    commands = [
-        as_root(cmd, is_root) for cmd in get_commands(use_ppa, download_images=not args.no_images, distro=distro)
-    ]
+    commands = [as_root(cmd, is_root) for cmd in get_commands(use_ppa, download_images=not args.no_images)]
     if use_ppa:
         print(f"\nUHD: from the Ettus PPA, which has packages for Ubuntu {codename}.")
-    elif distro == "debian":
-        print("\nUHD: from Debian itself (the Ettus PPA is for Ubuntu only).")
     else:
         print(
             f"\nwarning: the Ettus PPA has no packages for Ubuntu {codename} (yet), so it is left "
@@ -575,8 +494,8 @@ def main() -> int:
     print("\nThe following will be done:")
     if changed:
         print(
-            f"  enable source code in {sources_path}: {change_text} "
-            f"(original saved as {backup_path.name}):"
+            f"  enable source code in {sources_path}: {changed} 'Types: deb' line(s) become "
+            f"'Types: deb deb-src' (original saved as {backup_path.name}):"
         )
         for cmd in sources_commands:
             print(f"    $ {shown(cmd)}")
@@ -591,7 +510,7 @@ def main() -> int:
     else:
         print(
             f"  {QT6_PLACEHOLDER}: installed only if apt knows {QT6_KEY_PACKAGE} once the package "
-            "lists have been refreshed (it exists from Ubuntu 26.10 and Debian 14 on)"
+            "lists have been refreshed (it exists from Ubuntu 26.10 on)"
         )
     soapy_modules = soapy_module_packages()
     if soapy_modules:
@@ -618,11 +537,7 @@ def main() -> int:
     try:
         if not is_root:
             # Ask for the password once, before anything changes.
-            try:
-                run_command(["sudo", "-v"], env)
-            except subprocess.CalledProcessError:
-                print(f"\nerror: sudo doesn't work for you.\n{SUDO_HINT}", file=sys.stderr)
-                return 1
+            run_command(["sudo", "-v"], env)
         if changed:
             run_command(sources_commands[0], env)
             run_command(sources_commands[1], env, input_text=new_sources_text)
@@ -632,7 +547,7 @@ def main() -> int:
                 packages = qt6_packages()
                 if not packages:
                     print(
-                        f"\nnote: apt doesn't know {QT6_KEY_PACKAGE} in this {distro_name} release, so no "
+                        f"\nnote: apt doesn't know {QT6_KEY_PACKAGE} in this Ubuntu release, so no "
                         "Qt6 packages were installed. That doesn't matter for maint-3.10 (Qt5); "
                         "a build of GNU Radio's main branch (Qt6) will have no gr-qtgui."
                     )
@@ -661,7 +576,7 @@ def main() -> int:
     conflicting = installed_packages(CONFLICTING_PACKAGES)
     if conflicting:
         print(
-            f"\nwarning: {distro_name}'s own GNU Radio got installed as a dependency ("
+            "\nwarning: Ubuntu's own GNU Radio got installed as a dependency ("
             + ", ".join(conflicting) + "). Remove it before building GNU Radio:\n"
             "  sudo apt-get remove " + " ".join(conflicting),
             file=sys.stderr,
@@ -670,12 +585,7 @@ def main() -> int:
         version = subprocess.run(
             ["uhd_config_info", "--version"], capture_output=True, text=True, check=True,
         ).stdout.strip()
-        if use_ppa:
-            source = "the Ettus PPA"
-        elif distro == "debian":
-            source = "Debian"
-        else:
-            source = "Ubuntu (no PPA build for this release)"
+        source = "the Ettus PPA" if use_ppa else "Ubuntu (no PPA build for this release)"
         print(f"\nInstalled: {version}, from {source}")
     except (OSError, subprocess.CalledProcessError) as exc:
         print(f"\nerror: UHD doesn't run after installation: {exc}", file=sys.stderr)

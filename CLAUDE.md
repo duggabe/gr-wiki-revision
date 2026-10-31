@@ -330,7 +330,14 @@ notes' "If you used an earlier release") must stay in sync.
   active, clicking the "X" of the first (Untitled) tab closes the active
   tab instead. Filed by the user as
   [gnuradio/gnuradio#8250](https://github.com/gnuradio/gnuradio/issues/8250)
-  (2026-10-22, open). Upstream GRC, not the scripts.
+  (2026-10-22). Upstream GRC, not the scripts. Issue timeline (checked by
+  me with `gh`, 2026-10-31): closed and reopened by Marcus Müller on
+  2026-10-22 (he first thought PR #7811 fixed it, then "misread #7811");
+  the user found it **works on `main` -1216** (comment 2026-10-24, with a
+  harmless-looking `g_main_context_pop_thread_default` GLib-CRITICAL
+  warning) but **still fails on `maint-3.10` on 26.04** (2026-10-31);
+  Marcus (2026-10-31): no bugfix yet, probably backportable to
+  `maint-3.10` for a later 3.10 release. **Still open** (user and `gh`, 2026-10-31).
 - `uhd-host` installs the udev rules (`/usr/lib/udev/rules.d/60-uhd-host.rules`);
   no copy in `/etc/udev/rules.d` is needed. FPGA images go to
   `/usr/share/uhd/<version>/images` (`uhd_config_info --images-dir`).
@@ -370,6 +377,13 @@ Kept here only. Test counts differ by release and branch. `maint-3.10`:
 `gnuradio`'s Build-Depends on 26.04 but not on 24.04). `main` grows with
 upstream: 271 (-1193, 26.04), 272 / 273 (-1210, 26.04 / 26.10), 274 / 275
 (-1216, 26.04 / 26.10); 26.10 always runs one more, `qa_qtgui`.
+
+### `v3.1-rc1`
+
+| Date | Machine, Ubuntu | Scripts | Branch / build | Result |
+| --- | --- | --- | --- | --- |
+| 2026-10-31 | GMKtec, **clean 26.04** (reloaded after Debian 13) | `v3.1-rc1` (my reading) | `maint-3.10`, fresh clone | **UHD 4.11.0.0-0ubuntu1~resolute3** (PPA path), cmake's disabled-components list **empty**, **269/269** (user, 2026-10-31). Not reported yet: log order in `step1.log` / `step2.log`, the builder's `echo ... >> ~/.profile` message, the "already runs" note on a second run, version / prefix / component count, GRC from the desktop, SDRs. |
+| 2026-10-31 | same | same | "Changing branches" (`rm -rf ~/gnuradio-pkg ~/gnuradio/build`), then `main` **v3.11.0.0git-1216-gec1bf153**, prefix `/home/barry/gnuradio-pkg/` (user, 2026-10-31) | **274/274**, **40 components** (no `gr-qtgui`, no Thrift, as expected on 26.04), cmake's disabled-components list empty (user, 2026-10-31). **`step1.log` and `step2.log` look good** (user): log-order fix confirmed. **The builder's `~/.profile` note said the line was already there**, which was correct (user): the "already runs" branch of `d9197fa` confirmed; **the first run printed the `echo` command** (user, 2026-10-31): both branches of `d9197fa` confirmed. Not reported yet: GRC from the desktop, SDRs. |
 
 ### `v3.0` (home prefix, no sudo)
 

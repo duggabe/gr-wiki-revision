@@ -313,8 +313,11 @@ notes' "If you used an earlier release") must stay in sync.
   'QMouseEvent' object has no attribute 'x'` when clicked:
   `gr-qtgui/python/qtgui/range.py.cmakein`, `Slider.mousePressEvent` /
   `mouseMoveEvent` use `event.x()` / `.y()` (PyQt6 needs
-  `event.position().x()`). Upstream bug; the developers know and chose not
-  to open an issue (user, 2026-10-21). Flowgraphs still run.
+  `event.position().x()`). Upstream bug; at first the developers chose
+  not to open an issue (user, 2026-10-21), but the user filed it as
+  [gnuradio/gnuradio#8253](https://github.com/gnuradio/gnuradio/issues/8253)
+  (2026-10-24, open; on the watch list, user 2026-10-31). Flowgraphs
+  still run.
 - **PyQt6 on 26.04 and 26.10 comes with Step 1 anyway:** `python3-pyqtgraph`
   Depends `pyqt6-dev-tools | pyqt5-dev-tools`; `build-dep` brings
   `python3-pyqt5` but not `pyqt5-dev-tools`, so apt picks `pyqt6-dev-tools`,
@@ -384,6 +387,7 @@ upstream: 271 (-1193, 26.04), 272 / 273 (-1210, 26.04 / 26.10), 274 / 275
 | --- | --- | --- | --- | --- |
 | 2026-10-31 | GMKtec, **clean 26.04** (reloaded after Debian 13) | `v3.1-rc1` (my reading) | `maint-3.10`, fresh clone | **UHD 4.11.0.0-0ubuntu1~resolute3** (PPA path), cmake's disabled-components list **empty**, **269/269** (user, 2026-10-31). Not reported yet: log order in `step1.log` / `step2.log`, the builder's `echo ... >> ~/.profile` message, the "already runs" note on a second run, version / prefix / component count, GRC from the desktop, SDRs. |
 | 2026-10-31 | same | same | "Changing branches" (`rm -rf ~/gnuradio-pkg ~/gnuradio/build`), then `main` **v3.11.0.0git-1216-gec1bf153**, prefix `/home/barry/gnuradio-pkg/` (user, 2026-10-31) | **274/274**, **40 components** (no `gr-qtgui`, no Thrift, as expected on 26.04), cmake's disabled-components list empty (user, 2026-10-31). **`step1.log` and `step2.log` look good** (user): log-order fix confirmed. **The builder's `~/.profile` note said the line was already there**, which was correct (user): the "already runs" branch of `d9197fa` confirmed; **the first run printed the `echo` command** (user, 2026-10-31): both branches of `d9197fa` confirmed. Not reported yet: GRC from the desktop, SDRs. |
+| 2026-10-31 | ASUS, 26.10 (clean or not not stated) | `v3.1-rc1` (my reading) | `main` **v3.11.0.0git-1216-gec1bf153**, prefix `/home/barry/gnuradio-pkg/` | **275/275**, **41 components** (`gr-qtgui` with Qt6, no Thrift), cmake's disabled-components list empty (user, 2026-10-31): the same as `v3.0-rc1` on 26.10 at this commit. UHD version, log order and `~/.profile` message not reported for this run. **GRC `--gtk` and `--qt` work** (user, 2026-10-31, on the ASUS). |
 
 ### `v3.0` (home prefix, no sudo)
 
@@ -465,6 +469,9 @@ GMKtec, 2026-09-26. `v1.3` never built for real.
 | 2026-10-20 | Other tester, 24.04 (presumably clean, my reading) | same | USRP B200mini | `gr-uhd` (tester: "the UHD driver") | **Works, receive and transmit** (tester via the user, 2026-10-20) |
 | 2026-10-30 | User, GMKtec **clean Debian 13** | Debian draft (`fa1db6b`) + builder `a8a93dc` (`UHD_IMAGES_DIR`), `maint-3.10`, `~/gnuradio-pkg`, Debian's UHD 4.8.0.0+ds1-2 | USRP B200mini | `gr-uhd` (my reading) | **Found** once `UHD_IMAGES_DIR` was set; **loopback works** (user, 2026-10-30; 30 dB attenuator presumably, my reading): first USRP use on Debian |
 | 2026-10-30 | User, GMKtec **clean Debian 13** | same | RTL-SDR.COM v3 | presumably `gr-soapy` (my reading) | **Works** (user, 2026-10-30; presumably the usual broadcast FM in stereo, my reading). PlutoSDR not working on Debian yet (USB network; see Open items) |
+| 2026-10-31 | User, ASUS 26.10 (user) | `v3.1-rc1`, **`main`** -1216, `~/gnuradio-pkg`, Ubuntu's UHD 4.9.0.1 (my reading) | USRP B200mini | `gr-uhd` (my reading) | **Good** (user, 2026-10-31) |
+| 2026-10-31 | User, ASUS 26.10 (user) | `v3.1-rc1`, **`main`** -1216, `~/gnuradio-pkg`, Ubuntu's UHD 4.9.0.1 (my reading) | PlutoSDR | `gr-iio` (my reading) | **Good** (user, 2026-10-31) |
+| 2026-10-31 | User, ASUS 26.10 (user) | `v3.1-rc1`, **`main`** -1216, `~/gnuradio-pkg`, Ubuntu's UHD 4.9.0.1 (my reading) | RTL-SDR.COM v3 | presumably `gr-soapy` (my reading) | **Good** (user, 2026-10-31) |
 
 Transmit: on 24.04 (GMKtec, `v2.3`; the other tester with a HackRF, a
 LimeSDR Mini and a B200mini, `v2.3` and `v3.0-rc1`), on 26.04 (GMKtec,
@@ -486,6 +493,10 @@ loopbacks.
   give 42 components; consider adding the Thrift packages to Step 1 only if
   the developers keep ControlPort/Thrift (user, 2026-10-19). An existing
   `build/` keeps `ENABLE_CTRLPORT_THRIFT=OFF` cached.
+- **#8253 (QT GUI Range slider with PyQt6, `event.x()`):** open, filed by
+  the user 2026-10-24; watch it (user, 2026-10-31). Upstream, nothing for
+  the scripts; drop it from the Known limitations of the Release notes
+  once fixed.
 - **Qt6 on 24.04 / 26.04:** `gr-qtgui` on `main` waits for Qwt for Qt6
   there; `gnuradio-companion --qt` on `main` doesn't work there (see Useful
   facts). Nothing for the scripts to do.
@@ -802,7 +813,7 @@ gnuradio-config-info --enabled-components | tr ';' '\n' | wc -l
 Thanks!
 ~~~~
 
-### QT GUI Range slider issue for `gnuradio/gnuradio` (drafted 2026-10-20; not posted)
+### QT GUI Range slider issue for `gnuradio/gnuradio` (drafted 2026-10-20; posted by the user as #8253 on 2026-10-24)
 
 **Not to be posted** (user, 2026-10-21): the developers are aware of the Range slider issue and have chosen not to create an issue at this time. Text kept for reference.
 

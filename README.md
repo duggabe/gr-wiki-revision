@@ -7,7 +7,7 @@ The main content is two Python scripts that build
 without Docker. They back the
 [Building GNU Radio from Source Code](https://wiki.gnuradio.org/index.php?title=Building_GNU_Radio_from_Source_Code)
 page on the GNU Radio Wiki, and this README follows that page. The current
-release is `v3.0`; see [Releases](#releases).
+release is `v3.1`; see [Releases](#releases).
 
 The goals of these instructions are to:
 
@@ -438,6 +438,15 @@ be rebuilt.
 
 ## Releases
 
+**`v3.1`** (2026-10-31): at the end of a build, `gnuradio_clone_builder.py`
+prints the exact command that adds `setup_env.sh` to `~/.profile`, or says
+that `~/.profile` already has it. Both scripts' own messages now appear in
+order with the commands' output in `step1.log` and `step2.log`. The command
+that removes libraries left by earlier `main` builds (in
+[Changing branches, or removing the installed GNU Radio](#changing-branches-or-removing-the-installed-gnu-radio))
+now asks `~/gnuradio-pkg/bin/gnuradio-config-info` for the version. If you
+used `v3.0`, nothing needs redoing.
+
 **`v3.0`** (2026-10-21): neither script is run with `sudo` any more, and GNU
 Radio is installed into `~/gnuradio-pkg`. `gnuradio_clone_builder.py`
 installs with a plain `make install` (`--prefix` chooses another directory)
@@ -507,5 +516,5 @@ download `v2.1`. `gnuradio_dependencies_installer.py` is unchanged.
 - **The number of `make` jobs is limited by the machine's memory,** so that
   the build is not killed for running out of it.
 
-Further fixes will be tagged `v3.1`; a tag is never moved, so a link to a
+Further fixes will be tagged `v3.2`; a tag is never moved, so a link to a
 tag always gives the same scripts.

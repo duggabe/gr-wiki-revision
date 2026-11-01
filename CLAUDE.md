@@ -104,9 +104,9 @@ there had not been a Phase 1", user, 2026-10-13).
   in both front ends and all three SDRs on the ASUS. Step 1 is unchanged
   from `v3.0` apart from the log order; the builder adds only the
   `~/.profile` message (`d9197fa`) and the log order.
-- GitHub Releases: `v3.1` (Latest), `v3.1-rc1` (pre-release, kept for
-  now), `v3.0`, `v2.4`, `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
-  scripts attached. The `v1.2` Release was deleted 2026-10-13 (tags kept).
+- GitHub Releases: `v3.1` (Latest), `v3.0`, `v2.4`, `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
+  scripts attached. The `v1.2` Release was deleted 2026-10-13 and the
+  `v3.1-rc1` pre-release 2026-10-31 (user's requests; tags kept).
 - **Debian support paused** (user, 2026-10-30) and its code reverted
   (`7af39ab`); the work is kept in `fa1db6b` and `a8a93dc` (see Open
   items). The GMKtec has since been reloaded with 26.04.
@@ -210,7 +210,7 @@ notes' "If you used an earlier release") must stay in sync.
 | `v2.4` | 2026-10-15 | Step 1: `python3-pytest`, so 24.04 builds run `grc_tests`. Commit `ce9806d`; Release title "v2.4: pytest for the GRC test". |
 | `v3.0-rc1` | 2026-10-19 | Tag only, no Release. Commit `80b6b8f`. |
 | `v3.0` | 2026-10-21 | Tag on `80b6b8f` (= `v3.0-rc1`, no rc2). Both scripts run as the normal user; PPA check with Ubuntu-UHD fallback; Qt6 list where `libqwt-qt6-dev` exists; install into `~/gnuradio-pkg` + `setup_env.sh`. Release title "v3.0: no sudo, GNU Radio in your home directory", marked Latest; `releases/latest/download` checked byte-identical. Notes: What's changed, If you used an earlier release (the three `/usr/local` removal steps), Tested (24.04 / 26.04 / 26.10 table + hardware table), Quick start (download loop, links to the wiki page and README), Known limitations (`main` without `gr-qtgui` on 24.04/26.04, #8239, Range slider, the `python3` crash dialog). README converted in `42540ca`. |
-| `v3.1-rc1` | 2026-10-30 | Tag (annotated) on `ce7229d`. **GitHub pre-release, not Latest** (user's request), both scripts attached and checked byte-identical; `releases/latest` still `v3.0` (checked). Title "v3.1-rc1: release candidate (not for general use yet)". Contents: builder `~/.profile` echo message (`d9197fa`), log-order fix in both scripts, full-path leftover-library command in the README (wiki draft too, not pasted). Not run on a real build yet. |
+| `v3.1-rc1` | 2026-10-30 | Tag (annotated) on `ce7229d`. GitHub pre-release, not Latest (user's request), both scripts attached and checked byte-identical; `releases/latest` stayed `v3.0` (checked). **Pre-release deleted 2026-10-31, tag kept** (user). Title "v3.1-rc1: release candidate (not for general use yet)". Contents: builder `~/.profile` echo message (`d9197fa`), log-order fix in both scripts, full-path leftover-library command in the README (wiki draft too, not pasted). Not run on a real build yet. |
 | `v3.1` | 2026-10-31 | Tag (annotated) on `ce7229d` (= `v3.1-rc1`). Release title "v3.1: clearer ~/.profile step, logs in order", marked **Latest**, both scripts attached; `releases/latest/download` checked byte-identical to the tag. Notes: What's changed (builder `~/.profile` echo command or "already runs" note; log order in both scripts; docs' full-path leftover-library command), If you used v3.0 (nothing to redo), Tested (26.04 GMKtec clean: `maint-3.10` 269/269, `main` 274/40; 26.10 ASUS not clean: `main` 275/41, GRC both front ends, three SDRs), Quick start, Known limitations (as `v3.0`, Range slider now links #8253). README `v3.1` entry in `a15f600`. **Live wiki page updated with the local draft** (user, 2026-10-31), incl. the full-path leftover-library command. |
 | `v1.0`–`v1.3` | 2026-09-26 – 10-10 | Phase 1, tags only. |
 

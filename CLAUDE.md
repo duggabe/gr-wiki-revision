@@ -94,20 +94,25 @@ there had not been a Phase 1", user, 2026-10-13).
   section and the pre-3.10 `~/.gnuradio` / `~/.grc_gnuradio` folders. No
   Conda section: other wiki pages cover it (user, 2026-10-23).
 
-## Current state (2026-10-22)
+## Current state (2026-10-31)
 
-- **`v3.0` released** (2026-10-21, tag on `80b6b8f`, the same commit as
-  `v3.0-rc1`). Live wiki page = local draft (`v3.0`) = README (`42540ca`).
-  `main` pushed, working tree clean.
-- **`v3.0-rc1` passed on all three releases** (see Test results): the other
-  tester's clean 24.04, the clean 26.04 GMKtec, the clean 26.10 ASUS, each
-  with `maint-3.10` and (26.04 / 26.10) `main`, and all SDRs.
-- GitHub Releases: `v3.0` (Latest), `v2.4`, `v2.3`, `v2.2`, `v2.1`, `v2.0`,
-  all with both scripts attached. The `v1.2` Release was deleted 2026-10-13
-  (tags kept).
+- **`v3.1` released** (2026-10-31, tag on `ce7229d`, the same commit as
+  `v3.1-rc1`; marked Latest). Live wiki page = local draft = README
+  (`a15f600`). `main` pushed, working tree clean.
+- **`v3.1-rc1` passed** (see Test results): the clean 26.04 GMKtec with
+  `maint-3.10` and `main`, the 26.10 ASUS (not clean) with `main`, GRC
+  in both front ends and all three SDRs on the ASUS. Step 1 is unchanged
+  from `v3.0` apart from the log order; the builder adds only the
+  `~/.profile` message (`d9197fa`) and the log order.
+- GitHub Releases: `v3.1` (Latest), `v3.1-rc1` (pre-release, kept for
+  now), `v3.0`, `v2.4`, `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
+  scripts attached. The `v1.2` Release was deleted 2026-10-13 (tags kept).
+- **Debian support paused** (user, 2026-10-30) and its code reverted
+  (`7af39ab`); the work is kept in `fa1db6b` and `a8a93dc` (see Open
+  items). The GMKtec has since been reloaded with 26.04.
 - **On hold** (user, 2026-10-16): "I'm going to wait for the developers
   decisions before I do anything else": where the scripts live, Fedora
-  support, the `qa_fastnoise` backport (see Open items).
+  (and now Debian) support, the `qa_fastnoise` backport (see Open items).
 - Tracked files: the two scripts, `README.md`, `LICENSE` (CC BY-SA 4.0, by
   choice although CC advises against it for software), `.gitignore`,
   `CLAUDE.md`.
@@ -120,8 +125,8 @@ B200mini (serial 315C7B7), RTL-SDR (an RTL-SDR.COM v3), PlutoSDR.
 | Machine | Ubuntu | State |
 | --- | --- | --- |
 | LENOVO desktop (working machine, `~/gr-wiki-revision`) | 26.10 | 16 cores, 15 GiB RAM, 4 GB swap. **Reloaded with 26.10** (user, by 2026-10-22; clean presumably, my reading). Seen by me 2026-10-22: Ubuntu's UHD 4.9.0.1-1.4, `~/gnuradio` on `maint-3.10` at `273c82180`, `~/gnuradio-pkg/setup_env.sh` present, nothing in `/usr/local/bin`: so the `v3.0` scripts with the default prefix (user confirmed, 2026-10-22). **`make test` 269/269, 42 components** (user, 2026-10-22). User built `maint-3.10` and found [gnuradio/gnuradio#8250](https://github.com/gnuradio/gnuradio/issues/8250) with `gnuradio-companion --qt` (see Useful facts). Before (reloaded 2026-10-08): 26.04, UHD 4.11 from the PPA, GNU Radio 3.10.12.0 in `/usr/local`. |
-| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. **Now: clean Debian 13** (user, 2026-10-29), for the Debian look: no root password set at install, so the user's `sudo` works (user); SMB link set up; the whole LENOVO is shared over SMB (user; `~/share` on the LENOVO only holds a copy of `smb.conf` for editing). Nothing is mounted on the LENOVO side, so the GMKtec writes to the LENOVO, not the reverse (my reading). **Remote Desktop (RDP) works** (user, 2026-10-30), used from the LENOVO: the GNOME Settings switch locked up, so it was set up by hand with `openssl req` (cert/key in `~/.local/share/gnome-remote-desktop`), `grdctl rdp set-tls-key/set-tls-cert/set-credentials/disable-view-only/enable`, `systemctl --user enable --now gnome-remote-desktop`; `grdctl`'s "RDP server certificate is invalid" message was harmless. Before: **clean 26.04 with `v3.0-rc1`** (2026-10-20/21), `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 24.04 (`v2.2`, `v2.3`, 2026-10-14), Fedora 44 (2026-10-16), clean 26.04 (`v2.4`, 2026-10-17). |
-| Laptop (hostname `ASUS`) | 26.10 | Last: **clean 26.10 with `v3.0-rc1`** (2026-10-20), Ubuntu's UHD 4.9.0.1-1.4, Qt6 list installed, `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 26.10 for the Qt6 trial (2026-10-17) and the manual prefix trial (2026-10-19); before that 24.04, not clean. |
+| GMKtec (clean-install test machine) | reloaded per test | 4 cores, 10 GiB. **Now: clean 26.04 with `v3.1-rc1`** (2026-10-31), `~/gnuradio-pkg`, ended on `main` -1216. Before: **clean Debian 13** (user, 2026-10-29), for the Debian look: no root password set at install, so the user's `sudo` works (user); SMB link set up; the whole LENOVO is shared over SMB (user; `~/share` on the LENOVO only holds a copy of `smb.conf` for editing). Nothing is mounted on the LENOVO side, so the GMKtec writes to the LENOVO, not the reverse (my reading). **Remote Desktop (RDP) works** (user, 2026-10-30), used from the LENOVO: the GNOME Settings switch locked up, so it was set up by hand with `openssl req` (cert/key in `~/.local/share/gnome-remote-desktop`), `grdctl rdp set-tls-key/set-tls-cert/set-credentials/disable-view-only/enable`, `systemctl --user enable --now gnome-remote-desktop`; `grdctl`'s "RDP server certificate is invalid" message was harmless. Before: **clean 26.04 with `v3.0-rc1`** (2026-10-20/21), `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 24.04 (`v2.2`, `v2.3`, 2026-10-14), Fedora 44 (2026-10-16), clean 26.04 (`v2.4`, 2026-10-17). |
+| Laptop (hostname `ASUS`) | 26.10 | Last: **`v3.1-rc1` on `main` -1216** (2026-10-31, not clean): 275/275, 41 components, GRC both front ends, three SDRs. Before: **clean 26.10 with `v3.0-rc1`** (2026-10-20), Ubuntu's UHD 4.9.0.1-1.4, Qt6 list installed, `~/gnuradio-pkg`, ended on `main` -1216. Earlier: clean 26.10 for the Qt6 trial (2026-10-17) and the manual prefix trial (2026-10-19); before that 24.04, not clean. |
 | The other tester's machine (jesternofool) | 24.04 | Reinstalls a clean OS quickly. Clean installs for the `v2.3` and `v3.0-rc1` tests. Fork `jesternofool/gnuradio` (only `main`). Devices: HackRF, LimeSDR Mini, Airspy R2, B200mini, RTL-SDR. |
 
 ## The scripts

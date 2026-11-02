@@ -166,12 +166,14 @@ SOURCE_UHD_PATTERNS = (
 # GNU Radio Companion's menu entry, icons and file type, as its
 # grc_setup_freedesktop script installs them (under ~/.local/share for an
 # install as a normal user, under /usr/local/share or /usr/share as root).
+# mime/application/gnuradio-grc.xml is not listed: update-mime-database
+# generates it from mime/packages, so it is rebuilt rather than removed
+# (in /usr/share it may belong to Ubuntu's own gnuradio package).
 GRC_DESKTOP_PATTERNS = (
     "applications/gnuradio-grc.desktop",
     "icons/*/*/apps/gnuradio-grc.png",
     "icons/*/*/mimetypes/*gnuradio-grc.png",
     "mime/packages/gnuradio-grc.xml",
-    "mime/application/gnuradio-grc.xml",
 )
 SYSTEM_SHARE_DIRS = ("/usr/local/share", "/usr/share")
 
@@ -574,6 +576,11 @@ def survey(home: Path, owner: pwd.struct_passwd, extra_prefixes: list[Path],
             commands.append(["update-mime-database", str(home / ".local/share/mime")])
         if desktop and os.geteuid() != 0 and has_command("update-desktop-database"):
             commands.append(["update-desktop-database", str(home / ".local/share/applications")])
+        for share in SYSTEM_SHARE_DIRS:
+            if has_command("update-mime-database") and Path(share, "mime/packages/gnuradio-grc.xml") in system_desktop:
+                commands.append(["sudo", "update-mime-database", f"{share}/mime"])
+            if has_command("update-desktop-database") and Path(share, "applications/gnuradio-grc.desktop") in system_desktop:
+                commands.append(["sudo", "update-desktop-database", f"{share}/applications"])
         items.append(Item(
             "GNU Radio Companion's menu entry and icons",
             [f"{len(desktop) + len(system_desktop)} files:",

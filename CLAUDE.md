@@ -556,10 +556,28 @@ loopbacks.
   (`~/gnuradio-pkg`, 45 desktop files, build dir, `~/.profile` line 28);
   a real run on a fake home and prefix (PyBOMBS prefix, shared prefix with
   manifest, conda env kept, start-up lines); the program and man-page
-  patterns match all 20 / 23 in `~/gnuradio-pkg`. **Not run yet:** any
-  `sudo` path (`/usr/local`, apt, PPA, UHD), so it needs a GMKtec test
-  with a `v2.x` `/usr/local` install, Ubuntu's packages and a
-  source-built UHD. Docs not changed yet (my proposal: "Before you start"
+  patterns match all 20 / 23 in `~/gnuradio-pkg`. **GMKtec Round 1
+  (26.04, 2026-11-02; `379ef82` from `main`):** set up with Ubuntu's
+  `gnuradio` (`apt-get install`) and `ppa:gnuradio/gnuradio-releases`
+  (no `resolute` build, Release 404; entry written anyway) on top of the
+  `v3.1-rc1` `~/gnuradio-pkg` install. Dry run and real run
+  (`~/share/uninst-dry1.log`, `uninst-run1.log`): `~/gnuradio-pkg`, GRC
+  desktop files, `~/gnuradio/build`, the 24 Ubuntu packages (`apt-get
+  remove`; `libuhd4.9.0`, `python3-networkx`, `python3-pyqt5.qwt` left
+  for autoremove), the PPA `.sources` file (then `apt-get update`: only
+  the Ettus PPA left), the `~/.profile` line (`.bak` written): **all
+  removed as listed**. **Bug found:** the 46th GRC file was
+  `/usr/share/mime/application/gnuradio-grc.xml`, which
+  `update-mime-database` generates from Ubuntu's package (so `dpkg -S`
+  doesn't claim it); it was removed with `sudo rm`. No harm this time
+  (apt's `shared-mime-info` trigger rebuilt `/usr/share/mime` right
+  after). **Fixed (uncommitted):** `mime/application/gnuradio-grc.xml`
+  dropped from `GRC_DESKTOP_PATTERNS`; `sudo update-mime-database` /
+  `update-desktop-database` run for a system share dir whose GRC files
+  are removed (LENOVO dry run: 44 files, was 45). **Not run yet:** the
+  `/usr/local` and source-UHD paths (Round 2: builder `--prefix
+  /usr/local` on `maint-3.10`, UHD `v4.11.0.0` from source into
+  `/usr/local`, dry runs with and without the build dir visible). Docs not changed yet (my proposal: "Before you start"
   runs it; the builder's / Step 1's errors point to it; UnInstallGR gets a
   "Use the script" section with the manual sections kept); planned as
   `v3.2-rc1`.

@@ -120,6 +120,8 @@ GNURADIO_DIR_PATTERNS = (
 GNURADIO_FILE_PATTERNS = (
     "lib*/libgnuradio-*",
     "lib*/pkgconfig/gnuradio-*.pc",
+    "share/bash-completion/completions/gr_modtool",
+    "share/zsh/site-functions/_gr_modtool",
 )
 # GNU Radio's programs in <prefix>/bin, and their manual pages. The uhd_fft,
 # uhd_rx_* and uhd_siggen* programs come with GNU Radio (gr-uhd), not UHD.

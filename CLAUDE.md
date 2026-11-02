@@ -536,8 +536,8 @@ loopbacks.
 - **Uninstaller, `gnuradio_uninstaller.py` (user, 2026-11-02: "write a
   shell or Python program to check for and uninstall any GNU Radio version
   previously installed ... avoid copy and paste instructions"; to replace
-  UnInstallGR and "Before you start"'s clean-up).** Drafted by me,
-  uncommitted. Python, same conventions as the other two (as the user,
+  UnInstallGR and "Before you start"'s clean-up).** Drafted by me;
+  on `main` since `379ef82`, not in a Release. Python, same conventions as the other two (as the user,
   `sudo` only for root commands, `--dry-run`, `-y`; plus `--prefix` and
   `--settings`). It surveys first and changes nothing until confirmed. It
   finds Ubuntu's packages (`apt-get -s remove` shows dependents), GNU
@@ -577,7 +577,42 @@ loopbacks.
   are removed (LENOVO dry run: 44 files, was 45). **Not run yet:** the
   `/usr/local` and source-UHD paths (Round 2: builder `--prefix
   /usr/local` on `maint-3.10`, UHD `v4.11.0.0` from source into
-  `/usr/local`, dry runs with and without the build dir visible). Docs not changed yet (my proposal: "Before you start"
+  `/usr/local`, dry runs with and without the build dir visible).
+  **Round 2 so far** (user, 2026-11-02): the builder's `--prefix
+  /usr/local` build finished; **GRC's desktop files went to `/usr/share`**
+  (root's `grc_setup_freedesktop`, xdg system mode), not
+  `/usr/local/share`, so the system branch of the `7c872b1` fix runs
+  there. UHD `v4.11.0.0` from source on 26.04: `apt-get build-dep uhd`
+  (Ubuntu's older UHD) is not enough; cmake also needed
+  `libprotobuf-dev protobuf-compiler` and then `libgrpc++-dev
+  protobuf-compiler-grpc` (`lib/usrp/common/CMakeLists.txt:72/74`).
+  **Round 2 dry runs** (`7c872b1`; `~/share/uninst-dry2-manifest.log`,
+  `uninst-dry2-patterns.log`, 2026-11-02): GNU Radio in `/usr/local`
+  140 paths from the manifest vs 138 from the patterns alone (build dir
+  hidden as `~/.gr-build-hidden`); GRC: 23 files in `/usr/share`
+  (hicolor icons only in system mode); `~/gnuradio/build`; UHD in
+  `/usr/local` from `~/uhd/host/build/install_manifest.txt` (169 paths;
+  its build dir kept). The two the patterns missed (found by me with a
+  fake tree built from `step2-usrlocal.log`'s 17,268 installed files):
+  `share/bash-completion/completions/gr_modtool` and
+  `share/zsh/site-functions/_gr_modtool`. **Added to
+  `GNURADIO_FILE_PATTERNS`** (uncommitted); the patterns now cover all
+  17,268 (140 paths).
+  **Round 2 real run** (`7c872b1`, manifest path, user's checks,
+  2026-11-02): `find /usr/local` for gnuradio / uhd / `gr_modtool`:
+  nothing; `/usr/share/applications/gnuradio-grc.desktop` gone and no
+  GRC file left in `/usr/share/mime/application` (the MIME rebuild
+  worked); `ldconfig -p`: no `gnuradio`, `libuhd` only in
+  `/usr/lib/x86_64-linux-gnu` (4.11.0 from the PPA, plus Ubuntu's 4.9.0
+  left from Round 1 because `apt autoremove` wasn't run).
+  `~/share/uninst-run2.log`: `sudo rm` of the 140 GNU Radio paths, the 23
+  GRC files, then `sudo update-mime-database /usr/share/mime` and `sudo
+  update-desktop-database /usr/share/applications`; `sudo rm -rf
+  ~/gnuradio/build` (root-owned files from `sudo make install`); `sudo
+  rm` of the 169 UHD paths; one `sudo ldconfig` at the end; "Done."
+  **All `sudo` paths now run once on the GMKtec.** `uhd_find_devices`
+  with the PPA's UHD afterwards **found the B200mini** (user,
+  2026-11-02). **Rounds 1 and 2 passed.** Docs not changed yet (my proposal: "Before you start"
   runs it; the builder's / Step 1's errors point to it; UnInstallGR gets a
   "Use the script" section with the manual sections kept); planned as
   `v3.2-rc1`.

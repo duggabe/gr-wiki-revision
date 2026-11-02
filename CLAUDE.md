@@ -69,7 +69,22 @@ there had not been a Phase 1", user, 2026-10-13).
   scripts' argparse help) are now in the wiki draft only (user, 2026-11-02:
   "the Options tables need to be in the Wiki"), at the end of Step 1 and
   after Step 2's bullets, as `wikitable`s with `white-space:nowrap` on the
-  option cells. The `v2.4` text is kept as
+  option cells. **Draft reorganised** (user's outline, 2026-11-02): Before
+  you start, Downloading the scripts, Getting the source code, Starting a
+  branch, Step 1, Step 2 (Building..., Setting up the environment, The
+  main branch and Qt6, Checking the result), Making and submitting a PR
+  (Pull Request), Changing branches (incl. the leftover-library
+  paragraph), Removing an installed GNU Radio package. My additions:
+  `sudo apt-get install git` in "Getting the source code" (cloning now
+  comes before Step 1, which installs git). The pre-reorganisation draft is
+  saved in the session scratchpad only, not in git. Then (user, 2026-11-02: "Otherwise
+  it's rather overwhelming to see all of the commands at the top of the
+  document"): "Before you start" is one paragraph (for a system without
+  any form of GNU Radio; otherwise see "Removing an installed GNU Radio
+  package"), and its three removals moved into that section as
+  subsections (Ubuntu's packages, UHD built from source, GNU Radio in
+  `/usr/local`), before the `~/gnuradio-pkg` removal, with a link to
+  [[UnInstallGR]] for other installs. The `v2.4` text is kept as
   `wiki-draft-download-section-v2.4.mediawiki` (gitignored).
 - **The user updates the live wiki page by total replacement** with the
   whole local draft, so keep the draft complete and current. For bigger
@@ -205,8 +220,9 @@ if a GNU Radio is still installed in `/usr/local`. Steps not starting with
 `-y`.
 
 `INSTALL_DIR_PATTERNS` and the `rm -rf` list of the old `/usr/local`
-removal (wiki draft "Before you start" and the README; the `v3.0` Release
-notes' "If you used an earlier release") must stay in sync.
+removal (wiki draft "Removing an installed GNU Radio package" > "GNU Radio
+installed into /usr/local", in "Before you start" until 2026-11-02; the
+`v3.0` Release notes' "If you used an earlier release") must stay in sync.
 
 ## Releases
 

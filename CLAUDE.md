@@ -45,8 +45,8 @@ there had not been a Phase 1", user, 2026-10-13).
   results on both the wiki page and the README.md, leaving them only in
   CLAUDE.md"). Record them in full under "Test results" below. The GitHub
   Release notes keep their "Tested" sections (user: "OK").
-- **Tags** are never moved; fixes get a new tag. Next: `v3.2` (the README
-  says "Further fixes will be tagged `v3.2`"). Bigger changes are tested
+- **Tags** are never moved; fixes get a new tag. Next: `v3.2` (the README said
+  "Further fixes will be tagged `v3.2`" until it became static, 2026-11-02). Bigger changes are tested
   through `vX.Y-rcN` tags with no Release first, so `releases/latest` stays
   on the last release; testers download from
   `https://raw.githubusercontent.com/duggabe/gr-wiki-revision/<tag>/<file>`.
@@ -54,15 +54,22 @@ there had not been a Phase 1", user, 2026-10-13).
   Every Release must have **both scripts attached**, because the docs
   download from
   `https://github.com/duggabe/gr-wiki-revision/releases/latest/download/<file>`.
-- **The wiki draft leads; the README follows.** `wiki-draft-download-section.mediawiki`
-  (MediaWiki, gitignored, local only) is the user's text. The user edits in
-  MediaWiki; I convert to Markdown for the README. The README is the draft
-  section by section, plus README-only parts: a short repo intro (with the
-  wiki page link), the two options tables (keep in sync with the scripts'
-  argparse help), and the "Releases" section. The options tables' "Option"
-  header is padded with 40 `&nbsp;` so GitHub doesn't wrap the options
-  (`239bd31`; the user confirmed it looks good, 2026-10-15). Keep the
-  padding if the tables change. The `v2.4` text is kept as
+- **The wiki holds the instructions; the README is static** (user,
+  2026-11-02: "after the overview section I would like to refer the reader
+  to the Wiki page rather than reproducing the content in the README. That
+  way, the README would be static and the only editing would be in the
+  Wiki"). `wiki-draft-download-section.mediawiki` (MediaWiki, gitignored,
+  local only) is the user's text, edited in MediaWiki. The README is
+  the intro and overview (from the draft's top), then "Instructions"
+  (a link to the wiki page), "Releases" (a link to the Releases page, no
+  per-release text: the Release notes hold that), and "License". No
+  "current release" line. Until 2026-11-02 the README copied the draft
+  section by section, with a per-release history; that version is
+  `README.md` at `ec4d534`. The two options tables (keep in sync with the
+  scripts' argparse help) are now in the wiki draft only (user, 2026-11-02:
+  "the Options tables need to be in the Wiki"), at the end of Step 1 and
+  after Step 2's bullets, as `wikitable`s with `white-space:nowrap` on the
+  option cells. The `v2.4` text is kept as
   `wiki-draft-download-section-v2.4.mediawiki` (gitignored).
 - **The user updates the live wiki page by total replacement** with the
   whole local draft, so keep the draft complete and current. For bigger
@@ -97,8 +104,10 @@ there had not been a Phase 1", user, 2026-10-13).
 ## Current state (2026-10-31)
 
 - **`v3.1` released** (2026-10-31, tag on `ce7229d`, the same commit as
-  `v3.1-rc1`; marked Latest). Live wiki page = local draft = README
-  (`a15f600`). `main` pushed, working tree clean.
+  `v3.1-rc1`; marked Latest). Live wiki page = local draft as of
+  2026-10-31; since then the draft has the options tables (not pasted
+  yet). README made static, pointing to the wiki (2026-11-02, uncommitted).
+  Uncommitted too: `gnuradio_uninstaller.py` and CLAUDE.md notes.
 - **`v3.1-rc1` passed** (see Test results): the clean 26.04 GMKtec with
   `maint-3.10` and `main`, the 26.10 ASUS (not clean) with `main`, GRC
   in both front ends and all three SDRs on the ASUS. Step 1 is unchanged
@@ -491,7 +500,47 @@ loopbacks.
   ("the plan is to bring it into the gnuradio/gnuradio repo", details not
   settled; if it moves, the download links in the wiki draft, README, and
   Release notes, and the repo URLs here, need updating), Fedora support,
-  the `qa_fastnoise` backport.
+  the `qa_fastnoise` backport. **Update (user, 2026-11-02):** "the lead
+  developer/maintainer is inclined to put this package in the
+  https://github.com/gnuradio/gnuradio-docker repo". Checked by me
+  (2026-11-02): default branch `master`; no license file; no Releases and
+  no tags; top level `.github`, `ci`, `tools`, `README.md`; its README
+  says the repo holds the CI containers (`ci/<distro>-<version>-<GR
+  version>`), built by `.github/workflows/build-dockers.yml` on pushes and
+  PRs to `master`; the images include Debian 12/13/14, Fedora 42/43/44
+  (`fedora-44-3.11`, `-4.0` too), and Ubuntu 24.04/26.04 `-4.0`. The user
+  is considering renaming this repo, as the current name doesn't fit the
+  project any more (information only, before 2026-11-02); moot if it moves.
+- **Uninstaller, `gnuradio_uninstaller.py` (user, 2026-11-02: "write a
+  shell or Python program to check for and uninstall any GNU Radio version
+  previously installed ... avoid copy and paste instructions"; to replace
+  UnInstallGR and "Before you start"'s clean-up).** Drafted by me,
+  uncommitted. Python, same conventions as the other two (as the user,
+  `sudo` only for root commands, `--dry-run`, `-y`; plus `--prefix` and
+  `--settings`). It surveys first and changes nothing until confirmed. It
+  finds Ubuntu's packages (`apt-get -s remove` shows dependents), GNU
+  Radio PPA files, and source installs in `/usr/local`, `/opt` (2 levels)
+  and `~` (4 levels, no hidden dirs or mounts). A prefix is removed whole
+  only if it has our `setup_env.sh` marker or a PyBOMBS `.pybombs`;
+  otherwise file by file (manifest from a matching build dir, plus the
+  UnInstallGR patterns), then `ldconfig`. It also removes the GRC desktop
+  files, GNU Radio build dirs in `~`, and a source-built UHD in
+  `/usr/local`. Conda environments, `/etc/profile.d`, `sources.list`
+  lines and PyBOMBS itself are only listed. **User's decisions
+  (2026-11-02):** remove a source-built UHD too, as its own item; remove
+  GNU Radio lines from `~/.profile`, `~/.bashrc`, `~/.bash_aliases` (and
+  `~/.bash_profile`, my addition) with a `.bak` copy; keep the settings
+  folders unless `--settings`. Checked by me: dry run on the LENOVO
+  (`~/gnuradio-pkg`, 45 desktop files, build dir, `~/.profile` line 28);
+  a real run on a fake home and prefix (PyBOMBS prefix, shared prefix with
+  manifest, conda env kept, start-up lines); the program and man-page
+  patterns match all 20 / 23 in `~/gnuradio-pkg`. **Not run yet:** any
+  `sudo` path (`/usr/local`, apt, PPA, UHD), so it needs a GMKtec test
+  with a `v2.x` `/usr/local` install, Ubuntu's packages and a
+  source-built UHD. Docs not changed yet (my proposal: "Before you start"
+  runs it; the builder's / Step 1's errors point to it; UnInstallGR gets a
+  "Use the script" section with the manual sections kept); planned as
+  `v3.2-rc1`.
 - **Upstream `grc_tests` fix:** not on `main` as of `862edb76b` (a second
   plain `make test` on 26.04 failed `grc_tests`, 2026-10-18). When it lands,
   remove the builder's `git clean` step and its doc bullet in a new tag.

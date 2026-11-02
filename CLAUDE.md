@@ -59,7 +59,9 @@ there had not been a Phase 1", user, 2026-10-13).
   to the Wiki page rather than reproducing the content in the README. That
   way, the README would be static and the only editing would be in the
   Wiki"). `wiki-draft-download-section.mediawiki` (MediaWiki, gitignored,
-  local only) is the user's text, edited in MediaWiki. The README is
+  local only) is the user's text, edited in MediaWiki. It stays out of
+  git (user, 2026-11-02: "the wiki has its own history and roll-back
+  functions, so I don't see a need to track it with the repo"). The README is
   the intro and overview (from the draft's top), then "Instructions"
   (a link to the wiki page), "Releases" (a link to the Releases page, no
   per-release text: the Release notes hold that), and "License". No

@@ -62,7 +62,10 @@ Before building, it checks that:
     in the prefix or under /usr/local (they make GNU Radio's tests fail).
 
 It also warns if an earlier GNU Radio install is still in /usr/local while
-installing somewhere else.
+installing somewhere else. When either of the last two checks fails, it
+gives the one command that fixes it; then, and with the warning, it points
+to gnuradio_uninstaller.py, the third script, which removes every installed
+GNU Radio (including this program's own install and build directory).
 
 The build runs as you, even when this program is started with sudo, so the
 build directory stays yours. A `sudo make install` (from an earlier install
@@ -120,6 +123,10 @@ INSTALLED_GNURADIO_PATTERNS = ("bin/gnuradio-config-info", "lib*/libgnuradio-run
 
 # Written into a prefix the build user owns, after `make install`.
 SETUP_ENV_NAME = "setup_env.sh"
+
+# The third script, downloaded next to this one, which removes every
+# installed GNU Radio, including this program's own install and build.
+UNINSTALLER_NAME = "gnuradio_uninstaller.py"
 
 # Memory to allow per parallel make job. GNU Radio's Python bindings need
 # about this much for each file being compiled.
@@ -261,6 +268,18 @@ def find_installed_gnuradio(prefix: Path) -> list[Path]:
     for pattern in INSTALLED_GNURADIO_PATTERNS:
         found.extend(sorted(prefix.glob(pattern)))
     return found
+
+
+def uninstaller_lines(home: Path) -> list[str]:
+    """The command that runs the uninstaller from next to this script, and a
+    note on where to get it if it isn't there."""
+    path = Path(__file__).resolve().parent / UNINSTALLER_NAME
+    shown_path = "~/" + str(path.relative_to(home)) if path.is_relative_to(home) else str(path)
+    lines = [f"  python3 {shown_path}"]
+    if not path.is_file():
+        lines.append(f"({UNINSTALLER_NAME} isn't there yet: download it as described under "
+                     "\"Downloading the scripts\" on the wiki page.)")
+    return lines
 
 
 def owns_prefix(prefix: Path, owner: pwd.struct_passwd) -> bool:
@@ -586,6 +605,14 @@ def main() -> int:
             file=sys.stderr,
         )
         print("  sudo apt-get remove " + " ".join(conflicting), file=sys.stderr)
+        print(
+            "Or remove every GNU Radio on this machine with the uninstaller, which lists what "
+            f"it finds and asks first. It also removes any earlier install in {prefix} and the "
+            "build directory, so this program then builds from scratch:",
+            file=sys.stderr,
+        )
+        for line in uninstaller_lines(Path(owner.pw_dir)):
+            print(line, file=sys.stderr)
         print("Aborting.", file=sys.stderr)
         return 1
 
@@ -600,6 +627,13 @@ def main() -> int:
             file=sys.stderr,
         )
         print("  sudo rm -rf " + " ".join(str(d) for d in stale_dirs), file=sys.stderr)
+        print(
+            "The uninstaller finds them too, along with every GNU Radio on this machine, "
+            f"including any earlier install in {prefix} and the build directory:",
+            file=sys.stderr,
+        )
+        for line in uninstaller_lines(Path(owner.pw_dir)):
+            print(line, file=sys.stderr)
         print("Aborting.", file=sys.stderr)
         return 1
     print("OK: UHD is installed; no conflicting packages or leftover directories found.")
@@ -608,9 +642,13 @@ def main() -> int:
         print(
             f"\nwarning: an earlier GNU Radio install is still in {SYSTEM_PREFIX}. With "
             f"{SETUP_ENV_NAME} sourced, the one in {prefix} comes first, but anything started "
-            f"without it would get the old one. Consider removing the old install (see "
-            f"\"Changing branches\" on the wiki page, with the old build directory)."
+            f"without it would get the old one. To remove it, run the uninstaller first, then "
+            f"this program again. The uninstaller lists what it finds and asks first; it also "
+            f"removes any earlier install in {prefix} and the build directory, so this program "
+            "then builds from scratch:"
         )
+        for line in uninstaller_lines(Path(owner.pw_dir)):
+            print(line)
 
     # --- 3. Show the plan ---
     jobs = args.jobs or get_make_jobs()

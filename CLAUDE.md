@@ -137,7 +137,27 @@ there had not been a Phase 1", user, 2026-10-13).
   (`--dry-run`, run, what it removes, what it keeps or only lists, log
   out if `~/.profile` changed, options table, [[UnInstallGR]] for
   removal by hand). Its four manual subsections are gone. "Changing
-  branches" keeps its `rm -rf ~/gnuradio-pkg ~/gnuradio/build`. **Not to
+  branches" keeps its `rm -rf ~/gnuradio-pkg ~/gnuradio/build`.
+  "Before you start" now ends "The Step 1 and Step 2 scripts check for
+  some of these and stop, pointing to the uninstaller."
+  **Scripts' messages point to the uninstaller** (user, 2026-11-02:
+  "update the builder and Step 1 messages to point to the uninstaller";
+  uncommitted). Each script has `UNINSTALLER_NAME` and
+  `uninstaller_lines()`: `python3 <path next to this script>` (`~/`
+  shortened), plus a "download it as described under 'Downloading the
+  scripts'" note if the file isn't there. Step 1: Ubuntu's packages →
+  uninstaller first, `sudo apt-get remove ...` as "only these packages";
+  source-built UHD → uninstaller only (the three manual commands
+  dropped). Builder (my choice, since the uninstaller also removes the
+  prefix install and build dir, forcing a full rebuild): Ubuntu's
+  packages and the empty leftover dirs keep their one command first, the
+  uninstaller as the alternative with that cost stated; the `/usr/local`
+  warning now says to run the uninstaller first, then the builder again
+  (it pointed to "Changing branches", which never covered it). Step 1's
+  post-install "got installed as a dependency" warning unchanged. Both
+  docstrings mention it. Checked by me: all five messages with stubbed
+  checks, the missing-file note, and both `--dry-run` outputs on the
+  LENOVO byte-identical to `HEAD`'s. **Not to
   be pasted before a Release has the uninstaller attached**: the loop
   downloads from `releases/latest`. Pre-change draft in the session
   scratchpad only.

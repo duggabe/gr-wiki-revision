@@ -60,6 +60,8 @@ Before changing anything, it stops if it finds something that would conflict:
 Ubuntu's gnuradio package already installed, a UHD built from source in
 /usr/local (GNU Radio's cmake would find that one first), or an entry for the
 PPA that has no build for this Ubuntu release (apt-get update would fail).
+For the first two, it points to gnuradio_uninstaller.py, the third script,
+which removes them.
 
 Examples
 --------
@@ -160,6 +162,10 @@ SOURCE_UHD_PATTERNS = (
     "lib/cmake/uhd",
 )
 
+# The third script, downloaded next to this one, which removes every
+# installed GNU Radio (and a source-built UHD).
+UNINSTALLER_NAME = "gnuradio_uninstaller.py"
+
 
 def _parse_os_release(os_release_path: Path) -> dict[str, str]:
     info: dict[str, str] = {}
@@ -205,6 +211,19 @@ def find_source_built_uhd(prefix: str = SOURCE_UHD_PREFIX) -> list[Path]:
     for pattern in SOURCE_UHD_PATTERNS:
         found.extend(sorted(Path(prefix).glob(pattern)))
     return found
+
+
+def uninstaller_lines() -> list[str]:
+    """The command that runs the uninstaller from next to this script, and a
+    note on where to get it if it isn't there."""
+    path = Path(__file__).resolve().parent / UNINSTALLER_NAME
+    home = Path.home()
+    shown_path = "~/" + str(path.relative_to(home)) if path.is_relative_to(home) else str(path)
+    lines = [f"  python3 {shown_path}"]
+    if not path.is_file():
+        lines.append(f"({UNINSTALLER_NAME} isn't there yet: download it as described under "
+                     "\"Downloading the scripts\" on the wiki page.)")
+    return lines
 
 
 def ppa_has_build(codename: str) -> bool:
@@ -401,10 +420,14 @@ def main() -> int:
     if conflicting:
         print(
             "error: Ubuntu's own GNU Radio is installed (" + ", ".join(conflicting) + "). It would "
-            "sit next to the GNU Radio you are about to build from source. Remove it, then run "
-            "this installer again:",
+            "sit next to the GNU Radio you are about to build from source. Remove it with the "
+            "uninstaller, which lists every GNU Radio it finds and asks before removing "
+            "anything, then run this installer again:",
             file=sys.stderr,
         )
+        for line in uninstaller_lines():
+            print(line, file=sys.stderr)
+        print("To remove only these packages instead:", file=sys.stderr)
         print("  sudo apt-get remove " + " ".join(conflicting), file=sys.stderr)
         print("Aborting.", file=sys.stderr)
         return 1
@@ -418,18 +441,13 @@ def main() -> int:
         for path in source_uhd:
             print(f"  {path}", file=sys.stderr)
         print(
-            "GNU Radio's cmake would find it before the packaged UHD. Remove it, then run this "
-            "installer again. From the build directory it was installed from (e.g. "
-            "~/uhd/host/build):",
+            "GNU Radio's cmake would find it before the packaged UHD. Remove it with the "
+            "uninstaller, which lists what it finds (UHD, and any GNU Radio) and asks before "
+            "removing anything, then run this installer again:",
             file=sys.stderr,
         )
-        print("  sudo xargs rm -f < install_manifest.txt", file=sys.stderr)
-        print(
-            f"  sudo rm -rf {SOURCE_UHD_PREFIX}/include/uhd {SOURCE_UHD_PREFIX}/lib/uhd "
-            f"{SOURCE_UHD_PREFIX}/lib/cmake/uhd {SOURCE_UHD_PREFIX}/share/uhd",
-            file=sys.stderr,
-        )
-        print("  sudo ldconfig", file=sys.stderr)
+        for line in uninstaller_lines():
+            print(line, file=sys.stderr)
         print("Aborting.", file=sys.stderr)
         return 1
 

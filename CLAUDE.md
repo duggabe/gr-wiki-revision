@@ -921,6 +921,93 @@ gnuradio-runtime/include/gnuradio/thrift_application_base.h:108:26: note: overri
 Optional last line: "I can open a PR with these two changes."
 ~~~~
 
+### v3.2-rc1 test request for the other tester (drafted 2026-11-02)
+
+For the user to send to jesternofool. Part A runs on the tester's machine
+as it is (my assumption: it still has a `v3.0`/`v3.1` install in
+`~/gnuradio-pkg`); Part B is optional and puts the GNU Radio PPA's
+packages on it (the PPA has a `noble` build), the one path not yet tested
+with real PPA packages; Part C rebuilds from the clean state.
+
+~~~~markdown
+Hi! Thanks for all the testing so far. There's a release candidate for the next version, `v3.2-rc1`, and I'd like your help with it on Ubuntu 24.04.
+
+**What's new:** a third script, `gnuradio_uninstaller.py`. It finds every GNU Radio installed on the machine, however it was installed, and removes it:
+
+- Ubuntu's packages and GNU Radio PPAs
+- installs in `~/gnuradio-pkg`, `/usr/local` or a PyBOMBS prefix
+- GRC's menu entry
+- build directories
+- a UHD built from source in `/usr/local`
+- the GNU Radio lines in `~/.profile` and friends (each file is backed up to `.bak` first)
+
+It lists everything it found and changes nothing until you answer `y`. Step 1 and Step 2 now point to it when they find something in the way. Otherwise they are the same as v3.1.
+
+This time you don't need a clean install to start with: the more GNU Radio your machine has on it, the better the test.
+
+```bash
+# Download the three rc1 scripts
+mkdir -p ~/gr-v3.2 && cd ~/gr-v3.2
+for f in gnuradio_dependencies_installer.py gnuradio_clone_builder.py gnuradio_uninstaller.py; do python3 -c "import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1] + sys.argv[2], sys.argv[2])" https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v3.2-rc1/ $f; done
+```
+
+**A. The uninstaller on your machine as it is now**
+
+```bash
+cd ~/gr-v3.2
+python3 gnuradio_uninstaller.py --dry-run 2>&1 | tee uninst-dry.log
+```
+
+Please check the list before going on. Does it show everything you know is installed, and nothing that isn't GNU Radio's? If it looks right, run it for real, as yourself (NOT with sudo):
+
+```bash
+python3 gnuradio_uninstaller.py 2>&1 | tee uninst-run.log
+python3 gnuradio_uninstaller.py --dry-run     # should find nothing now
+```
+
+**B. Optional: Ubuntu's GNU Radio from the GNU Radio PPA**
+
+This puts the PPA's GNU Radio on the machine, so that Step 1 has something to stop on and the uninstaller has real PPA packages to remove:
+
+```bash
+sudo add-apt-repository -y ppa:gnuradio/gnuradio-releases
+sudo apt-get install -y gnuradio
+python3 gnuradio_dependencies_installer.py      # should stop and point to the uninstaller
+python3 gnuradio_uninstaller.py 2>&1 | tee uninst-ppa.log
+```
+
+**C. A fresh build after the clean-up**
+
+```bash
+python3 gnuradio_dependencies_installer.py 2>&1 | tee step1.log
+cd ~/gnuradio && git fetch upstream && git checkout maint-3.10
+cd ~/gr-v3.2 && python3 gnuradio_clone_builder.py 2>&1 | tee step2.log
+```
+
+The uninstaller removed the `setup_env.sh` line from `~/.profile`, so at the end Step 2 prints the command to add it back. Run that command, then log out of the desktop and back in. After that, the usual checks:
+
+```bash
+uhd_config_info --version
+gnuradio-config-info --version --prefix
+gnuradio-config-info --enabled-components | tr ';' '\n' | wc -l
+```
+
+**Please report:**
+
+1. **Part A:** what the dry run found (or just send `uninst-dry.log`). Did it miss anything, or list anything it shouldn't? Did the real run finish, and did the second dry run find nothing?
+2. **Part B (if you did it):** did Step 1 stop with the uninstaller's command? Did the uninstaller remove the packages and the PPA? Send `uninst-ppa.log`.
+3. **Part C:**
+   - the UHD version (it should be 4.11 from the Ettus PPA)
+   - the `make test` result (I expect 269/269)
+   - the prefix (it should be `/home/<you>/gnuradio-pkg/`)
+   - the component count (I expect 42)
+   - whether GRC is back in Activities and runs a flowgraph
+4. Your devices, if you have time, as before.
+5. Anything odd in any of the logs.
+
+Thanks!
+~~~~
+
 ### rc1 test request for the other tester (drafted 2026-10-19)
 
 For the user to send to jesternofool. Step 3 offers a plain clone first, the

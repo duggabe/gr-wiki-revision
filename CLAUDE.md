@@ -121,10 +121,14 @@ there had not been a Phase 1", user, 2026-10-13).
 ## Current state (2026-10-31)
 
 - **`v3.1` released** (2026-10-31, tag on `ce7229d`, the same commit as
-  `v3.1-rc1`; marked Latest). Live wiki page = local draft as of
-  2026-10-31; since then the draft has the options tables (not pasted
-  yet). README made static, pointing to the wiki (2026-11-02, uncommitted).
-  Uncommitted too: `gnuradio_uninstaller.py` and CLAUDE.md notes.
+  `v3.1-rc1`; marked Latest). **Live wiki page = local draft** (user,
+  2026-11-02: "the wiki has been updated"): with the options tables, the
+  reorganised layout, the short "Before you start", and the user's own
+  comment on the `git push` line in "Making and submitting a PR" (`git
+  push -u origin issue8218        # use your branch name; 'issue8218' is
+  only an example`, also in the local draft). README static, pointing to
+  the wiki (`2d08122`). `gnuradio_uninstaller.py` on `main` (`379ef82`),
+  not in a Release.
 - **`v3.1-rc1` passed** (see Test results): the clean 26.04 GMKtec with
   `maint-3.10` and `main`, the 26.10 ASUS (not clean) with `main`, GRC
   in both front ends and all three SDRs on the ASUS. Step 1 is unchanged

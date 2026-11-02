@@ -128,7 +128,19 @@ there had not been a Phase 1", user, 2026-10-13).
   push -u origin issue8218        # use your branch name; 'issue8218' is
   only an example`, also in the local draft). README static, pointing to
   the wiki (`2d08122`). `gnuradio_uninstaller.py` on `main` (`379ef82`),
-  not in a Release.
+  not in a Release. **Local draft now ahead of the live wiki** (user,
+  2026-11-02: "update the wiki draft to use the uninstaller"): the
+  download loop has `gnuradio_uninstaller.py` as a third file ("the three
+  scripts", "All three scripts have `--help`"); "Before you start" says
+  to remove GNU Radio "with the uninstaller script"; "Removing an
+  installed GNU Radio package" is rewritten around the uninstaller
+  (`--dry-run`, run, what it removes, what it keeps or only lists, log
+  out if `~/.profile` changed, options table, [[UnInstallGR]] for
+  removal by hand). Its four manual subsections are gone. "Changing
+  branches" keeps its `rm -rf ~/gnuradio-pkg ~/gnuradio/build`. **Not to
+  be pasted before a Release has the uninstaller attached**: the loop
+  downloads from `releases/latest`. Pre-change draft in the session
+  scratchpad only.
 - **`v3.1-rc1` passed** (see Test results): the clean 26.04 GMKtec with
   `maint-3.10` and `main`, the 26.10 ASUS (not clean) with `main`, GRC
   in both front ends and all three SDRs on the ASUS. Step 1 is unchanged
@@ -225,10 +237,11 @@ if a GNU Radio is still installed in `/usr/local`. Steps not starting with
 `--prefix`, `--jobs`, `--cmake-args="..."`, `--no-install`, `--dry-run`,
 `-y`.
 
-`INSTALL_DIR_PATTERNS` and the `rm -rf` list of the old `/usr/local`
-removal (wiki draft "Removing an installed GNU Radio package" > "GNU Radio
-installed into /usr/local", in "Before you start" until 2026-11-02; the
-`v3.0` Release notes' "If you used an earlier release") must stay in sync.
+`INSTALL_DIR_PATTERNS` and the uninstaller's `GNURADIO_DIR_PATTERNS`
+must stay in sync (also the `v3.0` Release notes' "If you used an earlier
+release" `rm -rf` list; the wiki draft's manual `/usr/local` commands
+were replaced by the uninstaller, 2026-11-02, and `UnInstallGR` has its
+own list).
 
 ## Releases
 

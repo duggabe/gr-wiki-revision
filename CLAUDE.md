@@ -921,7 +921,7 @@ gnuradio-runtime/include/gnuradio/thrift_application_base.h:108:26: note: overri
 Optional last line: "I can open a PR with these two changes."
 ~~~~
 
-### v3.2-rc1 test request for the other tester (drafted 2026-11-02)
+### v3.2-rc1 test request for the other tester (drafted 2026-11-02; sent by the user 2026-11-02)
 
 For the user to send to jesternofool. Part A runs on the tester's machine
 as it is (my assumption: it still has a `v3.0`/`v3.1` install in

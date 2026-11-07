@@ -559,6 +559,7 @@ loopbacks.
 
 ## Open items
 
+- **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec; `v3.2` would be a new tag on `5197d45` with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
 - **Waiting for the developers** (user, 2026-10-16): where the scripts live
   ("the plan is to bring it into the gnuradio/gnuradio repo", details not
   settled; if it moves, the download links in the wiki draft, README, and

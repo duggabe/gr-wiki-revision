@@ -364,6 +364,13 @@ own list).
   python3 -c "...urlretrieve..." ...; done` line in `~/gr-installers`
   (user, 2026-10-21: "The chained python3 calls would hang sometimes"; my
   guess: a paste ending on a trailing `&&` leaves bash at its `>` prompt).
+- **No container mode** (user, 2026-11-08: "In my opinion there is no
+  value added. It was just one person's suggestion"): the scripts stay for
+  bare metal, outside Docker. Running them inside a container would need
+  `python3` / `ca-certificates` in the image, `-y`, `xvfb` for `make
+  test`, `make` jobs from the container's limits, `ENV` instead of
+  `~/.profile`, and USB / display passthrough (my list, 2026-11-08; not
+  tried). Root without `sudo` already works in both scripts.
 - **No log-order fix** (user, 2026-10-21): Step 1's own `$ ...` / `note:`
   lines appear after apt's output in `step1.log` (Python block-buffers
   `print` into a pipe); `sys.stdout.reconfigure(line_buffering=True)` would

@@ -934,6 +934,65 @@ My rough guess: Step 1 grows by about half, the builder by a few dozen lines, an
 4. **Where the scripts live:** if they move into `gnuradio/gnuradio-docker` (or elsewhere), should Fedora support wait until after the move?
 ~~~~
 
+### Debian notes for the developers (drafted 2026-11-08; not sent)
+
+For the user to send to the GNU Radio developers (user, 2026-11-08: "Let's
+do the same for Debian"). From the Debian 13 runs (2026-10-29/30) and the
+Debian items under Open items. Line counts from `git show --stat`; the
+uninstaller estimate is mine.
+
+~~~~markdown
+## Debian support for the build scripts: notes
+
+The three scripts (Step 1 `gnuradio_dependencies_installer.py`, Step 2 `gnuradio_clone_builder.py`, and `gnuradio_uninstaller.py`) support Ubuntu only: 24.04 and 26.04, and 26.10 works too. I tried them on Debian 13, and it went better than Fedora because Debian is apt-based too. The work is paused and the code reverted, but it's kept in the repository's history. I'd like your views on the questions at the end.
+
+### What I tried
+
+On a clean **Debian 13** (trixie, netinst 13.7.0, x86_64), I ran a Debian version of Step 1 and the builder on **`maint-3.10`**, installing into `~/gnuradio-pkg`. `main` was not tried.
+
+**Results:**
+
+- Debian's UHD **4.8.0.0+ds1-2**.
+- **269/269**, GNU Radio 3.10.12.0, **42 components**, the same as on Ubuntu.
+- A flowgraph runs from GRC started from the desktop.
+- Hardware: a USRP B200mini loopback worked (after the images fix below), and an RTL-SDR received. The **PlutoSDR did not work** (see below).
+
+### Problems found
+
+1. **No PPA, so Debian's own UHD.** That's 4.8 on Debian 13 (4.9.0.1 in forky), not 4.11 as from the Ettus PPA on Ubuntu.
+2. **UHD can't find its images.** `uhd_images_downloader` puts them in `/usr/share/uhd/4.8.0/images`, but `uhd_config_info` reports `Package path: /lib` and an empty images directory, so `uhd_find_devices` fails with "Could not find path for image: usrp_b200_fw.hex". My reading: Debian's UHD gets loaded through `/lib`, which is a link to `/usr/lib`, so it looks under `/share`. The fix was to have the builder add `export UHD_IMAGES_DIR=/usr/share/uhd/<version>/images` to `setup_env.sh`, but only when UHD reports an empty images directory. On Ubuntu nothing changes.
+3. **PlutoSDR over USB.** `lsusb` sees it and its USB network interface appears, but NetworkManager leaves the interface disconnected with no address, so `ip:pluto.local` doesn't resolve. `nmcli device connect` brought it up, but it also broke the machine's other network access (Remote Desktop dropped) until the Pluto was unplugged and the machine rebooted. My guess is that the Pluto's DHCP took over the default route or DNS. Not tried: the connection settings `ipv4.never-default yes` and `ipv4.ignore-auto-dns yes`, or a `usb:` URI in the PlutoSDR blocks, which needs no network at all.
+4. **The sources format differs.** Debian 13 uses the one-line `/etc/apt/sources.list`, not Ubuntu's deb822 `ubuntu.sources`. The netinst install already had its `deb-src` lines enabled, so `apt-get build-dep` needed no change there.
+5. **There may be no `sudo`.** If a root password is set during the install, the user isn't put in the `sudo` group, and both scripts rely on `sudo`. On the test machine no root password was set, so `sudo` worked.
+6. **`Could not find the Qt platform plugin "wayland"`** appears when a flowgraph runs. It's harmless: Qt5 falls back to XWayland. My reading is that Debian's desktop lacks `qtwayland5`, which Ubuntu's has.
+
+Same as Ubuntu:
+
+- Debian 13's `libuhd-dev` also Recommends `gnuradio-dev`, so `--no-install-recommends` is still needed.
+- It also declares no Boost dependencies, so the explicit Boost list is still needed.
+- `soapysdr0.8-module-all` exists, and gives 11 modules, the same set as Ubuntu 24.04. There's no PlutoSDR Soapy module, which doesn't matter, because `gr-iio` covers the Pluto.
+
+### `main` on Debian 13
+
+Debian 13 has no `libqwt-qt6-dev` (it's only in forky), so `main` would build without `gr-qtgui`, as on Ubuntu 24.04 and 26.04. That's my reading; I didn't try it. One developer reported building Qwt 6.3 from source on Debian 13 for this. That's outside what apt-only scripts can do, so at most it would be a note in the docs. GNU Radio's own CI builds `main` on Debian 13 (in the `debian-13-3.10` image).
+
+### What adding Debian would take
+
+Much less than Fedora, since the package tools are the same. It was drafted and run:
+
+- **Step 1:** accept `ID=debian`. On Debian, skip the PPA check and `software-properties-common`. Enable `deb-src` in either the one-line or the deb822 format, adding lines only where they're missing. Print a hint when `sudo` is missing or fails. The draft changed about 180 lines of Step 1 (160 added, 48 removed), and its Ubuntu `--dry-run` output stayed byte-identical.
+- **Builder:** the `UHD_IMAGES_DIR` line (about 50 lines) and "Ubuntu's" → "the system's" in two messages.
+- **Uninstaller:** written after the Debian work, so not tried on Debian. It uses `apt-get` and `dpkg` like the other two, so I'd expect little to change apart from messages. That's my estimate.
+- **Docs:** Debian notes on the wiki page: `sudo`, UHD 4.8, and the PlutoSDR network setting once it's understood.
+- **Testing:** a clean Debian 13 with both branches and all three SDRs, and Ubuntu re-run.
+
+### Questions
+
+1. **Is Debian support wanted**, and for which branch? Debian 13 looks like a `maint-3.10` system: it has Qt5 Qwt only, and Debian's own GNU Radio is 3.10.12. Debian 14 would be the one where `main` gets `gr-qtgui`.
+2. **The PlutoSDR network problem:** has anyone seen it on Debian, and is a `usb:` URI the better way to recommend?
+3. **Where the scripts live:** if they move into `gnuradio/gnuradio-docker` (or elsewhere), should Debian support wait until after the move?
+~~~~
+
 ### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17; posted as #8239 on 2026-10-18)
 
 Paste each part into the matching field of GNU Radio's bug report form.

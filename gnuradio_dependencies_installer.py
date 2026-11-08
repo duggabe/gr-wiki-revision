@@ -55,6 +55,10 @@ Notes on those steps:
     on in this release, except the UHD module: that one needs Ubuntu's own
     UHD library, and USRPs are used through gr-uhd anyway.
   * The uhd-host package installs the udev rules for USRPs itself.
+  * If apt doesn't know one of the packages named above (renamed or dropped
+    in a later Ubuntu release), it is left out with a warning rather than
+    failing the whole line. The exceptions are git, software-properties-common
+    and the two UHD packages: without them the later steps can't work.
 
 Before changing anything, it stops if it finds something that would conflict:
 Ubuntu's gnuradio package already installed, a UHD built from source in
@@ -149,6 +153,12 @@ SOAPY_MODULE_PATTERN = re.compile(r"soapysdr[0-9.]*-module-[a-z0-9]+")
 SOAPY_SKIP_MODULES = ("uhd",)
 # Stands for the module list in the command list until it has been worked out.
 SOAPY_MODULES_PLACEHOLDER = "<SoapySDR device modules>"
+
+# Packages without which the later steps can't work, so a missing one fails
+# the run. Any other named package that apt doesn't know (renamed or dropped in
+# a later Ubuntu release) is left out with a warning instead, so that one stale
+# name doesn't stop the whole apt-get install.
+REQUIRED_PACKAGES = frozenset(TOOL_PACKAGES + UHD_PACKAGES)
 
 # Ubuntu's own GNU Radio, which must not be installed next to a source build.
 CONFLICTING_PACKAGES = ["gnuradio", "gnuradio-dev"]
@@ -263,6 +273,36 @@ def apt_knows(package: str) -> bool:
     except OSError:
         return False
     return result.returncode == 0 and "Package:" in result.stdout
+
+
+def unknown_packages(names) -> list[str]:
+    """The packages, except REQUIRED_PACKAGES, that apt doesn't know."""
+    return [name for name in names if name not in REQUIRED_PACKAGES and not apt_knows(name)]
+
+
+def skip_unknown_packages(cmd: list[str]) -> list[str] | None:
+    """
+    An `apt-get install` command without the packages apt doesn't know, after
+    a warning naming them; None if no package is left. Other commands, and
+    commands whose packages apt all knows, are returned unchanged.
+    """
+    if "install" not in cmd:
+        return cmd
+    at = cmd.index("install") + 1
+    unknown = unknown_packages(arg for arg in cmd[at:] if not arg.startswith("-"))
+    if not unknown:
+        return cmd
+    it, they = ("it", "it is") if len(unknown) == 1 else ("them", "they are")
+    print(
+        "\nwarning: apt doesn't know " + ", ".join(unknown) + " in this Ubuntu release (renamed "
+        f"or dropped?), so {they} left out. GNU Radio may build without whatever needed {it}; "
+        "check cmake's list of disabled components after Step 2, and please report the name.",
+        file=sys.stderr,
+    )
+    rest = [arg for arg in cmd[at:] if arg not in unknown]
+    if all(arg.startswith("-") for arg in rest):
+        return None
+    return cmd[:at] + rest
 
 
 def qt6_packages() -> list[str]:
@@ -541,6 +581,14 @@ def main() -> int:
             f"  {SOAPY_MODULES_PLACEHOLDER}: the drivers gr-soapy uses; the list is worked out "
             "once the package lists have been refreshed"
         )
+    unknown = unknown_packages(
+        [*BOOST_PACKAGES, *EXTRA_PACKAGES, *(QT6_PACKAGES if apt_knows(QT6_KEY_PACKAGE) else [])]
+    )
+    if unknown:
+        print(
+            "  note: apt doesn't know " + " ".join(unknown) + " (yet). Any still unknown once "
+            "the package lists have been refreshed is left out with a warning."
+        )
 
     if args.dry_run:
         print("\n--dry-run set: nothing changed.")
@@ -585,6 +633,9 @@ def main() -> int:
                     )
                     continue
                 cmd = [*(arg for arg in cmd if arg != SOAPY_MODULES_PLACEHOLDER), *packages]
+            cmd = skip_unknown_packages(cmd)
+            if cmd is None:
+                continue
             run_command(cmd, env)
     except subprocess.CalledProcessError as exc:
         print(f"\nerror: command failed with exit code {exc.returncode}: {shown(exc.cmd)}", file=sys.stderr)

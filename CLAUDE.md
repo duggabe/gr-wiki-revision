@@ -230,6 +230,20 @@ ppa:ettusresearch/uhd`). Then:
 
 Options: `--dry-run`, `-y`, `--no-images`, `--sources-path`, `--os-release-path`.
 
+**Unknown package names are skipped, not fatal** (user, 2026-11-08: "make
+the package lists warn and skip instead of failing"; uncommitted, for after
+`v3.2`). Before each `apt-get install`, `skip_unknown_packages()` drops the
+names `apt_knows()` doesn't find, with a warning that names them and says
+to check cmake's disabled components; a command with nothing left is
+skipped. `REQUIRED_PACKAGES` (`TOOL_PACKAGES` + `UHD_PACKAGES`: git,
+`software-properties-common`, `uhd-host`, `libuhd-dev`) still fail (my
+choice: the later steps can't work without them). The plan gets a `note:`
+for names apt doesn't know yet. Checked by me: all 25 listed names are real
+packages on 26.10; `--dry-run` output byte-identical to `HEAD`'s; stubbed
+tests (one fake name dropped, all fake → skipped, required kept, other
+commands untouched); a dry run with a fake Boost name prints the note. Not
+run for real.
+
 ### `gnuradio_clone_builder.py` (Step 2)
 
 Self-contained. Builds `~/gnuradio` (`--source-dir`); never clones or
@@ -441,6 +455,18 @@ own list).
 - **Ettus PPA builds** (Launchpad, 2026-10-17): `~noble3` and `~resolute3`
   (UHD 4.11.0.0), none for 26.10 `stonking`. Ubuntu's own UHD on 26.10 is
   4.9.0.1-1.4.
+- **GNU Radio 4.0 is a separate project** (user, 2026-11-08: "the 4.0 work
+  is totally separate and is a joint project with the Facility for
+  Antiproton and Ion Research (FAIR). I don't know how much for 3.x will
+  apply to it"). Its CI images are the `-4.0` ones in `gnuradio-docker`
+  (C++ rewrite deps: `vir-simd`, `libboost-ext-ut-dev`, `libcpr-dev`; no
+  Qt, UHD or Thrift). These scripts are for 3.x (`maint-3.10`, `main`).
+- **Boost may be reduced or removed** (user, 2026-11-08: "there is effort
+  to reduce or eliminate BOOST, there again it may be only for 4.0").
+  Step 1's `BOOST_PACKAGES` are there for UHD's `UHDConfig.cmake` (the
+  PPA's `libuhd-dev` declares no Boost dependencies), not for GNU Radio
+  itself, so they stay needed as long as UHD's cmake files ask for Boost,
+  whatever GNU Radio does (my reading).
 - `cmake` options persist in `build/CMakeCache.txt` (e.g. `ENABLE_GR_FEC`
   stayed `OFF` from an old manual build until `build/` was removed).
 

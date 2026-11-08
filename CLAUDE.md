@@ -875,6 +875,65 @@ loopbacks.
 
 ## Drafts
 
+### Fedora notes for the developers (drafted 2026-11-08; not sent)
+
+For the user to send to the GNU Radio developers (user, 2026-11-08: "save
+some notes on Fedora for the developers"). From the Fedora 44 trial
+(2026-10-16) and the proposal under Open items. The size estimates are mine,
+not measured.
+
+~~~~markdown
+## Fedora support for the build scripts: notes
+
+The three scripts (Step 1 `gnuradio_dependencies_installer.py`, Step 2 `gnuradio_clone_builder.py`, and `gnuradio_uninstaller.py`) support Ubuntu only: 24.04 and 26.04, and 26.10 works too. Before adding Fedora, I'd like your views on the questions at the end.
+
+### What I tried
+
+On a clean **Fedora 44** (x86_64), I built **`maint-3.10`** by hand, the way the scripts would:
+
+- Fedora's own UHD: `sudo dnf install uhd uhd-devel uhd-tools uhd-firmware` (4.9.0.1)
+- `sudo dnf builddep gnuradio`
+- cmake, make, make test, make install
+
+`main` was not tried on Fedora.
+
+**Results:**
+
+- GNU Radio 3.10.12.0 installed and imports.
+- **41 components**: Ubuntu's 42 minus Thrift. `gr-uhd` with RFNoC, `gr-iio` with `libad9361`, `gr-qtgui` and `gr-soapy` are all there.
+- **269/269** after one test fix (see below).
+- GNU Radio Companion works.
+- Hardware: a USRP B200mini loopback (transmit and receive, 30 dB attenuator) and a PlutoSDR loopback both worked, and an RTL-SDR received broadcast FM in stereo. No udev changes were needed: Fedora's `uhd` package rules are enough.
+
+### Problems found
+
+1. **`qa_fastnoise` fails on `maint-3.10`.** It's the Laplacian variance check (`test_001_real_laplacian_moments`): the variance came out at 1.99293, against `places=2`. `main` fixed this tolerance in `aee9fd3f7` ("qa_fastnoise: Widen the Laplacian variance tolerance", `places=2` → `delta=0.05`). That commit doesn't cherry-pick onto `maint-3.10`, because `56d230fd3` changed the same lines on `main`, but the one-line change by hand works: 269/269. The builder stops on any failing test, so it would stop on Fedora `maint-3.10` builds whenever this test fails.
+2. **No Thrift.** `dnf builddep gnuradio` doesn't bring `thrift-devel` or `python3-thrift`, though both are in Fedora 44. Adding them by name would fix it on `maint-3.10`. On `main`, Thrift is off anyway until #8239 is fixed.
+3. **Python modules go to `lib64`:** `<prefix>/lib64/python3.14/site-packages`, not `lib/`. The builder's `setup_env.sh` and its stale-directory check, and the uninstaller's patterns, only look under `lib/` today.
+4. **UHD is Fedora's 4.9.0.1,** not 4.11 as from the Ettus PPA on Ubuntu. There is no PPA equivalent, so the docs would just say so.
+
+### What adding Fedora would take
+
+- **Step 1:** the largest change. A second path chosen by `ID` in `/etc/os-release`, with the Ubuntu path unchanged:
+  - `dnf builddep gnuradio`, plus `dnf install` of `uhd uhd-devel uhd-tools uhd-firmware python3-QtPy python3-pyqtgraph python3-matplotlib python3-pytest thrift-devel python3-thrift`
+  - the SoapySDR modules from `dnf`'s list of `soapy-*` packages, since there's no metapackage. `soapy-uhd` can stay, as it uses the same UHD.
+  - a conflict check with `rpm -q gnuradio gnuradio-devel python3-gnuradio`
+  - no `deb-src`, PPA, or `uhd_images_downloader` steps: `uhd-firmware` brings the images.
+- **Step 2 (builder):** small. `rpm -q uhd-devel` instead of `dpkg-query libuhd-dev`, and `lib64` paths in `setup_env.sh` and the install-directory patterns. Plus a decision on `qa_fastnoise` (see below).
+- **Uninstaller:** moderate. It is apt-only today (`apt-get -s remove`, `dpkg -S`, PPA files), so it would need an `rpm` / `dnf` back end, COPR repositories in place of PPAs, and the `lib64` patterns.
+- **Docs:** Fedora notes on the wiki page.
+- **Testing:** a clean Fedora install for each change, and Ubuntu re-run to show nothing changed there.
+
+My rough guess: Step 1 grows by about half, the builder by a few dozen lines, and the uninstaller needs a second package back end.
+
+### Questions
+
+1. **Is Fedora support wanted** in these scripts, and if so, for `maint-3.10`, `main`, or both? CI tests `main` on Fedora (`fedora-44-3.11`, and `fedora-45-3.11` exists) and `maint-3.10` on Fedora 42 and 43.
+2. **`qa_fastnoise`:** could the tolerance change from `aee9fd3f7` be backported to `maint-3.10`? That's my preference. Otherwise, the builder could get an option to skip named tests, or the docs could describe the one-line edit.
+3. **Thrift:** should Step 1 install it on Fedora, given that ControlPort/Thrift may be dropped?
+4. **Where the scripts live:** if they move into `gnuradio/gnuradio-docker` (or elsewhere), should Fedora support wait until after the move?
+~~~~
+
 ### Thrift issue for `gnuradio/gnuradio` (drafted 2026-10-17; posted as #8239 on 2026-10-18)
 
 Paste each part into the matching field of GNU Radio's bug report form.

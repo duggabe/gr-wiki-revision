@@ -807,14 +807,26 @@ loopbacks.
     (and later) only, my recommendation. Testing: clean Debian 13 on the
     GMKtec, both branches, the three SDRs; Ubuntu re-run.
   - **Debian 13 is a `maint-3.10` system** (user, 2026-10-29: "It seems
-    to be a 'maint-3.10' oriented system"). GNU Radio's CI agrees
-    (`gnuradio/gnuradio-docker` `ci/`, checked 2026-10-29): Debian 13 has
-    only `ci-debian-13-3.10` (Qt5: `libqwt-qt5-dev`, `qtbase5-dev`,
-    `python3-pyqt5`, Debian's `libuhd-dev`, `libsoapysdr-dev`, Thrift,
-    `python3-pytest`); 3.11 (`main`) is paired with Debian 14
-    (`ci-debian-14-3.11`, besides `ci-debian-14-3.10`), as with Ubuntu
-    26.10 (`ci-ubuntu-26.10-3.11`). So Debian 13 support would mean
-    `maint-3.10` only (my reading).
+    to be a 'maint-3.10' oriented system"). In `gnuradio/gnuradio-docker`
+    `ci/` (checked 2026-10-29), Debian 13 has only `ci-debian-13-3.10`
+    (Qt5: `libqwt-qt5-dev`, `qtbase5-dev`, `python3-pyqt5`, Debian's
+    `libuhd-dev`, `libsoapysdr-dev`, Thrift, `python3-pytest`), and
+    `ci-debian-14-3.11` exists besides `ci-debian-14-3.10`. **Corrected
+    2026-11-08:** I first read this as "`main` is paired with Debian 14,
+    so Debian 13 support would mean `maint-3.10` only". Wrong: the image
+    suffix is not the branch. `main`'s own
+    `.github/workflows/make-test.yml` (checked by me) builds Debian 13 in
+    `debian-13-3.10` and Ubuntu 24.04 in `ubuntu-24.04-3.10`, besides
+    `ubuntu-26.10-3.11`, `fedora-44-3.11` (also for its "Fedora 45" job)
+    and `debian-i386-14-3.11`. So `main` builds on Debian 13 too, without
+    `gr-qtgui` presumably (no `libqwt-qt6-dev`; my reading), as on Ubuntu
+    24.04 / 26.04. **How to read the CI images:** look up which image a
+    branch's `make-test.yml` matrix pulls, not which image names exist.
+    The `-4.0` images (`ubuntu-24.04-4.0`, `-4.0-emscripten`,
+    `ubuntu-26.04-4.0`, `fedora-44-4.0`) are for GNU Radio 4.0
+    (`gnuradio4`: `vir-simd`, `libboost-ext-ut-dev`, `libcpr-dev`, no
+    Qt/UHD/Thrift), used by neither `main` nor `maint-3.10`; no 3.x CI
+    tests Ubuntu 26.04.
   - **Debian 13 sources** (GMKtec, netinst 13.7.0 with firmware,
     `/home/barry/debian13-sources.txt`, 2026-10-29): only the one-line
     `/etc/apt/sources.list` (`sources.list.d/` empty, no deb822 file);

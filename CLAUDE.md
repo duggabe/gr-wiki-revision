@@ -487,6 +487,12 @@ Kept here only. Test counts differ by release and branch. `maint-3.10`:
 upstream: 271 (-1193, 26.04), 272 / 273 (-1210, 26.04 / 26.10), 274 / 275
 (-1216, 26.04 / 26.10); 26.10 always runs one more, `qa_qtgui`.
 
+### `v3.2-rc2`
+
+| Date | Machine, Ubuntu | Scripts | Branch / build | Result |
+| --- | --- | --- | --- | --- |
+| 2026-11-08 | ASUS, 26.10 (not clean: had the `v3.1-rc1` `main` install, my reading) | `v3.2-rc2` (my reading; run from `~/gr-v3.2`, which rc1 used too) | `maint-3.10` (my reading from 3.10.12.0), prefix `/home/barry/gnuradio-pkg/` | **UHD 4.9.0.1-1.4** (Ubuntu's, the no-PPA path, as expected on 26.10), **3.10.12.0**, **42 components** (user's paste, 2026-11-08), **`make test` 269/269** (user, 2026-11-08). First `v3.2` run on 26.10. Logs in `~/share` (`uninst-dry.log`, `uninst-run.log`, `uninst-ppa.log`, `step1.log`, `step2.log`; the rc1 ones renamed `*.rc1`), read by me: **Part A:** the OS check let it run (26.10 = `ubuntu`); dry run and real run found and removed `~/gnuradio-pkg` (whole, by our marker), 44 GRC files in `~/.local/share` (then `update-mime-database` / `update-desktop-database` there, no `sudo`), `~/gnuradio/build`, and `~/.profile` line 28 (`.bak` written). **Part B** (the GNU Radio PPA on 26.10): the uninstaller found 24 packages, **Ubuntu's own 3.10.12.0-6build2** (the PPA has no `stonking` build, so apt took Ubuntu's, my reading), and `gnuradio-ubuntu-gnuradio-releases-stonking.sources`; removed both (`grub-pc-bin`, `python3-networkx` left for autoremove), then `apt-get update` with only Ubuntu's sources. **Step 1 stopped on them and pointed to the uninstaller** (user, 2026-11-08; not in a log). **Part C:** Step 1 `OK:` line, the no-PPA warning, Ubuntu's UHD 4.9.0.1-1.4, Qt6 list and 13 SoapySDR modules installed, **no `apt doesn't know` warning** (as expected: every name exists on 26.10); builder: disabled-components list empty, 269/269, and the `echo ... >> ~/.profile` command (the line was gone). GRC and SDRs not tried (user, 2026-11-08). **rc2 passed on 26.10.** |
+
 ### `v3.2-rc1`
 
 | Date | Machine, Ubuntu | Scripts | Branch / build | Result |

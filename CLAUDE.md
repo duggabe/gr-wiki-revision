@@ -599,7 +599,7 @@ loopbacks.
 
 ## Open items
 
-- **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec; `v3.2` would be a new tag on `5197d45` with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
+- **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec, `v3.2-rc2` on the 26.10 ASUS; **`v3.2` will be a new tag on `091d480`** (= `v3.2-rc2`; user, 2026-11-08: "yes, tag v3.2 on 091d480"; was planned on `5197d45`), with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
 - **Waiting for the developers** (user, 2026-10-16): where the scripts live
   ("the plan is to bring it into the gnuradio/gnuradio repo", details not
   settled; if it moves, the download links in the wiki draft, README, and
@@ -708,8 +708,7 @@ loopbacks.
   docstring updated. Checked by me: LENOVO `--dry-run` byte-identical to
   `HEAD`'s; fake os-release files: Fedora 44 stops (rc 1, "Nothing was
   changed"), Linux Mint (`ID_LIKE="ubuntu debian"`) and Debian 13 run; a
-  missing file stops. Not in `v3.2` (tag planned on `5197d45`), so the
-  `v3.2` uninstaller has no OS check (my note). **`UnInstallGR.mediawiki`
+  missing file stops. In `v3.2` (tag planned on `091d480`, user 2026-11-08). **`UnInstallGR.mediawiki`
   draft** (local; the live-page version saved in the session scratchpad
   only): intro sentence pointing to the script; new first section "Using
   the uninstaller script" (Ubuntu, Debian and derivatives; one-line Python

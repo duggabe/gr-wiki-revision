@@ -23,7 +23,7 @@ Docker. Both run as the normal user, not with `sudo`:
   `~/gnuradio-pkg`, and writes `~/gnuradio-pkg/setup_env.sh`, which
   `~/.profile` sources.
 
-Current release: **`v3.1`** (GitHub "Latest", 2026-10-31). Favour clarity,
+Current release: **`v3.2`** (GitHub "Latest", 2026-11-09; three scripts). Favour clarity,
 reproducibility, and reader choice: the scripts back wiki instructions that
 other people run.
 
@@ -167,7 +167,7 @@ there had not been a Phase 1", user, 2026-10-13).
   in both front ends and all three SDRs on the ASUS. Step 1 is unchanged
   from `v3.0` apart from the log order; the builder adds only the
   `~/.profile` message (`d9197fa`) and the log order.
-- GitHub Releases: `v3.1` (Latest), `v3.0`, `v2.4`, `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
+- GitHub Releases: `v3.2` (Latest, three scripts), `v3.2-rc2` and `v3.2-rc1` (pre-releases), `v3.1`, `v3.0`, `v2.4`, `v2.3`, `v2.2`, `v2.1`, `v2.0`, all with both
   scripts attached. The `v1.2` Release was deleted 2026-10-13 and the
   `v3.1-rc1` pre-release 2026-10-31 (user's requests; tags kept).
 - **Debian support paused** (user, 2026-10-30) and its code reverted
@@ -293,6 +293,7 @@ own list).
 | `v3.1` | 2026-10-31 | Tag (annotated) on `ce7229d` (= `v3.1-rc1`). Release title "v3.1: clearer ~/.profile step, logs in order", marked **Latest**, both scripts attached; `releases/latest/download` checked byte-identical to the tag. Notes: What's changed (builder `~/.profile` echo command or "already runs" note; log order in both scripts; docs' full-path leftover-library command), If you used v3.0 (nothing to redo), Tested (26.04 GMKtec clean: `maint-3.10` 269/269, `main` 274/40; 26.10 ASUS not clean: `main` 275/41, GRC both front ends, three SDRs), Quick start, Known limitations (as `v3.0`, Range slider now links #8253). README `v3.1` entry in `a15f600`. **Live wiki page updated with the local draft** (user, 2026-10-31), incl. the full-path leftover-library command. |
 | `v3.2-rc1` | 2026-11-02 | Tag (annotated) on `5197d45`, pushed (user: "let's create a v3.2-rc1"). Contents: `gnuradio_uninstaller.py` (tested on the GMKtec, Rounds 1 and 2), Step 1's and the builder's messages pointing to it (`5197d45`, not run on a real machine yet). Raw tag links checked byte-identical for all three scripts; `releases/latest` still `v3.1`. **GitHub pre-release created by the user** (2026-11-02, with `! gh release create ...`, since my own `gh release create` was blocked by Claude Code's permission check as "Create Public Surface"): title "v3.2-rc1: release candidate (not for general use yet)", pre-release, not Latest, notes from my draft (What's new, Testing it with a tag download loop, Tested so far). Checked by me: the three attached scripts byte-identical to the tag; `releases/latest` still `v3.1`. For future Releases: give the user the `!` command, with the files prepared in a separate step first (the first try failed because the blocked command was also the one that wrote the `rc/` copies). **Every Release from `v3.2` on needs all three scripts attached** (the wiki draft's loop downloads three). |
 | `v3.2-rc2` | 2026-11-08 | Tag (annotated) on `091d480`, pushed (user: "let's make v3.2-rc2 with the OS check"). Contents beyond rc1: the uninstaller's OS check (`091d480`) and Step 1's unknown-package skipping (`074cca9`, came along as it is on `main` between them). Raw tag links checked byte-identical for all three scripts; `releases/latest` still `v3.1`. **GitHub pre-release created by the user** (2026-11-08, `! gh release create ...`): title "v3.2-rc2: release candidate (not for general use yet)", pre-release, not Latest; checked by me: the three attached scripts byte-identical to the tag, `releases/latest` still `v3.1`. Not run on a real machine yet. |
+| `v3.2` | 2026-11-09 | Tag (annotated) on `091d480` (= `v3.2-rc2`), pushed (user: "I'm ready to tag v3.2"). Raw tag links checked byte-identical for all three scripts. **Release created by the user** (2026-11-09, `! gh release create ...`), title "v3.2: uninstaller script", marked **Latest**, all three scripts attached; checked by me: `releases/latest` = `v3.2`, its three downloads byte-identical to the tag. Notes: What's changed (the uninstaller; Step 1 / builder messages pointing to it; Step 1's unknown-package skipping), If you used v3.1 (nothing to redo), Tested (24.04 / 26.04 rc1, 26.10 rc2), Quick start (three-file loop, uninstaller `--dry-run` first), Known limitations (as `v3.1`; #8239 and #8253 still open, checked). |
 | `v1.0`–`v1.3` | 2026-09-26 – 10-10 | Phase 1, tags only. |
 
 ## Key decisions and why
@@ -599,7 +600,7 @@ loopbacks.
 
 ## Open items
 
-- **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec, `v3.2-rc2` on the 26.10 ASUS; **`v3.2` will be a new tag on `091d480`** (= `v3.2-rc2`; user, 2026-11-08: "yes, tag v3.2 on 091d480"; was planned on `5197d45`), with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
+- **`v3.2` released 2026-11-09** (see Releases); next: the user pastes the Building draft and the UnInstallGR draft to the wiki. Was: **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec, `v3.2-rc2` on the 26.10 ASUS; **`v3.2` will be a new tag on `091d480`** (= `v3.2-rc2`; user, 2026-11-08: "yes, tag v3.2 on 091d480"; was planned on `5197d45`), with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
 - **Waiting for the developers** (user, 2026-10-16): where the scripts live
   ("the plan is to bring it into the gnuradio/gnuradio repo", details not
   settled; if it moves, the download links in the wiki draft, README, and

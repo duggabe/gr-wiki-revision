@@ -119,6 +119,12 @@ there had not been a Phase 1", user, 2026-10-13).
 
 ## Current state (2026-11-09)
 
+- **Project ended** (user, 2026-11-09): "It appears that the developers
+  have decided that our scripts have no useful purpose for the way they
+  develop code and perform CI testing (which is just to confirm that GNU
+  Radio compiles without errors). So, at this point I am going to terminate
+  further work on this project." `v3.2` is the last release; the Open items
+  below are no longer being worked on.
 - **`v3.2` released** (2026-11-09, tag on `091d480` = `v3.2-rc2`, Latest,
   three scripts). **Live wiki = local drafts** (user, 2026-11-09): the
   Building page (download loop with three scripts, "Before you start" and

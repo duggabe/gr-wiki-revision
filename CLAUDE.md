@@ -129,7 +129,7 @@ there had not been a Phase 1", user, 2026-10-13).
   push -u origin issue8218        # use your branch name; 'issue8218' is
   only an example`, also in the local draft). README static, pointing to
   the wiki (`2d08122`). `gnuradio_uninstaller.py` on `main` (`379ef82`),
-  not in a Release. **Local draft now ahead of the live wiki** (user,
+  not in a Release. **Local draft with the uninstaller pasted to the wiki 2026-11-09** (after the `v3.2` Release; drafted per user,
   2026-11-02: "update the wiki draft to use the uninstaller"): the
   download loop has `gnuradio_uninstaller.py` as a third file ("the three
   scripts", "All three scripts have `--help`"); "Before you start" says
@@ -600,7 +600,7 @@ loopbacks.
 
 ## Open items
 
-- **`v3.2` released 2026-11-09** (see Releases); next: the user pastes the Building draft and the UnInstallGR draft to the wiki. Was: **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec, `v3.2-rc2` on the 26.10 ASUS; **`v3.2` will be a new tag on `091d480`** (= `v3.2-rc2`; user, 2026-11-08: "yes, tag v3.2 on 091d480"; was planned on `5197d45`), with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
+- **`v3.2` released 2026-11-09** (see Releases); **the wiki has been updated** (user, 2026-11-09: "the wiki has been updated"): the Building page = the local draft with the uninstaller (my reading), and **UnInstallGR = its local draft** with the uninstaller section (user, 2026-11-09: "yes, UnInstallGR too"). Was: **`v3.2` release on hold until after the weekend** (user, 2026-11-06, a Friday: "wait until after the weekend in case jesternofool does run the tests"), so not before Monday 2026-11-09. Ready otherwise: `v3.2-rc1` passed on the 26.04 and 24.04 GMKtec, `v3.2-rc2` on the 26.10 ASUS; **`v3.2` will be a new tag on `091d480`** (= `v3.2-rc2`; user, 2026-11-08: "yes, tag v3.2 on 091d480"; was planned on `5197d45`), with all three scripts attached, then the wiki draft pasted (its loop downloads three files from `releases/latest`). If the tester reports, record the results first.
 - **Waiting for the developers** (user, 2026-10-16): where the scripts live
   ("the plan is to bring it into the gnuradio/gnuradio repo", details not
   settled; if it moves, the download links in the wiki draft, README, and
@@ -720,10 +720,7 @@ loopbacks.
   completion files; new "UHD Built from Source" subsection (`sudo make
   uninstall` in UHD's build dir, `sudo ldconfig`; UHD's `host/CMakeLists.txt`
   has an `uninstall` target, checked by me, not run). All manual sections
-  kept (PyBOMBS, pre-3.10 folders). **Not to be pasted before a Release has
-  the uninstaller**; better after the one with the OS check (my
-  recommendation), since Fedora users read the same page and the `v3.2`
-  script has no OS check.
+  kept (PyBOMBS, pre-3.10 folders). **Pasted to the wiki by the user 2026-11-09**, after the `v3.2` Release (which has the OS check).
 - **Upstream `grc_tests` fix:** not on `main` as of `862edb76b` (a second
   plain `make test` on 26.04 failed `grc_tests`, 2026-10-18). When it lands,
   remove the builder's `git clean` step and its doc bullet in a new tag.

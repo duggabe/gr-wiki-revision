@@ -1118,6 +1118,30 @@ gnuradio-runtime/include/gnuradio/thrift_application_base.h:108:26: note: overri
 Optional last line: "I can open a PR with these two changes."
 ~~~~
 
+### v3.2-rc2 test request for the other tester (drafted 2026-11-08; not sent)
+
+For the user to send to jesternofool (user, 2026-11-08: "write the rc2
+version for him"). Replaces the rc1 request below, which it refers to for
+the details; Parts A–C are unchanged.
+
+~~~~markdown
+Hi! No pressure at all, but in case you haven't got to the `v3.2-rc1` tests yet: please use **`v3.2-rc2`** instead. It's the same as rc1 with two small changes:
+
+- The uninstaller now checks that it's on Ubuntu, Debian, or a system based on them, and stops otherwise. On Ubuntu you shouldn't notice any difference.
+- If Step 1 meets a package name that apt doesn't know, it now warns and leaves it out instead of stopping. On 24.04 all the names exist, so there should be no such warning.
+
+The download is the same loop with `rc2` in it:
+
+```bash
+mkdir -p ~/gr-v3.2 && cd ~/gr-v3.2
+for f in gnuradio_dependencies_installer.py gnuradio_clone_builder.py gnuradio_uninstaller.py; do python3 -c "import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1] + sys.argv[2], sys.argv[2])" https://raw.githubusercontent.com/duggabe/gr-wiki-revision/v3.2-rc2/ $f; done
+```
+
+(If you already downloaded rc1 into `~/gr-v3.2`, this just overwrites it.) Then Parts A, B and C from my earlier message, exactly as written. The report list is the same too; please also mention any line starting with `warning: apt doesn't know` in `step1.log`, or the uninstaller saying "this program works only on Ubuntu, Debian ...".
+
+Thanks!
+~~~~
+
 ### v3.2-rc1 test request for the other tester (drafted 2026-11-02; sent by the user 2026-11-02)
 
 For the user to send to jesternofool. Part A runs on the tester's machine

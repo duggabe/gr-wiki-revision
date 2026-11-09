@@ -56,6 +56,11 @@ environment is only listed: conda should remove it.
 
 After changing ~/.profile, log out of the desktop and back in.
 
+It runs only on Ubuntu, Debian and systems based on them (dpkg and apt),
+and stops on any other system without changing anything: there it couldn't
+tell which files belong to installed packages. The wiki page UnInstallGR
+describes removing GNU Radio by hand on other systems.
+
 Examples
 --------
   # See what would be removed, without changing anything:
@@ -82,6 +87,11 @@ import subprocess
 import sys
 import typing
 from pathlib import Path
+
+# The systems this program knows: it asks dpkg and apt which files belong to
+# packages, so on any other system it could take a packaged file for one of
+# GNU Radio's own. Matched against ID and ID_LIKE in /etc/os-release.
+SUPPORTED_OS_IDS = ("ubuntu", "debian")
 
 # Ubuntu's own GNU Radio packages (dpkg-query patterns).
 GNURADIO_PACKAGE_PATTERNS = ["gnuradio", "gnuradio-dev", "gnuradio-doc", "libgnuradio-*"]
@@ -726,6 +736,21 @@ def run_command(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True)
 
 
+def read_os_release(path: Path) -> dict[str, str]:
+    info: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if "=" in line:
+            key, _, value = line.partition("=")
+            info[key.strip()] = value.strip().strip('"')
+    return info
+
+
+def is_supported_os(info: dict[str, str]) -> bool:
+    """Whether os-release describes Ubuntu, Debian, or a system based on them."""
+    ids = [info.get("ID", ""), *info.get("ID_LIKE", "").split()]
+    return any(i in SUPPORTED_OS_IDS for i in ids)
+
+
 def _confirm(prompt: str) -> bool:
     try:
         return input(prompt).strip().lower() in ("y", "yes")
@@ -758,7 +783,27 @@ def main() -> int:
         "-y", "--yes", action="store_true",
         help="Do not prompt for confirmation before removing.",
     )
+    parser.add_argument(
+        "--os-release-path", default="/etc/os-release",
+        help="Path to read the OS name from (default: /etc/os-release).",
+    )
     args = parser.parse_args()
+
+    try:
+        info = read_os_release(Path(args.os_release_path))
+    except OSError as exc:
+        print(f"error: could not read {args.os_release_path}: {exc}", file=sys.stderr)
+        return 1
+    if not is_supported_os(info) or not has_command("dpkg-query"):
+        name = info.get("PRETTY_NAME") or info.get("ID") or "this system"
+        print(
+            f"error: this program works only on Ubuntu, Debian and systems based on them, "
+            f"which use dpkg and apt; {name} isn't one. On other systems it could take files "
+            "that belong to an installed package for GNU Radio's own. See the GNU Radio wiki "
+            "page UnInstallGR for removing GNU Radio by hand. Nothing was changed.",
+            file=sys.stderr,
+        )
+        return 1
 
     owner = get_owner()
     home = Path(owner.pw_dir)

@@ -691,6 +691,32 @@ loopbacks.
   runs it; the builder's / Step 1's errors point to it; UnInstallGR gets a
   "Use the script" section with the manual sections kept); planned as
   `v3.2-rc1`.
+- **UnInstallGR with the uninstaller** (user, 2026-11-08: "yes, draft
+  both"; uncommitted). **Uninstaller OS check:** it had none, and
+  `owned_by_package()` answers "not owned" when `dpkg-query` is missing, so
+  on Fedora it would have listed the `gnuradio` RPM's GRC files in
+  `/usr/share` for `sudo rm` (found by me). Now `main()` reads
+  `/etc/os-release` (`--os-release-path`, as in Step 1) and stops unless
+  `ID` or `ID_LIKE` has `ubuntu` or `debian` and `dpkg-query` exists;
+  docstring updated. Checked by me: LENOVO `--dry-run` byte-identical to
+  `HEAD`'s; fake os-release files: Fedora 44 stops (rc 1, "Nothing was
+  changed"), Linux Mint (`ID_LIKE="ubuntu debian"`) and Debian 13 run; a
+  missing file stops. Not in `v3.2` (tag planned on `5197d45`), so the
+  `v3.2` uninstaller has no OS check (my note). **`UnInstallGR.mediawiki`
+  draft** (local; the live-page version saved in the session scratchpad
+  only): intro sentence pointing to the script; new first section "Using
+  the uninstaller script" (Ubuntu, Debian and derivatives; one-line Python
+  download from `releases/latest` into `~/gr-installers`, checked against
+  the `v3.2-rc1` asset; `--dry-run`, run, what it removes / keeps / only
+  lists, log out, options table), adapted from the Building draft's
+  section; the manual `/usr/local` `rm -f` list gains the two `gr_modtool`
+  completion files; new "UHD Built from Source" subsection (`sudo make
+  uninstall` in UHD's build dir, `sudo ldconfig`; UHD's `host/CMakeLists.txt`
+  has an `uninstall` target, checked by me, not run). All manual sections
+  kept (PyBOMBS, pre-3.10 folders). **Not to be pasted before a Release has
+  the uninstaller**; better after the one with the OS check (my
+  recommendation), since Fedora users read the same page and the `v3.2`
+  script has no OS check.
 - **Upstream `grc_tests` fix:** not on `main` as of `862edb76b` (a second
   plain `make test` on 26.04 failed `grc_tests`, 2026-10-18). When it lands,
   remove the builder's `git clean` step and its doc bullet in a new tag.
